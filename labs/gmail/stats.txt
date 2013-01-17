@@ -1,0 +1,5 @@
+Parse everything stats
+
+python email lib    12245 mails in 234.621875 secs      0 exceptions    52.19 m/s
+java javamail       12231 mails in 54 secs              14 exceptions    226.5 m/s
+

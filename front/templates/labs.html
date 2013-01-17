@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Goldfinch</title>
+
+        <link rel="stylesheet" href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css" type="text/css" media="screen" charset="utf-8">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css', _external=True) }}?v={{ config.CSS_VERSION }}" type="text/css" media="screen" charset="utf-8">
+
+        <script src="http://documentcloud.github.com/underscore/underscore.js" type="text/javascript"></script>
+        <script src="http://code.jquery.com/jquery-1.7.2.js" type="text/javascript"></script>
+
+        <script src="http://backbonejs.org/backbone.js" type="text/javascript"></script>
+
+        <script src="{{ url_for('static', filename='js/base.js', _external=True) }}?v={{ config.JS_VERSION }}" type="text/javascript"></script>
+
+        <script>
+            openpgp.init();
+
+            function init() {
+                window.requestFileSystem  = window.requestFileSystem || window.webkitRequestFileSystem;
+                window.requestFileSystem(window.TEMPORARY, 1024*1024, onInitFs, errorHandler);
+
+            }
+
+            function errorHandler(er) {
+                console.error(er);
+            }
+
+            var publicKeyFile = 'goldfinch-public-key.pgp';
+
+            function writePublicKeyToFS(fs, key) {
+                fs.root.getFile(publicKeyFile, {create: true}, function(fileEntry) {
+                    fileEntry.createWriter(function(fileWriter) {
+                        fileWriter.onwriteend = function(e) {
+                            console.log('Write completed.');
+                        };
+
+                        fileWriter.onerror = function(e) {
+                            console.log('Write failed: ' + e.toString());
+                        };
+
+                        // Create a new Blob and write it to log.txt.
+                        var bb = new BlobBuilder(); // Note: window.WebKitBlobBuilder in Chrome 12.
+                        bb.append(key);
+                        fileWriter.write(bb.getBlob('text/plain'));
+                    }, errorHandler);
+                }, errorHandler);
+            }
+
+            var localFS = null;
+
+            function readPublicKeyFromFS(fs) {
+                fs.root.getFile(publicKeyFile, {create: true}, function(fileEntry) {
+                    fileEntry.file(function(file) {
+                        var reader = new FileReader();
+                        reader.onloadend = function(e) {
+                            var key = this.result;
+                            openpgp.keyring.importPublicKey(key);
+                            console.info("Public key imported:\n" + key);
+                        };
+                        reader.readAsText(file);
+                    }, errorHandler);
+                }, errorHandler);
+            }
+
+            function onInitFs(fs) {
+                localFS = fs;
+                console.info('FS initialized');
+            }
+
+            function encrypt() {
+                var message = document.getElementById("textarea").value;
+                var publicKey = openpgp.keyring.publicKeys[0].obj;
+                document.getElementById("textarea").value = openpgp.write_encrypted_message(publicKey, message);
+            }
+            function decrypt() {
+
+                var privateKeyArmor = document.getElementById("privatekey").innerHTML;
+                var privateKey = openpgp.read_privateKey(privateKeyArmor)[0];
+
+                var messageArmor = document.getElementById("textarea").value;
+                var message = openpgp.read_message(messageArmor)[0];
+
+                console.info(message);
+
+                var keymat = null;
+                var sesskey = null;
+
+                for (var i = 0; i < message.sessionKeys.length; i++) {
+                    if (privateKey.privateKeyPacket.publicKey.getKeyId() == message.sessionKeys[i].keyId.bytes) {
+                        keymat = { key: privateKey, keymaterial: privateKey.privateKeyPacket};
+                        sesskey = message.sessionKeys[i];
+                        break;
+                    }
+                    for (var j = 0; j < privateKey.subKeys.length; j++) {
+                        if (privateKey.subKeys[j].publicKey.getKeyId() == message.sessionKeys[i].keyId.bytes) {
+                            keymat = { key: privateKey, keymaterial: privateKey.subKeys[j]};
+                            sesskey = message.sessionKeys[i];
+                            break;
+                        }
+                    }
+                }
+
+                if (keymat && sesskey) {
+                    var password = prompt("PGP password", null);
+                    if (!password || !keymat.keymaterial.decryptSecretMPIs(password)) {
+                        alert("Wrong password!");
+                    } else {
+                        document.getElementById("textarea").value = message.decrypt(keymat, sesskey);
+                    }
+                }
+            }
+
+            function handleFiles(files) {
+                var file = files[0];
+                console.info(file);
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var contents = e.target.result;
+                    console.info(contents);
+                };
+                reader.readAsText(file);
+            }
+
+            function loadPublicKey(email) {
+                //var email = prompt("Person email", null);
+
+                var loader = "<img src='http://arrr.tv/static/img/ajax-loader2.gif'/>";
+                $("#pk-loader").html(loader);
+
+                $.ajax({
+                    url : "/keyserver",
+                    type : "POST",
+                    data : {email : email},
+                    success : function(response) {
+                        if (response.status == 'ok') {
+                            $("#pk-loader").html("Loaded");
+                            console.info(response.public_key);
+                        } else {
+                            $("#pk-loader").html(response.message);
+                        }
+                    },
+                    error : function(response) {
+                        $("#pk-loader").html("Error");
+                        console.error(response);
+                    }
+                });
+            }
+
+            var renderMessage = _.template("<div class='message well'><p>From: <%= from %></p><p><%= message %></p></div>");
+
+            function showMessage(from, message) {
+                $(".messages").append(renderMessage({message: message, from: from}));
+            }
+            $(function() {
+                $.get("/get", function(response) {
+                    _.map(response.messages, function(el) {
+                        showMessage(el.sender, el.message);
+                    });
+                });
+            });
+
+        </script>
+
+    </head>
+    <body>
+        <div class="container">
+            <br/>
+            <h1><img src="/static/goldfinch.png" class="logo"/> Goldfinch</h1>
+            <div class="composing">
+                <form class="form-inline">
+                    <div class="control-group">
+                        <input type="email" placeholder="To:" id="recipient"/>
+                        <input type="button" class="btn" value="public key" onClick="javascript:return loadPublicKey($('#recipient').val())"/>
+                        <label id="pk-loader"></label>
+                    </div>
+                    <div class="control-group">
+                        <textarea id="textarea" name="content" class="input-xlarge message-box" placeholder="Message…"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <input type="button" class="btn" value="Encrypt" onClick="javascript:return encrypt()"/>
+                        <input type="button" class="btn" value="Decrypt" onClick="javascript:return decrypt()"/>
+                        <button class="btn btn-primary">Send</button>
+                    </div>
+                </form>
+            </div>
+            <div class="reading">
+                <form class="form-inline">
+                <div class="control-group">
+                    <label for="private-key">Private key:</label>
+                    <input type="file" class="input-file" id="private-key" onChange="handleFiles(this.files)">
+                </div>
+                </form>
+                <div class="messages">
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
+
+                <div class="hero-unit">
+                 <h1>Hello, world!</h1>
+                 <p>This  is  a  template for a simple marketing or informational website.  It  includes  a large callout called the hero unit and three  supporting  pieces of  content. Use it as a starting point to create  something more  unique.</p>
+                 <p><a class="btn btn-primary btn-large">Learn more &raquo;</a></p>
+               </div>
+               <div class="row-fluid">
+                 <div class="span4">
+                   <h2>Heading</h2>
+                   <p>Donec  id  elit  non mi porta gravida at eget metus. Fusce dapibus, tellus  ac  cursus  commodo, tortor mauris condimentum nibh, ut fermentum massa  justo  sit  amet risus. Etiam porta sem malesuada magna mollis euismod.  Donec  sed  odio dui. </p>
+                   <p><a class="btn" href="#">View details &raquo;</a></p>
+                 </div><!--/span-->
+                 <div class="span4">
+                   <h2>Heading</h2>
+                   <p>Donec  id  elit  non mi porta gravida at eget metus. Fusce dapibus, tellus  ac  cursus  commodo, tortor mauris condimentum nibh, ut fermentum massa  justo  sit  amet risus. Etiam porta sem malesuada magna mollis euismod.  Donec  sed  odio dui. </p>
+                   <p><a class="btn" href="#">View details &raquo;</a></p>
+                 </div><!--/span-->
+                 <div class="span4">
+                   <h2>Heading</h2>
+                   <p>Donec  id  elit  non mi porta gravida at eget metus. Fusce dapibus, tellus  ac  cursus  commodo, tortor mauris condimentum nibh, ut fermentum massa  justo  sit  amet risus. Etiam porta sem malesuada magna mollis euismod.  Donec  sed  odio dui. </p>
+                   <p><a class="btn" href="#">View details &raquo;</a></p>
+                 </div><!--/span-->
+               </div><!--/row-->

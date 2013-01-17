@@ -1,0 +1,8 @@
+beanstalkc
+Flask
+ipython
+watchdog
+redis
+gevent
+gunicorn
+

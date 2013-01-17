@@ -1,0 +1,35 @@
+/* CSS declarations go here */
+.sidebar-nav {
+  padding: 9px 0; }
+
+.sidebar-nav-fixed {
+  position: fixed;
+  width: 21.97%; }
+
+@media (max-width :  767px) {
+  .sidebar-nav-fixed {
+    position: static;
+    width: auto; } }
+.header {
+  padding: 10px 0 10px 20px; }
+  .header h1 {
+    display: inline;
+    vertical-align: middle; }
+  .header .logo {
+    width: 50px;
+    margin-right: 10px;
+    vertical-align: middle; }
+
+.error-block {
+  display: none; }
+
+.packs li .loader {
+  float: right;
+  padding: 0px 10px; }
+  .packs li .loader img {
+    display: inline;
+    vertical-align: middle; }
+.packs li .badge {
+  float: right;
+  display: none;
+  margin-top: 2px; }
