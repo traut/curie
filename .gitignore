@@ -1,0 +1,10 @@
+.DS_Store
+*.pyc
+*.log
+*.mo
+*.*~
+local_settings.py
+.env
+var
+snapshot.db
+
