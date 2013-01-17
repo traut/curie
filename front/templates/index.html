@@ -29,7 +29,8 @@
             <div class="error-block" id="error-block"><span class="label label-important" id="error-message"></span></div>
         </div>
 
-    {% set packs = ['inbox', 'sent', 'facebook', 'twitter', 'linkedin'] %}
+        {% set packs = ['inbox', 'sent'] %}
+        {% set social = ['facebook', 'twitter', 'linkedin'] %}
 
     <div class="container-fluid app">
         <div class="row-fluid">
@@ -38,9 +39,11 @@
                      <ul class="nav nav-list packs">
                        <li class="nav-header">Packs</li>
                        {% for p in packs %}
-                       <li>
-                           <a href="#p/{{ p }}" class="pack" name="{{ p }}">{{ p }} <span class="badge badge-inverse"></span><span class="loader"></span></a>
-                       </li>
+   <li><a href="#p/{{ p }}" class="pack" name="{{ p }}">{{ p }} <span class="badge badge-inverse"></span><span class="loader"></span></a></li>
+                       {% endfor %}
+                       <li class="nav-header">Social</li>
+                       {% for s in social %}
+   <li><a href="#p/{{ s }}" class="pack" name="{{ s }}">{{ s }} <span class="badge badge-inverse"></span><span class="loader"></span></a></li>
                        {% endfor %}
                      </ul>
                 </div>
@@ -51,7 +54,7 @@
                     //message.save();
 
 
-                    var appView = new AppView({{ packs|safe }});
+                    var appView = new AppView({{ (packs + social)|safe }});
                     var appRouter = new AppRouter(appView);
                     Backbone.history.start();
 

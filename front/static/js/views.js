@@ -96,7 +96,7 @@ var AppView = Backbone.View.extend({
         return this;
     },
     activatePack : function(packName) {
-        document.title = packName + " — Goldfinch";
+        document.title = packName;
         _.each(this.packs, function(p) {
             p.active = false;
         });
