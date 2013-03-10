@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Curie</title>
+
+        <link rel="stylesheet" href="/static/css/bootstrap.css" type="text/css" media="screen" charset="utf-8">
+        <link rel="stylesheet" href="/static/css/bootstrap-responsive.css" type="text/css">
+
+        <link rel="stylesheet" href="/static/css/base.css" type="text/css" media="screen" charset="utf-8">
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+
+        <script src="/static/js/underscore-min.js" type="text/javascript"></script>
+        <script src="/static/js/backbone-min.js" type="text/javascript"></script>
+
+        <script src="/static/js/jsSHA/sha512.js" type="text/javascript"></script>
+
+        <script src="/static/js/models.js" type="text/javascript"></script>
+        <script src="/static/js/views.js" type="text/javascript"></script>
+        <script src="/static/js/routes.js" type="text/javascript"></script>
+
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="/static/js/backbone-socketio-sync.js"></script>
+
+    </head>
+    <body>
+        <div class="header">
+            <img src="/static/img/curie.gif" class="logo"/><h1>Curie</h1>
+            <div class="error-block" id="error-block"><span class="label label-important" id="error-message"></span></div>
+        </div>
+
+    <div class="container-fluid app">
+        <div class="row-fluid">
+            <div class="span3">
+                <div class="well sidebar-nav sidebar-nav-fixed">
+                     <ul class="nav nav-list packs">
+                       <li class="nav-header">Packs</li>
+       <li><a href="#p/inbox" class="pack" name="inbox">inbox <span class="badge badge-inverse"></span><span class="loader"></span></a></li>
+       <li><a href="#p/sent" class="pack" name="sent">sent <span class="badge badge-inverse"></span><span class="loader"></span></a></li>
+                       <li class="nav-header">Social</li>
+   <li><a href="#p/facebook" class="pack" name="facebook">facebook <span class="badge badge-inverse"></span><span class="loader"></span></a></li>
+                     </ul>
+                </div>
+            </div>
+            <script>
+                window.curie = window.curie || {};
+
+                $(function() {
+                    var message = new Message({ from: 'yana.dobrunova@gmail.com', to: 'sergey@polzunov.com', subject: 'Hey, take a look at this!'});
+                    //message.save();
+
+
+
+
+                    var email = "sergey@polzunov.com";
+                    var password = "some"
+                    var channel = new jsSHA(email, "TEXT").getHash("SHA-512", "HEX");
+                    io['transports'] = ['xhr-polling'];
+
+                    window.curie.socket = io.connect('/stream/' + channel, {secure: true, port: 443, query: "email=" + email + "&password=" + password});
+                    
+                    var appView = new AppView(["inbox", "sent", "facebook"]);
+                    var appRouter = new AppRouter(appView);
+                    Backbone.history.start();
+                    appView.addMessage("inbox", "something");
+
+
+                    window.curie.socket.on('new-received', function(data) {
+                        console.info(data);
+                        appView.addMessage(data.pack, data.message);
+                    });
+
+
+                });
+
+            </script>
+            <div class="span9">
+                <table class="table" id="messages-list">
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    </body>
+</html>

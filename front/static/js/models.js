@@ -4,7 +4,7 @@ var Message = Backbone.Model.extend({
         to : 'default to',
         from : 'default from',        
         subject : 'default subject'
-    }
+    },
 });
 
 var Messages = Backbone.Collection.extend({
@@ -14,7 +14,7 @@ var Messages = Backbone.Collection.extend({
         return this.filter(function(message) {
             return message.get('status') == 'unread';
         });
-    }
+    },
 });
 
 var Pack = Backbone.Model.extend({
@@ -23,6 +23,6 @@ var Pack = Backbone.Model.extend({
 
         this.messages = new Messages();
         this.messages.url = '/pack/' + this.get('name')  + '/messages';
-    }
+    },
 });
 

@@ -1,0 +1,17 @@
+<field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false" />
+<field name="received" type="date" indexed="true" stored="true"/>
+<field name="header_message_id" type="string" indexed="true" stored="true"/>
+<field name="header_in_reply_to" type="string" indexed="true" stored="true"/>
+<field name="header_references" type="string" indexed="true" stored="true"/>
+<field name="header_keywords" type="text_general" indexed="true" stored="true"/>
+<field name="header_from" type="string_email" indexed="true" stored="true" />
+<field name="header_sender" type="string_email" indexed="true" stored="true"/>
+<field name="header_to" type="string_email" indexed="true" stored="true" multiValued="true" />
+<field name="header_cc" type="string_email" indexed="true" stored="false" multiValued="true" />
+<field name="header_bcc" type="string_email" indexed="true" stored="false" multiValued="true" />
+<field name="header_orig_date" type="date" indexed="true" stored="true" />
+<field name="header_subject" type="text_general" indexed="true" stored="true" />
+<field name="name" type="text_ws_lower" indexed="true" stored="true" />
+<field name="body" type="html_text" indexed="true" stored="false" multiValued="true"/>
+<field name="timestamp" type="date" indexed="true" stored="true" default="NOW" multiValued="false"/>
+

@@ -1,10 +1,12 @@
 .DS_Store
 *.pyc
+*.class
 *.log
 *.mo
 *.*~
 local_settings.py
 .env
+.sass-cache
 var
 snapshot.db
 

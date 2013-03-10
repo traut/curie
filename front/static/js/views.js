@@ -71,6 +71,7 @@ var PackView = Backbone.View.extend({
     },
     updateBadge : function() {
         var unread = this.model.messages.getUnread().length;
+        console.info("updating the badge to " + unread);
         if (unread == 0) {
             this.badge.hide();
         } else {
@@ -109,7 +110,7 @@ var AppView = Backbone.View.extend({
     },
     addMessage : function(pack, message) {
         this.getPackByName(pack).model.messages.unshift(message);
-        console.info("message pushed");
+        console.info("message " + message + " pushed to " + pack);
     }
 });
 

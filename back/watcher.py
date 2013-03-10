@@ -41,7 +41,6 @@ class FileHandler(FileSystemEventHandler):
 
 
 
-
 def start_observer(mailDir, processingDir, queue):
 
     newDir = os.path.join(mailDir, 'new')
