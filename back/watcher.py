@@ -10,6 +10,8 @@ import shutil
 from watchdog.observers import Observer
 from watchdog.events import FileCreatedEvent, FileSystemEventHandler
 
+import hashlib
+
 import logging
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger(__name__)
@@ -17,33 +19,50 @@ log = logging.getLogger(__name__)
 from settings import *
 
 
-class FileHandler(FileSystemEventHandler):
+def move_file(filename, destdir):
 
+    hashed = hashlib.sha256(filename).hexdigest()
+    subdir = os.path.join(destdir, hashed[:2], hashed[2:4], hashed[4:6])
+
+    try:
+        os.makedirs(subdir)
+    except OSError:
+        pass
+
+    dest = os.path.join(subdir, hashed)
+    shutil.move(filename, dest)
+
+    log.info(filename + " –> " + dest)
+
+    return dest
+
+
+
+class FileHandler(FileSystemEventHandler):
 
     def __init__(self, destination, tube):
         self.destination = destination
         self.tube = tube
-
         self.conn = beanstalkc.Connection(QUEUE_SERVER_NAME, QUEUE_SERVER_PORT)
         self.conn.use(tube)
 
     def push_into_tube(self, filename):
-        data = dict(filename=filename)
-        self.conn.put(json.dumps(data), ttr=QUEUE_TTR)
-        log.debug("File %s put into the queue %s", filename, self.tube)
-
+        self.conn.put(filename, ttr=QUEUE_TTR)
+        log.debug("%s put into the queue '%s'", filename, self.tube)
 
     def on_created(self, event):
         if isinstance(event, FileCreatedEvent):
             filename = event.src_path
-            self.push_into_tube(filename)
-            shutil.move(filename, self.destination)
+            storage_name = move_file(filename, self.destination)
+            self.push_into_tube(storage_name)
 
 
 
 def start_observer(mailDir, processingDir, queue):
 
     newDir = os.path.join(mailDir, 'new')
+
+    log.info("watching=%s, storage=%s, queue=%s", newDir, processingDir, queue)
 
     handler = FileHandler(processingDir, queue)
 
@@ -69,8 +88,6 @@ if __name__ == '__main__':
     mailDir = sys.argv[1]
     processingDir = sys.argv[2]
     queue = sys.argv[3]
-
-    log.info("%s, %s, %s", mailDir, processingDir, queue)
 
     start_observer(mailDir, processingDir, queue)
 

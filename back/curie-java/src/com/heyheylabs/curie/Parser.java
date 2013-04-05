@@ -69,7 +69,10 @@ public class Parser {
         }
          */
 
-        add(parsed, "header_subject", new String(email.getSubject().getBytes(), DEFAULT_CHARSET));
+        String subject = email.getSubject();
+        if (subject != null) {
+            add(parsed, "header_subject", new String(subject.getBytes(), DEFAULT_CHARSET));
+        }
         add(parsed, "header_message_id", email.getMessageID());
         add(parsed, "received", DEFAULT_DATE_FORMAT.format(new Date()));
 
@@ -101,6 +104,9 @@ public class Parser {
         String filename = args[0];
 
         HashMap<String, Set<String>> result = new Parser().parseMessage(new File(filename));
+
+        log.info("JSON: " + new JSONObject(result).toJSONString());
+
         Client client = new ClientImpl(QUEUE_HOST, QUEUE_PORT);
         long jobId = client.put(65536, 0, 120, new JSONObject(result).toJSONString().getBytes());
 
@@ -115,8 +121,12 @@ public class Parser {
             for (Address a : recipients) {
                 if ("rfc822".equalsIgnoreCase(a.getType())) {
                     InternetAddress ia = (InternetAddress) a;
-                    add(parsed, nameField, ia.getPersonal());
-                    add(parsed, emailField, ia.getAddress());
+                    if (ia.getPersonal() != null) {
+                        add(parsed, nameField, ia.getPersonal());
+                    }
+                    if (ia.getAddress() != null) {
+                        add(parsed, emailField, ia.getAddress());
+                    }
                 }
             }
         }
