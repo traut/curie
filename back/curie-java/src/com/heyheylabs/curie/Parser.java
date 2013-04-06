@@ -108,8 +108,8 @@ public class Parser {
         add(result, "received", DEFAULT_DATE_FORMAT.format(new Date()));
         add(result, "original", filename);
 
-        String jsonString = new JSONObject(result).toJSONString();
-        log.info("JSON: " + jsonString);
+        JSONObject jsonBlob = new JSONObject(result);
+        //log.info("JSON: " + jsonString);
         
         String jsonFilename = filename + ".json";
         File file = new File(jsonFilename);
@@ -117,7 +117,7 @@ public class Parser {
             file.delete();
         }
         BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-        writer.write(jsonString);
+        jsonBlob.writeJSONString(writer);
         writer.flush();
         writer.close();
         
