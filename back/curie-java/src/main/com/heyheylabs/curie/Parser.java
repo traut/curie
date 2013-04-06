@@ -10,9 +10,8 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 import java.util.TimeZone;
 
 import javax.mail.Address;
@@ -23,23 +22,22 @@ import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMessage.RecipientType;
+import javax.mail.internet.MimeUtility;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 
-
-
+/*
+ * CurieMail parser
+ */
 public class Parser {
 
     private static final Log log = LogFactory.getLog(Parser.class);
     
     private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
     private static final SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");
-    
-    private static final String QUEUE_HOST = "localhost";
-    private static final int QUEUE_PORT = 11300;
 
     private Properties props;
     private Session session;
@@ -48,29 +46,21 @@ public class Parser {
     public Parser() {
         props = new Properties();
         session = Session.getInstance(props);
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));        
     }
 
-    private HashMap<String, Set<String>> parseMessage(File file) throws MessagingException, IOException {
+    public HashMap<String, List<String>> parseMessage(File file) throws MessagingException, IOException {
 
-        HashMap<String, Set<String>> parsed = new HashMap<String, Set<String>>();
+        HashMap<String, List<String>> parsed = new HashMap<String, List<String>>();
 
         long start = System.currentTimeMillis();
 
         FileInputStream fis = new FileInputStream(file);
         MimeMessage email = new MimeMessage(session, fis);
-
-        /*
-        email.getAllHeaderLines();
-        for (Enumeration<Header> e = email.getAllHeaders(); e.hasMoreElements();) {
-            Header h = e.nextElement();
-            logger.info(h.getName() + ": " + h.getValue());
-        }
-         */
-
+        
         String subject = email.getSubject();
         if (subject != null) {
-            add(parsed, "header_subject", new String(subject.getBytes(), DEFAULT_CHARSET));
+            add(parsed, "header_subject", subject);
         }
         add(parsed, "header_message_id", email.getMessageID());
         
@@ -81,10 +71,8 @@ public class Parser {
         addAddresses(parsed, email.getFrom(), "header_from_name", "header_from_email");
 
         add(parsed, "header_orig_date", DEFAULT_DATE_FORMAT.format(email.getSentDate()));
-
-        //Address sender = email.getSender();
-        //add(parsed, "header_in_reply_to", email.getHeader("In-Reply-To"));
-        //Charset messageCharset = readCharset(email.getContentType());
+        add(parsed, "header_in_reply_to", email.getHeader("In-Reply-To"));
+        
         parsePart(email, parsed);
 
         log.info(file.getAbsolutePath() + " parsed in " + (System.currentTimeMillis() - start) / (float) 1000 + " secs");
@@ -103,7 +91,7 @@ public class Parser {
         String filename = args[0];
 
         Parser parser = new Parser();
-        HashMap<String, Set<String>> result = parser.parseMessage(new File(filename));
+        HashMap<String, List<String>> result = parser.parseMessage(new File(filename));
         
         add(result, "received", DEFAULT_DATE_FORMAT.format(new Date()));
         add(result, "original", filename);
@@ -121,18 +109,12 @@ public class Parser {
         writer.flush();
         writer.close();
         
+        log.info(jsonBlob.toJSONString());
+        
         log.info("JSON blob in " + jsonFilename);
-
-        /*
-        Client client = new ClientImpl(QUEUE_HOST, QUEUE_PORT);
-        long jobId = client.put(65536, 0, 120, new JSONObject(result).toJSONString().getBytes());
-        log.info("Pushed as job " + jobId);
-        client.close();
-        */
-
     }
 
-    private void addAddresses(HashMap<String, Set<String>> parsed, Address[] recipients, String nameField, String emailField) {
+    private void addAddresses(HashMap<String, List<String>> parsed, Address[] recipients, String nameField, String emailField) {
         if (recipients != null) {
             for (Address a : recipients) {
                 if ("rfc822".equalsIgnoreCase(a.getType())) {
@@ -148,20 +130,20 @@ public class Parser {
         }
     }
 
-    private static void add(HashMap<String, Set<String>> map, String key, String... values) {
-        if (map.containsKey(key)) {
-            System.out.println(key);
-            System.out.println(map.get(key));
-            System.out.println(Arrays.asList(values));
-            map.get(key).addAll(Arrays.asList(values));
-        } else {
-            map.put(key, new HashSet<String>(Arrays.asList(values)));
+    private static void add(HashMap<String, List<String>> map, String key, String... values) {
+        if (values != null && values.length > 0) {
+            if (map.containsKey(key)) {
+                map.get(key).addAll(Arrays.asList(values));
+            } else {
+                map.put(key, Arrays.asList(values));
+            }
         }
+        
     }
 
-    public void parsePart(Part p, HashMap<String, Set<String>> parsed) throws IOException, MessagingException {
+    public void parsePart(Part p, HashMap<String, List<String>> parsed) throws IOException, MessagingException {
         if (p.isMimeType("text/plain") || p.isMimeType("text/html")) {
-            add(parsed, "body", new String(p.getContent().toString().getBytes(), DEFAULT_CHARSET));
+            add(parsed, "body", p.getContent().toString());
         } else if (p.isMimeType("multipart/*")) {
             Multipart mp = (Multipart) p.getContent();
             for (int i = 0; i < mp.getCount(); i++) {
