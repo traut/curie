@@ -2,6 +2,7 @@ package com.heyheylabs.curie;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
@@ -26,9 +27,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
-
-import com.surftools.BeanstalkClient.Client;
-import com.surftools.BeanstalkClientImpl.ClientImpl;
 
 
 
@@ -74,7 +72,7 @@ public class Parser {
             add(parsed, "header_subject", new String(subject.getBytes(), DEFAULT_CHARSET));
         }
         add(parsed, "header_message_id", email.getMessageID());
-        add(parsed, "received", DEFAULT_DATE_FORMAT.format(new Date()));
+        
 
         addAddresses(parsed, email.getRecipients(RecipientType.TO), "header_to_name", "header_to_email");
         addAddresses(parsed, email.getRecipients(RecipientType.BCC), "header_bcc_name", "header_bcc_email");
@@ -103,16 +101,32 @@ public class Parser {
 
         String filename = args[0];
 
-        HashMap<String, Set<String>> result = new Parser().parseMessage(new File(filename));
+        Parser parser = new Parser();
+        HashMap<String, Set<String>> result = parser.parseMessage(new File(filename));
+        
+        add(result, "received", DEFAULT_DATE_FORMAT.format(new Date()));
+        add(result, "original", filename);
 
-        log.info("JSON: " + new JSONObject(result).toJSONString());
+        String jsonString = new JSONObject(result).toJSONString();
+        log.info("JSON: " + jsonString);
+        
+        String jsonFilename = filename + ".json";
+        File file = new File(jsonFilename);
+        if (file.exists()) {
+            file.delete();
+        }
+        FileWriter writer = new FileWriter(file);
+        writer.write(jsonString);
+        writer.close();
+        
+        log.info("JSON blob in " + jsonFilename);
 
+        /*
         Client client = new ClientImpl(QUEUE_HOST, QUEUE_PORT);
         long jobId = client.put(65536, 0, 120, new JSONObject(result).toJSONString().getBytes());
-
         log.info("Pushed as job " + jobId);
-        
         client.close();
+        */
 
     }
 
