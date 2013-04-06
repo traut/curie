@@ -1,5 +1,6 @@
 package com.heyheylabs.curie;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -115,8 +116,9 @@ public class Parser {
         if (file.exists()) {
             file.delete();
         }
-        FileWriter writer = new FileWriter(file);
+        BufferedWriter writer = new BufferedWriter(new FileWriter(file));
         writer.write(jsonString);
+        writer.flush();
         writer.close();
         
         log.info("JSON blob in " + jsonFilename);
