@@ -14,8 +14,10 @@ var server = http.createServer(function(req, res) {
     util.log('Listening at: http://localhost:8080');
 });
 
-var io = socketio.listen(server)
+var io = socketio.listen(server);
 
+
+var expectedPassword = "expected-password";
 
 io.configure(function (){
     io.set('authorization', function (handshakeData, callback) {
@@ -27,12 +29,21 @@ io.configure(function (){
         var shasum = crypto.createHash('sha512');
         var channel = shasum.update(email).digest('hex');
 
-        util.log("Creating special channel '" + channel + "'");
+        if (pass != expectedPassword) {
+            callback(null, false);
+            return;
+        }
+
+        handshakeData["user"] = {
+            email : email
+        };
+
+        util.log("User " + email + " authorized. Creating special channel '" + channel + "'");
+
         io.of("/stream/" + channel).on('connection', function (socket) {
             util.log(email + " connected");
 
             socket.on('create', function (data) {
-                console.info(data);
                 store.create(socket, data.cast);       
             });      
             socket.on('read', function (data) {

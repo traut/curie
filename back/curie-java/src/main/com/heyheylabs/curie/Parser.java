@@ -48,39 +48,6 @@ public class Parser {
         session = Session.getInstance(props);
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));        
     }
-
-    public HashMap<String, List<String>> parseMessage(File file) throws MessagingException, IOException {
-
-        HashMap<String, List<String>> parsed = new HashMap<String, List<String>>();
-
-        long start = System.currentTimeMillis();
-
-        FileInputStream fis = new FileInputStream(file);
-        MimeMessage email = new MimeMessage(session, fis);
-        
-        String subject = email.getSubject();
-        if (subject != null) {
-            add(parsed, "header_subject", subject);
-        }
-        add(parsed, "header_message_id", email.getMessageID());
-        
-
-        addAddresses(parsed, email.getRecipients(RecipientType.TO), "header_to_name", "header_to_email");
-        addAddresses(parsed, email.getRecipients(RecipientType.BCC), "header_bcc_name", "header_bcc_email");
-        addAddresses(parsed, email.getRecipients(RecipientType.BCC), "header_bcc_name", "header_bcc_email");
-        addAddresses(parsed, email.getFrom(), "header_from_name", "header_from_email");
-
-        add(parsed, "header_orig_date", DEFAULT_DATE_FORMAT.format(email.getSentDate()));
-        add(parsed, "header_in_reply_to", email.getHeader("In-Reply-To"));
-        
-        parsePart(email, parsed);
-
-        log.info(file.getAbsolutePath() + " parsed in " + (System.currentTimeMillis() - start) / (float) 1000 + " secs");
-        fis.close();
-
-        return parsed;
-    }
-
     public static void main(String[] args) throws IOException, MessagingException {
 
         if (args.length != 1) {
@@ -109,10 +76,42 @@ public class Parser {
         writer.flush();
         writer.close();
         
-        log.info(jsonBlob.toJSONString());
-        
         log.info("JSON blob in " + jsonFilename);
     }
+
+
+    public HashMap<String, List<String>> parseMessage(File file) throws MessagingException, IOException {
+
+        HashMap<String, List<String>> parsed = new HashMap<String, List<String>>();
+
+        long start = System.currentTimeMillis();
+
+        FileInputStream fis = new FileInputStream(file);
+        MimeMessage email = new MimeMessage(session, fis);
+        
+        String subject = email.getSubject();
+        if (subject != null) {
+            add(parsed, "header_subject", subject);
+        }
+        add(parsed, "header_message_id", email.getMessageID());
+        
+
+        addAddresses(parsed, email.getRecipients(RecipientType.TO), "header_to_name", "header_to_email");
+        addAddresses(parsed, email.getRecipients(RecipientType.CC), "header_cc_name", "header_cc_email");
+        addAddresses(parsed, email.getRecipients(RecipientType.BCC), "header_bcc_name", "header_bcc_email");
+        addAddresses(parsed, email.getFrom(), "header_from_name", "header_from_email");
+
+        add(parsed, "header_orig_date", DEFAULT_DATE_FORMAT.format(email.getSentDate()));
+        add(parsed, "header_in_reply_to", email.getHeader("In-Reply-To"));
+        
+        parsePart(email, parsed);
+
+        log.info(file.getAbsolutePath() + " parsed in " + (System.currentTimeMillis() - start) / (float) 1000 + " secs");
+        fis.close();
+
+        return parsed;
+    }
+
 
     private void addAddresses(HashMap<String, List<String>> parsed, Address[] recipients, String nameField, String emailField) {
         if (recipients != null) {

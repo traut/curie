@@ -12,7 +12,8 @@
       "redis": "0.8.2",
       "crypto": "0.0.3",
       "socket.io": "0.9.13",
-      "backbone.io": "0.3.3"
+      "backbone.io": "0.3.3",
+      "solr": "0.2.2"
   },
   "devDependencies": {},
   "optionalDependencies": {},

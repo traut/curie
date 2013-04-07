@@ -2,7 +2,11 @@
 var MessageRowView = Backbone.View.extend({
     tagName : 'tr',
     render : function() {
-        $(this.el).html('<td>' + this.model.get('from') + '</td><td>' + this.model.get('subject') + '</td>');
+        $(this.el).html(
+            '<td>' + escapeHTML(this.model.get('from')) + '</td>' + 
+            '<td>' + escapeHTML(this.model.get('subject')) + '</td>' +
+            '<td>' + escapeHTML(this.model.get('received')) + '</td>'
+        );
         return this;
     },
 });
@@ -113,4 +117,11 @@ var AppView = Backbone.View.extend({
         console.info("message " + message + " pushed to " + pack);
     }
 });
+
+function escapeHTML(string) {
+    var pre = document.createElement('pre');
+    var text = document.createTextNode( string );
+    pre.appendChild(text);
+    return pre.innerHTML;
+}
 

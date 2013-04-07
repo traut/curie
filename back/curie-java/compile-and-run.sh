@@ -1,1 +1,1 @@
-javac -cp '.:libs/*' src/com/heyheylabs/curie/Parser.java && java -cp '.:libs/*:src/' com.heyheylabs.curie.Parser $1
+javac -cp '.:libs/*' src/main/com/heyheylabs/curie/Parser.java && java -cp '.:libs/*:src/main/' com.heyheylabs.curie.Parser $1

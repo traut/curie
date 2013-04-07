@@ -52,8 +52,8 @@
 
 
 
-                    var email = "sergey@polzunov.com";
-                    var password = "some"
+                    var email = "some@curie.heyheylabs.com";
+                    var password = "expected-password";
                     var channel = new jsSHA(email, "TEXT").getHash("SHA-512", "HEX");
 
                     window.curie.socket = io.connect('/stream/' + channel, {secure: true, port: 443, query: "email=" + email + "&password=" + password});
