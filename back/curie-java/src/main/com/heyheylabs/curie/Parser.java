@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.TimeZone;
@@ -134,7 +135,7 @@ public class Parser {
             if (map.containsKey(key)) {
                 map.get(key).addAll(Arrays.asList(values));
             } else {
-                map.put(key, Arrays.asList(values));
+                map.put(key, new LinkedList<String>(Arrays.asList(values)));
             }
         }
         
