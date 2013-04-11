@@ -39,7 +39,7 @@ def process(message):
         id = mid,
 
         received = received,
-        label = ["inbox"],
+        labels = ["inbox"],
         header_orig_date = orig_date,
 
         header_message_id = get_or_none("header_message_id"),

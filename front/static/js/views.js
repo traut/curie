@@ -1,12 +1,21 @@
 
 var MessageRowView = Backbone.View.extend({
     tagName : 'tr',
+    initialize : function() {
+        this.model.on({
+            "change" : this.render,
+            "destroy" : this.remove
+        });
+    },
     render : function() {
         $(this.el).html(
             '<td>' + escapeHTML(this.model.get('from')) + '</td>' + 
             '<td>' + escapeHTML(this.model.get('subject')) + '</td>' +
-            '<td>' + escapeHTML(this.model.get('received')) + '</td>'
+            '<td>' + new Date(this.model.get('received')) + '</td>'
         );
+        if (!this.model.get('read')) {
+            $(this.el).addClass("unseen");
+        }
         return this;
     },
 });
@@ -15,8 +24,10 @@ var PackView = Backbone.View.extend({
     el : ".app",
     initialize : function() {
 
-        this.model.messages.bind("add", this.addMessage, this);
-        this.model.messages.bind("add", this.updateBadge, this);
+        this.model.messages.on("reset add remove", this.render, this);
+
+        this.model.messages.on("fetch:start", this.showLoader, this);
+        this.model.messages.on("fetch:end", this.hideLoader, this);
 
         this.listBody = $("#messages-list tbody", this.el);
 
@@ -25,23 +36,36 @@ var PackView = Backbone.View.extend({
         this.badge = $(".badge", this.packLiEl);
 
         this.active = false;
+
+        this.newCounter = 0;
+
+        //FIXME: add packs menu here
     },
     activate : function() {
+
+        console.info("Activating PackView " + this.model.get('name'));
+
         this.active = true;
-        this.markAsActive();
-        this.render();
-    },
-    markAsActive : function() {
-        this.updateBadge();
         this.allLiEls.removeClass("active");
         this.packLiEl.addClass("active");
+        this.render();
     },
     render : function() {
+        console.info("HEY");
 
-        this.listBody.empty();
-        this.showLoader();
+        console.info("Rendering PackView " + this.model.get('name') + ", active=" + this.active);
 
-        var self = this;
+        this.updateBadge();
+
+        if (this.active) {
+            var listBody = this.listBody;
+            listBody.empty();
+            this.model.messages.each(function(message) {
+                listBody.append(new MessageRowView({model : message}).render().el);
+            });
+        }
+
+        /*
         this.model.messages.fetch({
             success : function(coll, response) {
                 self.hideLoader();
@@ -55,23 +79,8 @@ var PackView = Backbone.View.extend({
                 console.error("ERROR!");
             }
         });
+        */
         return this;
-    },
-    addMessage : function(model, collection, options) {
-        if (this.active) {
-            var render = new MessageRowView({model : model}).render().el;
-            if (options.index == 0) {
-                $("tr:first", this.listBody).before(render);
-            } else {
-                this.listBody.append(render);
-            }
-        } 
-    },
-    showLoader : function() {
-        $(".loader", this.packLiEl).html("<img src='/static/img/loader.gif'/>");
-    },
-    hideLoader : function() {
-        $(".loader", this.packLiEl).empty();
     },
     updateBadge : function() {
         var unread = this.model.messages.getUnread().length;
@@ -81,6 +90,12 @@ var PackView = Backbone.View.extend({
         } else {
             this.badge.html(unread).show();
         }
+    },
+    showLoader : function() {
+        $(".loader", this.packLiEl).html("<img src='/static/img/loader.gif'/>");
+    },
+    hideLoader : function() {
+        $(".loader", this.packLiEl).empty();
     },
     hideBadge : function() {
         $(".badge", this.packLiEl).empty().hide();
@@ -95,6 +110,8 @@ var AppView = Backbone.View.extend({
         this.packs = _.map(packsNames, function(p) {
             return new PackView({ model : new Pack(p) });
         });
+
+        this.lastFetchTimeEl = $("#lastFetchTime");
     },
     render : function(selectedPack) {
         this.getPackByName(selectedPack || "inbox").activate();
@@ -112,9 +129,31 @@ var AppView = Backbone.View.extend({
             return p.model.get('name') == packName;
         });
     },
-    addMessage : function(pack, message) {
-        this.getPackByName(pack).model.messages.unshift(message);
-        console.info("message " + message + " pushed to " + pack);
+    addMessage : function(message) {
+        console.info(message);
+        this.packs.map(function(pack) {
+            var packName = pack.model.get('name');
+            if (message.labels && message.labels.indexOf(packName) > -1) {
+                pack.model.messages.unshift(message);
+                console.info("message " + message.id + " pushed to " + packName);
+            }
+        });
+    },
+    updateLastFetchTime : function() {
+        this.lastFetchTimeEl.text(new Date());
+    },
+    fetchPacks : function() {
+
+        var self = this;
+        var updateFetchTime = _.after(this.packs.length, function() {
+            self.updateLastFetchTime();
+        });
+
+        this.packs.map(function(p) {
+            p.model.messages.fetch({update: true});
+            updateFetchTime();
+        });
+
     }
 });
 

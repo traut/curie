@@ -1,18 +1,21 @@
 var Message = Backbone.Model.extend({
     defaults: {
         id : 'someDefaultMailID',
-        to : 'default to',
-        from : 'default from',        
-        subject : 'default subject'
+        to_name : 'default to name',
+        to_email : 'default to email',
+        from_name : 'default from',        
+        from_email : 'default from',        
+        subject : 'default subject',
+        unread : true,
+        labels : []
     },
 });
 
 var Messages = Backbone.Collection.extend({
     model : Message,
-
     getUnread : function() {
         return this.filter(function(message) {
-            return message.get('status') == 'unread';
+            return !message.get('read');
         });
     },
 });

@@ -5,7 +5,7 @@
 
    <field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
 
-   <field name="received" type="date" indexed="true" stored="true"/>
+   <field name="received" type="date" indexed="true" stored="true" required="true"/>
    <field name="indexed" type="date" indexed="true" stored="true" default="NOW" multiValued="false"/>
 
    <field name="header_message_id" type="string" indexed="true" stored="true"/>
@@ -34,7 +34,9 @@
 
    <field name="body" type="html_text" indexed="true" stored="false" multiValued="true"/>
 
-   <field name="label" type="string" indexed="true" stored="true"/>
+   <field name="labels" type="string" indexed="true" stored="true"/>
+
+   <field name="unread" type="boolean" indexed="true" stored="true" default="true"/>
 
    <field name="_version_" type="long" indexed="true" stored="true"/>
    
@@ -43,6 +45,8 @@
  <uniqueKey>id</uniqueKey>
  
   <types>
+
+    <fieldType name="boolean" class="solr.BoolField" sortMissingLast="true"/>
 
     <fieldtype name="html_text" class="solr.TextField" positionIncrementGap="100">
         <analyzer type="index">

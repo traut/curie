@@ -1,54 +1,44 @@
 var util = require('util'),
-    Router = require('barista').Router,
+    barista = require('barista'),
     solr = require('solr'),
-    util = require('util');
+    winston = require('winston'),
+    isodate = require("isodate");
 
 var solr = solr.createClient();
 
-var router = new Router;
+var router = new barista.Router();
 
 router.match('/pack/:pack/messages', 'GET').to('packStore.getMessages');
 router.match('/pack/:pack/messages/:messageId', 'GET').to('packStore.getMessage');
 
 PackStore = function() {
-    var PACKS = {
-        inbox : [
-            {id: "someId1", from: 'yana.dobrunova@gmail.com', to: 'sergey@polzunov.com', subject: 'Hey, take a look at this!'},
-        ],
-        sent : [
-            {id: "someId2", from: 'someone@gmail.com', to: 'anotherone@gmail.com', subject: 'This is a sent email!'},
-        ]
-    };
     return {
         getMessages : function(handshake, options, callback) {
             var pack = options.pack;
             var toEmail = handshake.user.email;
 
-            console.info("Looking for messages in " + pack);
+            winston.info("Searching for pack=" + pack + ", toEmail=" + toEmail);
 
             readLabel(toEmail, pack, function(docs) {
-                console.info(docs);
+                winston.info("Docs found: " + docs.length);
                 var msgs = docs.map(function(doc) {
                     return {
                         id : doc.id,
-                        from: formatEmail(doc.header_from_name, doc.header_from_email),
-                        to: formatEmail(doc.header_to_name, doc.header_to_email),
+                        from_name: doc.header_from_name,
+                        from_email: doc.header_from_email,
+                        to_name: doc.header_to_name,
+                        to_email: doc.header_to_email,
                         subject: doc.header_subject,
-                        received: doc.received
+                        received: isodate(doc.received).getTime(),
+                        unread: doc.unread,
+                        labels: doc.labels
                     }
                 });
                 callback(msgs);
             });
         },
         getMessage : function(options) {
-            var pack = options.pack;
-            var messageId = options.messageId;
-            var packObj = PACKS[pack] || [];
-            for (var i = 0; i < packObj.length; i++) {
-                if (packObj[i].id == messageId) {
-                    return packObj[i];
-                }
-            }
+            winston.info("Getting message", options.id);
         }
     }
 };
@@ -57,21 +47,14 @@ var stores = {
     packStore : PackStore()
 }
 
-function formatEmail(name, email){
-    if (email && name) {
-        return util.format("%s <%s>", name, email);
-    } else if (email) {
-        return email;
-    }
-    throw "No email";
-}
-
 function readLabel(toEmail, label, callback){
-    var query = util.format("+label:%s +header_to_email:%s", label, toEmail)
-    solr.query(query, function(err, response) {
+    var query = util.format("+labels:%s +header_to_email:%s", label, toEmail)
+    solr.query(query, {
+        sort: "received desc",
+    }, function(err, response) {
         if (err) throw err;
         var responseObj = JSON.parse(response);
-        console.log('A search for "' + query + '" returned ' + responseObj.response.numFound + ' documents.');
+        winston.info("query=" + query + ", results.length=" + responseObj.response.docs.length);
         callback(responseObj.response.docs);
     });
 }

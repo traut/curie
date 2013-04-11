@@ -32,14 +32,15 @@
     <div class="container-fluid app">
         <div class="row-fluid">
             <div class="span3">
-                <div class="well sidebar-nav sidebar-nav-fixed">
-                     <ul class="nav nav-list packs">
+                <div class="sidebar-nav sidebar-nav-fixed">
+                     <ul class="nav nav-list packs well">
                        <li class="nav-header">Packs</li>
        <li><a href="#p/inbox" class="pack" name="inbox">inbox <span class="badge badge-inverse"></span><span class="loader"></span></a></li>
        <li><a href="#p/sent" class="pack" name="sent">sent <span class="badge badge-inverse"></span><span class="loader"></span></a></li>
                        <li class="nav-header">Social</li>
    <li><a href="#p/facebook" class="pack" name="facebook">facebook <span class="badge badge-inverse"></span><span class="loader"></span></a></li>
                      </ul>
+                    <div class="muted text-center" id="lastFetchTime"></div>
                 </div>
             </div>
             <script>
@@ -56,18 +57,25 @@
                     var password = "expected-password";
                     var channel = new jsSHA(email, "TEXT").getHash("SHA-512", "HEX");
 
-                    window.curie.socket = io.connect('/stream/' + channel, {secure: true, port: 443, query: "email=" + email + "&password=" + password});
+                    window.curie.socket = io.connect('/stream/' + channel, {
+                        secure: true,
+                        port: 443,
+                        query: "email=" + email + "&password=" + password,
+                        'force new connection': true
+                    });
                     
                     var appView = new AppView(["inbox", "sent", "facebook"]);
                     var appRouter = new AppRouter(appView);
                     Backbone.history.start();
-                    appView.addMessage("inbox", "something");
 
-
-                    window.curie.socket.on('new-received', function(data) {
-                        console.info(data);
-                        appView.addMessage(data.pack, data.message);
+                    window.curie.socket.on('new-messages', function(data) {
+                        appView.addMessage(data.message);
                     });
+
+                    // fetch every 10 secs
+                    setInterval(function() {
+                        appView.fetchPacks();
+                    }, 10 * 1000); 
 
 
                 });

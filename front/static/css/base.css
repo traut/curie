@@ -6,7 +6,7 @@
   position: fixed;
   width: 21.97%; }
 
-@media (max-width :  767px) {
+@media (max-width: 767px) {
   .sidebar-nav-fixed {
     position: static;
     width: auto; } }
@@ -33,3 +33,6 @@
   float: right;
   display: none;
   margin-top: 2px; }
+
+.unseen td {
+  font-weight: bold; }

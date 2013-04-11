@@ -1,20 +1,26 @@
-var redis = require('redis');
+var redis = require('redis'),
+    winston = require('winston');
 
 module.exports = {
     subscribe : function(feedName, socketEventName, socket) {
-        var client = redis.createClient();
-        client.on('error', function (err) {
-            console.info('Error ' + err);
-        });
-        client.on('message', function (channel, message) {
-            console.info("channel: " + channel + "; message: " + messages);
-            socket.emit(socketEventName, { pack: 'inbox', message: message });
-        });
-        client.on('disconnect', function() {
-            console.info('Disconnected from Redis feed ' + feedName);
-        });
-        client.subscribe(feedName);
-        console.info("Subscribed to " + feedName);
+        if (!socket.feed) {
+            socket.feed = redis.createClient();
+            socket.feed.on('subscribe', function(feed, count) {
+                winston.info("Socket " + socket.id + " subscribed to " + feed);
+            });
+
+            socket.feed.on('message', function (channel, noticeStr) {
+                var notice = JSON.parse(noticeStr);
+                socket.emit(socketEventName, { message: notice.message });
+            });
+
+            socket.feed.subscribe(feedName);
+
+            socket.on("disconnect", function() {
+                socket.feed.unsubscribe(feedName);
+                socket.feed.quit();
+            });
+        }
     }
 }
 
