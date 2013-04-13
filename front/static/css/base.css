@@ -34,5 +34,10 @@
   display: none;
   margin-top: 2px; }
 
-.unseen td {
+.unread {
   font-weight: bold; }
+
+.messageList a {
+  color: black; }
+  .messageList a .muted {
+    font-weight: normal; }

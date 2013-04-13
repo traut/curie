@@ -45,6 +45,8 @@ def process(message_id):
         )
     )
 
+    print json.dumps(notice)
+
 
 
 if __name__ == '__main__':

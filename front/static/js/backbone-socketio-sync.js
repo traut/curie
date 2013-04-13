@@ -9,7 +9,7 @@ Backbone.sync = function (method, model, options) {
      */
     var modelCast = function () {
         var obj = { 
-            url : model.url
+            url : model.url()
         };
         if (model.id) {
             obj.url += "/" + model.id;
@@ -56,9 +56,9 @@ Backbone.sync = function (method, model, options) {
     var update = function () {
         var cast = modelCast(model); 
         var e = eventSignature('update', cast);
-        socket.emit('update', {'cast' : sign, item : model.attributes }); // model.attribues is the model data
+        socket.emit('update', {'cast' : cast, item : model.attributes }); // model.attribues is the model data
         socket.once(e, function (data) { 
-            console.log(data);                     
+            console.log(data);
         });                           
     };  
      

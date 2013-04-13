@@ -102,7 +102,9 @@ public class Parser {
         addAddresses(parsed, email.getRecipients(RecipientType.BCC), "header_bcc_name", "header_bcc_email");
         addAddresses(parsed, email.getFrom(), "header_from_name", "header_from_email");
 
-        add(parsed, "header_orig_date", DEFAULT_DATE_FORMAT.format(email.getSentDate()));
+        if (email.getSentDate() != null) {
+            add(parsed, "header_orig_date", DEFAULT_DATE_FORMAT.format(email.getSentDate()));
+        }
         add(parsed, "header_in_reply_to", email.getHeader("In-Reply-To"));
         
         parsePart(email, parsed);

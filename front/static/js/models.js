@@ -1,31 +1,51 @@
 var Message = Backbone.Model.extend({
     defaults: {
-        id : 'someDefaultMailID',
-        to_name : 'default to name',
-        to_email : 'default to email',
-        from_name : 'default from',        
-        from_email : 'default from',        
-        subject : 'default subject',
+        id : null,
+        to_name : null,
+        to_email : null,
+        from_name : null,
+        from_email : null,
+        subject : null,
         unread : true,
         labels : []
     },
+    urlRoot: "/messages"
 });
 
 var Messages = Backbone.Collection.extend({
     model : Message,
-    getUnread : function() {
-        return this.filter(function(message) {
-            return !message.get('read');
-        });
+    getUnreadCount : function() {
+        return this.where({unread : true}).length;
     },
 });
 
 var Pack = Backbone.Model.extend({
-    initialize: function(packName) {
-        this.set('name', packName);
-
-        this.messages = new Messages();
-        this.messages.url = '/pack/' + this.get('name')  + '/messages';
+    defaults : {
+        name : '',
+        active : false,
+        hashUrl : null
     },
+    initialize: function() {
+        this.messages = new Messages();
+        var name = this.get('name');
+        this.messages.url = function() {
+            return '/pack/' + name  + '/messages';
+        }
+    },
+
+});
+
+var Packs = Backbone.Collection.extend({
+    model: Pack,
+    getActive : function() {
+        return this.findWhere({active : true});
+    },
+    activateOne : function(packName) {
+        var active = this.getActive();
+        if (active) {
+            active.set("active", false);
+        }
+        this.findWhere({name : packName}).set("active", true);
+    }
 });
 

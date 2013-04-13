@@ -1,95 +1,73 @@
 
 var MessageRowView = Backbone.View.extend({
-    tagName : 'tr',
+    template : Handlebars.templates.messageRow,
     initialize : function() {
-        this.model.on({
-            "change" : this.render,
-            "destroy" : this.remove
-        });
+        this.model.bind("change:unread", this.renderUnread, this);
     },
     render : function() {
-        $(this.el).html(
-            '<td>' + escapeHTML(this.model.get('from')) + '</td>' + 
-            '<td>' + escapeHTML(this.model.get('subject')) + '</td>' +
-            '<td>' + new Date(this.model.get('received')) + '</td>'
-        );
-        if (!this.model.get('read')) {
-            $(this.el).addClass("unseen");
+        console.info("rendering messageRowView " + this.model.get("id"));
+        var data = this.model.toJSON();
+
+        if (!this.hashUrl) {
+            this.hashUrl = window.curie.router.reverse("showMessage", {
+                pack : this.options.pack,
+                message : this.model.get("id")
+            });
         }
+        data.url = this.hashUrl;
+        var html = this.template(data);
+
+        this.$el = $(html);
+
         return this;
     },
+    renderUnread : function(e) {
+        if (e.changed.unread == true) {
+            console.info("adding unread to message");
+            $("#message-" + this.model.get('id')).addClass("unread");
+        } else if (e.changed.unread == false) {
+            console.info("removing unread to message");
+            $("#message-" + this.model.get('id')).removeClass("unread");
+        }
+
+    }
 });
 
 var PackView = Backbone.View.extend({
-    el : ".app",
+    el : "#packView",
+    template : Handlebars.templates.messageList,
+
     initialize : function() {
 
+        this.model.on("change:active", this.render, this);
         this.model.messages.on("reset add remove", this.render, this);
 
-        this.model.messages.on("fetch:start", this.showLoader, this);
-        this.model.messages.on("fetch:end", this.hideLoader, this);
+        this.messageRowViews = [];
 
-        this.listBody = $("#messages-list tbody", this.el);
-
-        this.packLiEl = $(".nav a.pack[name=" + this.model.get('name') + "]", this.el).parent();
-        this.allLiEls = $(".nav a.pack", this.el).parent();
-        this.badge = $(".badge", this.packLiEl);
-
-        this.active = false;
-
-        this.newCounter = 0;
-
-        //FIXME: add packs menu here
-    },
-    activate : function() {
-
-        console.info("Activating PackView " + this.model.get('name'));
-
-        this.active = true;
-        this.allLiEls.removeClass("active");
-        this.packLiEl.addClass("active");
-        this.render();
+        //this.model.messages.on("change:unread", this.showLoader, this);
+        //this.model.messages.on("fetch:end", this.hideLoader, this);
     },
     render : function() {
-        console.info("HEY");
-
-        console.info("Rendering PackView " + this.model.get('name') + ", active=" + this.active);
-
-        this.updateBadge();
-
-        if (this.active) {
-            var listBody = this.listBody;
-            listBody.empty();
-            this.model.messages.each(function(message) {
-                listBody.append(new MessageRowView({model : message}).render().el);
-            });
-        }
-
-        /*
-        this.model.messages.fetch({
-            success : function(coll, response) {
-                self.hideLoader();
-                self.updateBadge();
-                coll.each(function(message) {
-                    self.listBody.append(new MessageRowView({model : message}).render().el);
+        if (this.model.get('active')) {
+            console.trace();
+            console.info(this.model.messages);
+            console.info("rendering PackView pack=" + this.model.get('name') + ", active=" + this.model.get('active'));
+            var pack = this.model.get("name");
+            this.messageRowViews = this.model.messages.map(function(message) {
+                return new MessageRowView({
+                    model : message,
+                    pack : pack
                 });
-            },
-            error : function() {
-                self.hideLoader();
-                console.error("ERROR!");
-            }
-        });
-        */
-        return this;
-    },
-    updateBadge : function() {
-        var unread = this.model.messages.getUnread().length;
-        console.info("updating the badge to " + unread);
-        if (unread == 0) {
-            this.badge.hide();
+            });
+            this.$el.html(this.template({
+                rows : this.messageRowViews.map(function(rv) {
+                    return {html : rv.render().$el.prop('outerHTML')};
+                })
+            }));
         } else {
-            this.badge.html(unread).show();
+            console.info("pack render event, but nothing to do. pack=" + this.model.get('name'));
         }
+        return this;
     },
     showLoader : function() {
         $(".loader", this.packLiEl).html("<img src='/static/img/loader.gif'/>");
@@ -97,35 +75,117 @@ var PackView = Backbone.View.extend({
     hideLoader : function() {
         $(".loader", this.packLiEl).empty();
     },
-    hideBadge : function() {
-        $(".badge", this.packLiEl).empty().hide();
-    }
+    showMessage : function(message) {
+        console.info("Showing message " + message);
+        // show message
+         
+        // mark message as read
+        var message = this.model.messages.get(message);
+        if (message) {
+            message.save("unread", false);
+        } else {
+            if (this.model.messages.length == 0) {
+                console.info("---- saving for later");
+                var self = this;
+                var func = _.once(function() {
+                    console.info("HEYHEY");
+                    self.model.messages.get(message).save("unread", false);
+                });
+                this.model.messages.on("reset", func, this);
+            }
+        }
+
+    },
+});
+
+
+var PackListView = Backbone.View.extend({
+    el : "#packList",
+    template : Handlebars.templates.packList,
+    initialize : function() {
+
+        var self = this;
+
+        //this.model.on("reset add remove", this.render, this);
+        this.model.on("change:active", this.updateActive, this);
+        this.model.on("add reset", function(model) {
+            console.info("mapping to model " + model.get("name"));
+            model.messages.on("change reset add remove", self.badgeUpdaterFor(model), self);
+        });
+    },
+    render : function(selectedPack) {
+        console.info("rendering PackListView");
+        this.model.models.map(function(p) {
+            if (!p.get('hashUrl')) {
+                p.set('hashUrl', window.curie.router.reverse('showPack', {pack : p.get('name')}));
+            }
+        });
+        this.$el.html(
+            this.template({ packs : this.model.toJSON() })
+        );
+        return this;
+    },
+    updateActive : function(m) {
+        console.info("updating active " + m.get('name'));
+        var activeClass = "active";
+        var el = $("a[name=" + m.get('name') + "].pack").parents("li");
+        if (m.changed.active == true) {
+            if (el && !el.hasClass(activeClass)) {
+                el.addClass(activeClass);
+            }
+        } else if (m.changed.active == false) {
+            el.removeClass(activeClass);
+        }
+    },
+    badgeUpdaterFor : function(packModel) {
+        var packName = packModel.get('name');
+        function updateBadge(m) {
+            console.info("updating badge pack=" + packName + ", message=" + m.get("id"));
+            var badge = $(".nav a[name=" + packName + "].pack .badge");
+            var unread = packModel.messages.getUnreadCount();
+            if (unread == 0) {
+                badge.hide();
+            } else {
+                badge.html(unread).show();
+            }
+        }
+        return updateBadge;
+    },
 });
 
 var AppView = Backbone.View.extend({
     el : ".app",
-    events : {
-    },
     initialize : function(packsNames) {
-        this.packs = _.map(packsNames, function(p) {
-            return new PackView({ model : new Pack(p) });
+        var self = this;
+
+        var packModels = this.packModels = new Packs();
+        this.packListView = new PackListView({
+            model : this.packModels
+        });
+        var packViews = this.packViews = [];
+
+        _.map(packsNames, function(p) {
+            var model = new Pack({ name : p });
+            packModels.add(model);
+            packViews.push(new PackView({ model : model }));
         });
 
         this.lastFetchTimeEl = $("#lastFetchTime");
     },
     render : function(selectedPack) {
-        this.getPackByName(selectedPack || "inbox").activate();
+        console.info("rendering appView");
+        this.packListView.render();
         return this;
     },
     activatePack : function(packName) {
-        document.title = packName;
-        _.each(this.packs, function(p) {
-            p.active = false;
-        });
-        this.getPackByName(packName).activate();
+        this.packModels.activateOne(packName);
     },
-    getPackByName : function(packName) {
-        return _.find(this.packs, function(p) {
+    deactivatePack : function(packName) {
+        $(".nav a.pack[name=" + packName + "]", ".app");
+        var allLiEls = $(".nav a.pack", ".app").parent();
+    },
+    getPackViewByName : function(packName) {
+        return _.find(this.packViews, function(p) {
             return p.model.get('name') == packName;
         });
     },
@@ -142,17 +202,18 @@ var AppView = Backbone.View.extend({
     updateLastFetchTime : function() {
         this.lastFetchTimeEl.text(new Date());
     },
-    fetchPacks : function() {
+    fetchPacks : function(callback) {
 
         var self = this;
-        var updateFetchTime = _.after(this.packs.length, function() {
+        var updateFetchTime = _.after(this.packListView.model.length, function() {
             self.updateLastFetchTime();
         });
 
-        this.packs.map(function(p) {
-            p.model.messages.fetch({update: true});
+        this.packListView.model.models.map(function(model) {
+            model.messages.fetch({update: true});
             updateFetchTime();
         });
+
 
     }
 });

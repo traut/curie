@@ -59,7 +59,15 @@ body {
     }
 }
 
-.unseen td {
+.unread {
     font-weight: bold;
+}
 
+.messageList {
+    a {
+        color: black;
+        .muted {
+            font-weight: normal;
+        }
+    }
 }
