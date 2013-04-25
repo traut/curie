@@ -63,12 +63,14 @@
         </analyzer>
     </fieldtype>
 
-    <fieldType name="string_email" class="solr.TextField" sortMissingLast="true" omitNorms="true">
-        <analyzer>
-            <tokenizer class="solr.StandardTokenizerFactory" />
-            <filter class="solr.LowerCaseFilterFactory" />
-            <filter class="solr.WordDelimiterFilterFactory" />
-        </analyzer>
+    <fieldType name="string_email" class="solr.TextField" sortMissingLast="true" omitNorms="true" positionIncrementGap="100"> 
+        <analyzer> 
+            <tokenizer class="solr.StandardTokenizerFactory"/> 
+            <filter class="solr.LowerCaseFilterFactory"/> 
+            <filter class="solr.PatternReplaceFilterFactory" pattern="\." replacement=" DOT " replace="all" /> 
+            <filter class="solr.PatternReplaceFilterFactory" pattern="@" replacement=" AT " replace="all" /> 
+            <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0"/> 
+        </analyzer> 
     </fieldType>
 
     <fieldType name="text_ws_lower" class="solr.TextField" positionIncrementGap="100">

@@ -75,10 +75,8 @@ PackStore = function() {
                     doc[key] = options.changed[key];
                 }
                 doc["_version_"] = 1; // document must exist
-                console.info(doc);
                 solr.add(doc, function(err) {
                     if (err) {
-                        console.info(err);
                         winston.error("Can't add a doc", {doc : doc, err: err});
                         callback(err, null);
                         return;
@@ -103,7 +101,7 @@ var stores = {
 
 function queryForLabel(toEmail, label, callback){
     var email = solrLib.valueEscape(toEmail);
-    var query = util.format("+labels:%s +header_to_email:%s", label, email);
+    var query = util.format('+labels:%s +header_to_email:"%s"', label, email);
     solr.query(query, {
         sort: "received desc",
     }, function(err, response) {
