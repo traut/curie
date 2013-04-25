@@ -1,0 +1,25 @@
+<div class="modal-body">
+    <div class="header text-center">
+        <img src="/static/img/curie.gif" class="logo"/><h1>Curie</h1>
+    </div>
+    <br/>
+
+    <div class="alert alert-error hide" id="errorNote"></div>
+    <form class="form-horizontal" id="loginForm">
+        <div class="control-group">
+            <div class="controls">
+                <input type="email" id="inputEmail" placeholder="Email" name="email" tabindex="2">
+            </div>
+        </div>
+        <div class="control-group">
+            <div class="controls">
+                <input type="password" id="inputPassword" placeholder="Password" name="password" tabindex="3">
+            </div>
+        </div>
+        <div class="control-group">
+            <div class="controls">
+                <button type="submit" class="btn" tabindex="4" onFocus="this.tabIndex=1;" onBlur="this.tabIndex=4;">Sign in</button>
+            </div>
+        </div>
+    </form>
+</div>

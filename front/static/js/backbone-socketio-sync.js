@@ -1,5 +1,6 @@
 Backbone.sync = function (method, model, options) {
-    console.info(method, model, options);
+
+    console.info("Backbone.sync", method, model, options);
 
     var socket = window.curie.socket; // grab active socket from global namespace; io.connect() was used to create socket
  
@@ -11,9 +12,11 @@ Backbone.sync = function (method, model, options) {
         var obj = { 
             url : model.url()
         };
+        /*
         if (model.id) {
             obj.url += "/" + model.id;
         }
+        */
         if (model.ctx) obj.ctx = model.ctx;
         return obj;
     };
@@ -35,7 +38,7 @@ Backbone.sync = function (method, model, options) {
 
         socket.once(signature, function (data) {
             model.id = data.id;  
-            console.log(model, data, "created");                     
+            //console.log(model, data, "created");                     
         });                           
 
         socket.emit('create', {'cast' : cast, item : model.attributes }); 
@@ -58,7 +61,17 @@ Backbone.sync = function (method, model, options) {
         var e = eventSignature('update', cast);
         socket.emit('update', {'cast' : cast, item : model.attributes }); // model.attribues is the model data
         socket.once(e, function (data) { 
-            console.log(data);
+            //console.log(data);
+        });                           
+    };  
+
+    // Patch an existing model on the server.
+    var patch = function () {
+        var cast = modelCast(model); 
+        var e = eventSignature('patch', cast);
+        socket.emit('patch', {'cast' : cast, 'changed' : options.attrs});
+        socket.once(e, function (data) { 
+            console.log("patch response", data);
         });                           
     };  
      
@@ -68,7 +81,7 @@ Backbone.sync = function (method, model, options) {
         var e = eventSignature('delete', cast);
         socket.emit('delete', {'cast' : cast, item : model.attributes }); // model.attribues is the model data
         socket.once(e, function (data) { 
-            console.log(data);                     
+            //console.log(data);                     
         });                           
     };             
        
@@ -82,6 +95,9 @@ Backbone.sync = function (method, model, options) {
             break;  
         case 'update':
             update();
+            break;
+        case 'patch':
+            patch();
             break;
         case 'delete':
             destroy();

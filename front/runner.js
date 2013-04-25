@@ -3,7 +3,8 @@ var http = require('http'),
     fs = require('fs'),
     crypto = require('crypto'),
     redis = require('redis'),
-    winston = require('winston');
+    winston = require('winston'),
+    cookie = require('cookie');
 
 var store = require("./store.js");
 var feed = require("./feed.js");
@@ -16,29 +17,51 @@ var server = http.createServer(function(req, res) {
 });
 
 var io = socketio.listen(server);
+io.set('log level', 1); // info
 
 var newMessagesSocketName = "new-messages";
-var expectedPassword = "expected-password";
+
+var expectedEmails = [
+    "some@curie.heyheylabs.com",
+    "t@curie.heyheylabs.com"
+];
+var expectedPassword = "p";
+
+var sessions = {};
 
 
 io.configure(function (){
     io.set('authorization', function (handshakeData, callback) {
 
+        var cookies = cookie.parse(handshakeData.headers.cookie || "");
+        if (cookies['curie.stream'] && cookies['curie.session']) {
+            if (sessions[cookies['curie.session']]) {
+                var sessionId = cookies['curie.session'];
+                winston.info("Session " + sessionId + " authorized");
+
+                handshakeData.session = sessions[sessionId];
+                callback(null, true);
+                return;
+            }
+        }
+
         var email = handshakeData.query.email;
         var pass = handshakeData.query.password;
 
-        var shasum = crypto.createHash('sha512');
-        var channel = shasum.update(email).digest('hex');
+        console.info(email + " " + pass);
 
-        if (pass != expectedPassword) {
+        if (expectedEmails.indexOf(email) == -1 && pass != expectedPassword) {
             callback(null, false);
             return;
         }
 
-        handshakeData.user = {
+        var sessionId = "session" + (Math.random() * 10000);
+        sessions[sessionId] = handshakeData.session = {
             email : email,
+            id : sessionId
         };
 
+        var channel = crypto.createHash('sha512').update(email).digest('hex');
         var channelKey = "channel-" + channel;
         var channelNamespace = "/stream/" + channel;
 
@@ -49,6 +72,8 @@ io.configure(function (){
 
             io.of("/stream/" + channel).on('connection', function(socket) {
                 winston.info("Connection created " + socket.id);
+
+                socket.emit("session-id", socket.handshake.session.id);
 
                 socket.redis = redis.createClient();
                 socket.redis.incr(channelKey);
@@ -64,6 +89,9 @@ io.configure(function (){
                 socket.on('update', function(data) {
                     winston.info("update", data);
                     store.update(socket, data.cast);       
+                }); 
+                socket.on('patch', function(data) {
+                    store.patch(socket, data.cast, data.changed);
                 }); 
                 socket.on('delete', function(data) {
                     winston.info("delete", data);

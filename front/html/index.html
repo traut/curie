@@ -3,15 +3,22 @@
     <head>
         <title>Curie</title>
 
-        <link rel="stylesheet" href="/static/css/bootstrap.css" type="text/css" media="screen" charset="utf-8">
-        <link rel="stylesheet" href="/static/css/bootstrap-responsive.css" type="text/css">
+        <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.css" type="text/css" media="screen" charset="utf-8">
+        <link rel="stylesheet" href="/static/bootstrap/css/bootstrap-responsive.css" type="text/css">
 
         <link rel="stylesheet" href="/static/css/base.css" type="text/css" media="screen" charset="utf-8">
 
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,600&subset=latin,cyrillic-ext,cyrillic' rel='stylesheet' type='text/css'>
+
+
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+
+        <script src="/static/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
 
         <script src="/static/js/underscore-min.js" type="text/javascript"></script>
         <script src="/static/js/backbone-min.js" type="text/javascript"></script>
+
+        <script src="/static/js/moment.min.js" type="text/javascript"></script>
 
         <script src="/static/js/jsSHA/sha512.js" type="text/javascript"></script>
         <script src="/static/js/handlebars.runtime.js" type="text/javascript"></script>
@@ -22,16 +29,16 @@
         <script src="/static/js/views.js" type="text/javascript"></script>
         <script src="/static/js/routes.js" type="text/javascript"></script>
 
+        <script src="/static/js/login-modal.js" type="text/javascript"></script>
+
+        <script src="/static/js/utils.js" type="text/javascript"></script>
+
         <script src="/socket.io/socket.io.js"></script>
         <script src="/static/js/backbone-socketio-sync.js"></script>
+        
 
     </head>
     <body>
-        <div class="header">
-            <img src="/static/img/curie.gif" class="logo"/><h1>Curie</h1>
-            <div class="error-block" id="error-block"><span class="label label-important" id="error-message"></span></div>
-        </div>
-
     <div class="container-fluid app">
         <div class="row-fluid">
             <div class="span3">
@@ -44,51 +51,91 @@
             <script>
                 window.curie = window.curie || {};
 
-                $(function() {
-                    var message = new Message({ from: 'yana.dobrunova@gmail.com', to: 'sergey@polzunov.com', subject: 'Hey, take a look at this!'});
-                    //message.save();
 
-                    var email = "some@curie.heyheylabs.com";
-                    var password = "expected-password";
-                    var channel = new jsSHA(email, "TEXT").getHash("SHA-512", "HEX");
+                function createConnection(options) {
 
-                    window.curie.socket = io.connect('/stream/' + channel, {
+                    var email = options.email || null,
+                        password = options.password || null,
+                        channel = options.channel || new jsSHA(email, "TEXT").getHash("SHA-512", "HEX");
+
+                    var initialData = {
                         secure: true,
                         port: 443,
-                        query: "email=" + email + "&password=" + password,
                         'force new connection': true
+                    }
+                    if (email && password) {
+                        initialData.query = "email=" + email + "&password=" + password;
+                    }
+
+                    var socket = window.curie.socket = io.connect('/stream/' + channel, initialData);
+
+                    socket.on('error', function() {
+                        console.error("Error received");
+                        // clea
+                        window.curie.loginModal.show();
+                        window.curie.loginModal.shake();
                     });
-                    
-                    var appView = new AppView(["inbox", "sent", "facebook"]);
-                    var appRouter = new AppRouter(appView);
-                    window.curie.router = appRouter;
+                    socket.on('session-id', function(sessionId) {
+                        console.info("Setting session to " + sessionId);
 
+                        setCookie("session", sessionId);
+                    });
+                    socket.on('connect', function() {
+                        console.info("Connection to " + channel + " created");
 
-                    appView.render();
+                        setCookie("stream", channel);
+                        initDataLoad();
+                        window.curie.loginModal.hide();
+                    });
+                }
 
+                function initInterface() {
+                    window.curie.appView = new AppView(["inbox", "sent", "facebook"]);
+                    window.curie.router = new AppRouter(window.curie.appView);
+
+                    window.curie.appView.render();
+                }
+
+                function initDataLoad() {
                     window.curie.socket.on('new-messages', function(data) {
-                        appView.addMessage(data.message);
+                        window.curie.appView.addMessage(data.message);
                     });
+                    window.curie.appView.fetchPacks();
 
-                    appView.fetchPacks();
+                    Backbone.history.stop();
                     Backbone.history.start();
-
-
-                    // fetch every 10 secs
-                    /*
                     setInterval(function() {
-                        appView.fetchPacks();
+                        window.curie.appView.fetchPacks();
                     }, 10 * 1000); 
-                    */
-
-
-                });
+                }
 
             </script>
             <div class="span9" id="packView">
             </div>
         </div>
     </div>
+
+
+        <div class="modal hide" id="loginModal" data-backdrop="static" data-keyboard="false" data-show="true"></div>
+
+        <script>
+
+            $(function() {
+                initInterface();
+
+                window.curie.loginModal = LoginModal().create();
+
+                if (window.readCookie("curie.stream")) {
+                    console.info("Stream exists! " + window.readCookie("curie.stream"));
+                    createConnection({
+                        channel : window.readCookie("curie.stream")
+                    });
+                } else {
+                    window.curie.loginModal.show();
+                }
+
+            });
+        </script>
 
     </body>
 </html>

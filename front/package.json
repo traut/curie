@@ -14,7 +14,8 @@
       "socket.io": "0.9.13",
       "backbone.io": "0.3.3",
       "solr": "0.2.2",
-      "isodate": "0.1.4"
+      "isodate": "0.1.4",
+      "async": "0.2.7"
   },
   "devDependencies": {},
   "optionalDependencies": {},

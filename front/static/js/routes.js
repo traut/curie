@@ -33,11 +33,11 @@ var AppRouter = Backbone.Router.extend({
     // views
 
     showPack : function(pack) {
-        this.view.activatePack(pack);
+        this.view.packModels.activateOne(pack);
     },
 
     showMessage : function(pack, message) {
-        this.view.activatePack(pack);
+        this.showPack(pack);
         this.view.getPackViewByName(pack).showMessage(message);
     },
 

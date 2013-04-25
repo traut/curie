@@ -1,4 +1,4 @@
-var Message = Backbone.Model.extend({
+var MessagePreview = Backbone.Model.extend({
     defaults: {
         id : null,
         to_name : null,
@@ -6,14 +6,28 @@ var Message = Backbone.Model.extend({
         from_name : null,
         from_email : null,
         subject : null,
-        unread : true,
+        unread : null,
         labels : []
+    },
+});
+
+var MessageFull = Backbone.Model.extend({
+    defaults: {
+        id : null,
+        to_name : null,
+        to_email : null,
+        from_name : null,
+        from_email : null,
+        subject : null,
+        unread : null,
+        labels : [],
+        body : null
     },
     urlRoot: "/messages"
 });
 
 var Messages = Backbone.Collection.extend({
-    model : Message,
+    model : MessagePreview,
     getUnreadCount : function() {
         return this.where({unread : true}).length;
     },
@@ -41,11 +55,15 @@ var Packs = Backbone.Collection.extend({
         return this.findWhere({active : true});
     },
     activateOne : function(packName) {
-        var active = this.getActive();
-        if (active) {
-            active.set("active", false);
+        var requestedPack = this.findWhere({name : packName});
+        if (!requestedPack.get("active")) {
+            console.info("making " + packName + " active");
+            var active = this.getActive();
+            if (active) {
+                active.set("active", false);
+            }
+            requestedPack.set("active", true);
         }
-        this.findWhere({name : packName}).set("active", true);
     }
 });
 

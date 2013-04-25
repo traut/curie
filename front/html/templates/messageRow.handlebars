@@ -1,11 +1,11 @@
-<div id="message-{{ id }}" class="row-fluid {{#if unread }}unread{{/if}}">
-    <a href="#{{ url }}">
-    {{# if from_name }}
-        <div class="span4">{{ from_name }} <span class="muted">&lt;{{ from_email }}&gt;</span></div>
-    {{ else }}
-        <div class="span4">{{ from_email }}</div>
-    {{/if}}
-        <div class="span4">{{ subject }}</div>
-        <div class="span3">{{ received }}</div>
-    </a>
-</div>
+    <div id="message-row-{{ id }}" class="row messageRow {{#if unread }}unread{{/if}}">
+        <a href="#{{ url }}">
+        {{# if from_name }}
+            <div class="span4">{{ from_name }} <span class="muted">&lt;{{ from_email }}&gt;</span></div>
+        {{ else }}
+            <div class="span4">{{ from_email }}</div>
+        {{/if}}
+            <div class="span5">{{ subject }}</div>
+            <div class="span3 date">{{#dateformat received 'HH:mm, dddd, MMM Do'}}{{/dateformat}}</div>
+        </a>
+    </div>

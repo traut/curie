@@ -1,0 +1,19 @@
+<div id="message-{{ id }}" class="row messageView">
+    <div class="pull-right">
+        {{#each labels}} <span class="badge">{{ this }}</span>{{/each}}
+    </div>
+    <p>
+        <strong>Received:</strong> {{#dateformat received 'HH:mm:ss, dddd, MMM Do, YYYY'}}{{/dateformat}}<br/>
+        <strong>From:</strong> {{# if from_name }} {{ from_name }} <span class="muted">&lt;{{ from_email }}&gt;</span> {{ else }} {{ from_email }} {{/if}}<br/>
+        <strong>To:</strong> {{# if to_name }} {{ to_name }} <span class="muted">&lt;{{ to_email }}&gt;</span> {{ else }} {{ to_email }} {{/if}}<br/>
+        <strong>Subject:</strong> {{ subject }}<br/>
+    </p>
+    <div class="pull-right">
+        <button data-message="{{ id }}" name="markUnread" class="btn btn-mini">Mark unread</button>
+    </div>
+    {{#each body }}
+        <div class="body{{@index}}">
+        {{{ this }}}
+        </div>
+    {{/each }}
+</div>

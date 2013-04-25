@@ -1,3 +1,54 @@
+var MessageView = Backbone.View.extend({
+    tagName : 'div',
+    template : Handlebars.templates.message,
+    initialize : function() {
+        this.model.on("change", this.render, this);
+        this.model.fetch();
+    },
+    render : function(e) {
+        console.info("rendering message " + this.model.id);
+
+        var data = this.model.toJSON();
+
+        //FIXME: create a separate formatter class
+        data.body = _.map(data.body, function(b) {
+            return b.replace(/\n{2}/g, "<br/>").replace(/\n/g, "<br/>");
+        });
+
+        this.$el.html(this.template(data));
+
+        var self = this;
+        var markUnreadButton = $("button[name=markUnread]", this.$el);
+        markUnreadButton.click(function() {
+            self.setToUnreadTrue = true;
+            self.setUnreadTo(true);
+        });
+
+        if (this.$el.is(":visible") && this.model.get("unread") && !this.setToUnreadTrue) {
+
+            //FIXME: this is causing 'change' event and render() again
+            setTimeout(function() {
+                self.setUnreadTo(false);
+            }, 100);
+        };
+    },
+    setUnreadTo : function(bool) {
+        this.model.save({unread : bool}, {patch : true});
+    },
+    hide : function() {
+        this.setToUnreadTrue = false;
+        this.$el.hide();
+    },
+    show : function() {
+        console.info("Show called for message " + this.model.id);
+        if (!jQuery.contains(document.documentElement, this.$el[0])) { // the element removed from DOM
+            console.info("Message " + this.model.id + " is not in DOM. adding");
+            $("#message-row-" + this.model.id).after(this.$el.hide());
+        }
+        this.$el.show();
+
+    }
+});
 
 var MessageRowView = Backbone.View.extend({
     template : Handlebars.templates.messageRow,
@@ -24,10 +75,10 @@ var MessageRowView = Backbone.View.extend({
     renderUnread : function(e) {
         if (e.changed.unread == true) {
             console.info("adding unread to message");
-            $("#message-" + this.model.get('id')).addClass("unread");
+            $("#message-row-" + this.model.id).addClass("unread");
         } else if (e.changed.unread == false) {
             console.info("removing unread to message");
-            $("#message-" + this.model.get('id')).removeClass("unread");
+            $("#message-row-" + this.model.id).removeClass("unread");
         }
 
     }
@@ -43,14 +94,14 @@ var PackView = Backbone.View.extend({
         this.model.messages.on("reset add remove", this.render, this);
 
         this.messageRowViews = [];
+        this.messageViews = {};
 
         //this.model.messages.on("change:unread", this.showLoader, this);
         //this.model.messages.on("fetch:end", this.hideLoader, this);
+        
     },
     render : function() {
         if (this.model.get('active')) {
-            console.trace();
-            console.info(this.model.messages);
             console.info("rendering PackView pack=" + this.model.get('name') + ", active=" + this.model.get('active'));
             var pack = this.model.get("name");
             this.messageRowViews = this.model.messages.map(function(message) {
@@ -76,25 +127,23 @@ var PackView = Backbone.View.extend({
         $(".loader", this.packLiEl).empty();
     },
     showMessage : function(message) {
-        console.info("Showing message " + message);
+        this.messageViews[message] = this.messageViews[message] || new MessageView({
+            model : new MessageFull({
+                id: message
+            })
+        });
+        _.each(this.messageViews, function(mv, messageId) {
+            if (messageId == message) {
+                mv.show();
+            } else {
+                mv.hide();
+            }
+        }, this);
         // show message
          
         // mark message as read
-        var message = this.model.messages.get(message);
-        if (message) {
-            message.save("unread", false);
-        } else {
-            if (this.model.messages.length == 0) {
-                console.info("---- saving for later");
-                var self = this;
-                var func = _.once(function() {
-                    console.info("HEYHEY");
-                    self.model.messages.get(message).save("unread", false);
-                });
-                this.model.messages.on("reset", func, this);
-            }
-        }
-
+        // should we in the MessageView
+        // this.model.messages.get(message).save("unread", false);
     },
 });
 
@@ -125,13 +174,20 @@ var PackListView = Backbone.View.extend({
         );
         return this;
     },
+    updateDocumentTitle : function(packName) {
+        document.title = packName + " - Curie";
+    },
     updateActive : function(m) {
-        console.info("updating active " + m.get('name'));
+        var packName = m.get('name');
         var activeClass = "active";
-        var el = $("a[name=" + m.get('name') + "].pack").parents("li");
+
+        console.info("updating active " + packName);
+
+        var el = $("a[name=" + packName + "].pack").parents("li");
         if (m.changed.active == true) {
             if (el && !el.hasClass(activeClass)) {
                 el.addClass(activeClass);
+                this.updateDocumentTitle(packName);
             }
         } else if (m.changed.active == false) {
             el.removeClass(activeClass);
@@ -177,9 +233,6 @@ var AppView = Backbone.View.extend({
         this.packListView.render();
         return this;
     },
-    activatePack : function(packName) {
-        this.packModels.activateOne(packName);
-    },
     deactivatePack : function(packName) {
         $(".nav a.pack[name=" + packName + "]", ".app");
         var allLiEls = $(".nav a.pack", ".app").parent();
@@ -200,7 +253,7 @@ var AppView = Backbone.View.extend({
         });
     },
     updateLastFetchTime : function() {
-        this.lastFetchTimeEl.text(new Date());
+        this.lastFetchTimeEl.text(moment().format('HH:mm:ss, dddd, MMM Do'));
     },
     fetchPacks : function(callback) {
 
@@ -217,11 +270,4 @@ var AppView = Backbone.View.extend({
 
     }
 });
-
-function escapeHTML(string) {
-    var pre = document.createElement('pre');
-    var text = document.createTextNode( string );
-    pre.appendChild(text);
-    return pre.innerHTML;
-}
 
