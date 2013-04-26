@@ -25,8 +25,8 @@ body {
     margin-right: 10px;
     vertical-align: middle; }
 
-.error-block {
-  display: none; }
+.sidebarInfo {
+  margin: 5px 0px; }
 
 .packs li .loader {
   float: right;
@@ -50,8 +50,17 @@ body {
   border-radius: 4px; }
   .messageRow.unread {
     font-weight: 800; }
-    .messageRow.unread .date {
+    .messageRow.unread .dateField {
       font-weight: normal; }
+  .messageRow .dateField {
+    font-weight: normal;
+    white-space: nowrap; }
+  .messageRow .emailField {
+    overflow: hidden;
+    white-space: nowrap; }
+  .messageRow .subjectField {
+    overflow: hidden;
+    white-space: nowrap; }
   .messageRow [class*="span"] {
     min-height: 0px;
     vertical-align: middle; }

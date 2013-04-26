@@ -45,14 +45,28 @@
                 <div class="sidebar-nav sidebar-nav-fixed">
                      <ul class="nav nav-list packs well" id="packList">
                      </ul>
-                    <div class="muted text-center" id="lastFetchTime"></div>
+                    <div class="muted text-center sidebarInfo" id="lastFetchTime"></div>
+                    <div class="muted text-center alert alert-error hide sidebarInfo" id="errorAlert"></div>
                 </div>
             </div>
             <script>
                 window.curie = window.curie || {};
 
+                function dummy() {};
 
-                function createConnection(options) {
+                function showAlert(msg) {
+                    $("#errorAlert").html(msg).show();
+                }
+
+                function hideAlert() {
+                    $("#errorAlert").html("").hide();
+                }
+
+                function createConnection(options, successCallback, failCallback) {
+
+
+                    successCallback = successCallback || dummy;
+                    failCallback = failCallback || dummy;
 
                     var email = options.email || null,
                         password = options.password || null,
@@ -70,22 +84,24 @@
                     var socket = window.curie.socket = io.connect('/stream/' + channel, initialData);
 
                     socket.on('error', function() {
-                        console.error("Error received");
-                        // clea
-                        window.curie.loginModal.show();
-                        window.curie.loginModal.shake();
+                        showAlert("Socket error");
+                        //FIXME: drop all models from memory 
+                        failCallback();
                     });
                     socket.on('session-id', function(sessionId) {
                         console.info("Setting session to " + sessionId);
-
                         setCookie("session", sessionId);
                     });
                     socket.on('connect', function() {
+                        hideAlert(); // maybe we were showing some connection-related alerts
                         console.info("Connection to " + channel + " created");
 
                         setCookie("stream", channel);
                         initDataLoad();
-                        window.curie.loginModal.hide();
+                        successCallback();
+                    });
+                    socket.on("disconnect", function() {
+                        showAlert("Disconneted");
                     });
                 }
 
@@ -129,6 +145,11 @@
                     console.info("Stream exists! " + window.readCookie("curie.stream"));
                     createConnection({
                         channel : window.readCookie("curie.stream")
+                    }, function() {
+                        console.info("Connection created");
+                    }, function() {
+                        console.info("Stream is dead, showing loginModal");
+                        window.curie.loginModal.show();
                     });
                 } else {
                     window.curie.loginModal.show();

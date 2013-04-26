@@ -8,6 +8,12 @@ var util = require('util'),
 
 var STORAGE_PATH = "/home/curie/storage/";
 
+var MAIL_ACCESS_MAP = {
+    "t@curie.heyheylabs.com" : ["t@curie.heyheylabs.com", "dev@arrr.tv", "webmaster@arrr.tv"],
+    "some@curie.heyheylabs.com" : ["some@curie.heyheylabs.com"]
+}
+
+
 var solr = solrLib.createClient();
 
 var router = new barista.Router();
@@ -101,7 +107,16 @@ var stores = {
 
 function queryForLabel(toEmail, label, callback){
     var email = solrLib.valueEscape(toEmail);
-    var query = util.format('+labels:%s +header_to_email:"%s"', label, email);
+
+
+    var query = '+labels:' + label; // +header_to_email:"%s"', label, email);
+
+    query += " +(";
+    for(i in MAIL_ACCESS_MAP[toEmail]) {
+        query += ' header_to_email:"' + solrLib.valueEscape(MAIL_ACCESS_MAP[toEmail][i]) + '"';
+    }
+    query += ")";
+
     solr.query(query, {
         sort: "received desc",
     }, function(err, response) {

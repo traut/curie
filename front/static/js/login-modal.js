@@ -6,11 +6,17 @@ LoginModal = function() {
     var emailInputId = "#inputEmail";
     var passwordInputId = "#inputPassword";
 
+    var modalLoader = "#modalLoader";
+
     var modal = {
         create : function () {
             modalObj.html(Handlebars.templates.loginModal());
             $(formObjId).submit(function(e) {
                 e.preventDefault();
+
+                $(":input", modalObj).attr("disabled", true);
+                $(modalLoader, modalObj).show();
+
                 var email = $(emailInputId, formObjId).val();
                 var password = $(passwordInputId, formObjId).val();
                 if (!email || !password) {
@@ -19,6 +25,17 @@ LoginModal = function() {
                 createConnection({
                     email : email,
                     password : password
+                }, function() {
+                    // success
+                    $(":input", modalObj).removeAttr("disabled");
+                    $(modalLoader, modalObj).hide();
+                    modal.hide();
+                }, function() {
+                    // fail
+                    $(":input", modalObj).removeAttr("disabled");
+                    $(modalLoader, modalObj).hide();
+                    modal.show();
+                    modal.shake();
                 });
                 return false;
             });

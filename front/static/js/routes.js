@@ -29,15 +29,15 @@ var AppRouter = Backbone.Router.extend({
         return this.navigate(url, navigateOptions);
     },
 
-
     // views
 
     showPack : function(pack) {
-        this.view.packModels.activateOne(pack);
+        this.view.packModels.activate(pack);
+        this.view.packModels.renderEvent(pack);
     },
 
     showMessage : function(pack, message) {
-        this.showPack(pack);
+        this.view.packModels.activate(pack);
         this.view.getPackViewByName(pack).showMessage(message);
     },
 

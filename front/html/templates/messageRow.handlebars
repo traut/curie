@@ -1,11 +1,11 @@
     <div id="message-row-{{ id }}" class="row messageRow {{#if unread }}unread{{/if}}">
         <a href="#{{ url }}">
         {{# if from_name }}
-            <div class="span4">{{ from_name }} <span class="muted">&lt;{{ from_email }}&gt;</span></div>
+            <div class="span4 emailField">{{ from_name }} <span class="muted">&lt;{{ from_email }}&gt;</span></div>
         {{ else }}
-            <div class="span4">{{ from_email }}</div>
+            <div class="span4 emailField">{{ from_email }}</div>
         {{/if}}
-            <div class="span5">{{ subject }}</div>
-            <div class="span3 date">{{#dateformat received 'HH:mm, dddd, MMM Do'}}{{/dateformat}}</div>
+            <div class="span5 subjectField">{{ subject }}</div>
+            <div class="span3 dateField">{{#dateformat received 'HH:mm, dddd, MMM Do'}}{{/dateformat}}</div>
         </a>
     </div>

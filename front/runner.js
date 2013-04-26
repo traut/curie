@@ -25,6 +25,7 @@ var expectedEmails = [
     "some@curie.heyheylabs.com",
     "t@curie.heyheylabs.com"
 ];
+
 var expectedPassword = "p";
 
 var sessions = {};

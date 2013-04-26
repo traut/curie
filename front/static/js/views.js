@@ -1,3 +1,5 @@
+function dummy() {};
+
 var MessageView = Backbone.View.extend({
     tagName : 'div',
     template : Handlebars.templates.message,
@@ -17,23 +19,33 @@ var MessageView = Backbone.View.extend({
 
         this.$el.html(this.template(data));
 
-        var self = this;
+
         var markUnreadButton = $("button[name=markUnread]", this.$el);
+        var self = this;
         markUnreadButton.click(function() {
+            var markUnreadButton = $("button[name=markUnread]", self.$el);
             self.setToUnreadTrue = true;
-            self.setUnreadTo(true);
+
+            self.setUnreadTo(true, function() {
+                console.info("unread update success");
+            }, function() {
+                console.info("unread update error");
+            });
         });
 
         if (this.$el.is(":visible") && this.model.get("unread") && !this.setToUnreadTrue) {
-
             //FIXME: this is causing 'change' event and render() again
             setTimeout(function() {
                 self.setUnreadTo(false);
             }, 100);
         };
     },
-    setUnreadTo : function(bool) {
-        this.model.save({unread : bool}, {patch : true});
+    setUnreadTo : function(bool, successCallback, errorCallback) {
+        this.model.save({unread : bool}, {
+            patch : true,
+            success : successCallback || dummy,
+            error : errorCallback || dummy
+        });
     },
     hide : function() {
         this.setToUnreadTrue = false;
@@ -67,17 +79,13 @@ var MessageRowView = Backbone.View.extend({
         }
         data.url = this.hashUrl;
         var html = this.template(data);
-
         this.$el = $(html);
-
         return this;
     },
     renderUnread : function(e) {
         if (e.changed.unread == true) {
-            console.info("adding unread to message");
             $("#message-row-" + this.model.id).addClass("unread");
         } else if (e.changed.unread == false) {
-            console.info("removing unread to message");
             $("#message-row-" + this.model.id).removeClass("unread");
         }
 
@@ -91,32 +99,73 @@ var PackView = Backbone.View.extend({
     initialize : function() {
 
         this.model.on("change:active", this.render, this);
-        this.model.messages.on("reset add remove", this.render, this);
+        this.model.on("render", this.render, this);
 
-        this.messageRowViews = [];
+        this.model.messages.on("reset", this.render, this);
+
+        this.model.messages.on("add", this.addMessage, this);
+        this.model.messages.on("remove", this.removeMessage, this);
+
+        this.messageRowViews = {};
         this.messageViews = {};
+
+        this.$messageList = $('<div id="messages-list" class="messageList">');
 
         //this.model.messages.on("change:unread", this.showLoader, this);
         //this.model.messages.on("fetch:end", this.hideLoader, this);
         
     },
+    addMessage : function(model, collection) {
+        console.info("Adding message", model);
+        //FIXME: for now, adding it to the top, but should keep a sorted list of models in memory
+        var packName = this.model.get("name");
+
+        var modelsWithoutViews = _.filter(collection.models, function(model) {
+            return !this.messageRowViews[model.id];
+        }, this);
+        _.each(modelsWithoutViews, function(model) {
+            this.messageRowViews[model.id] = new MessageRowView({
+                model : model,
+                pack : packName
+            });
+            console.info("View added for " + model.id);
+        }, this);
+        this.render();
+    },
+    removeMessage : function(model, collection, options) {
+        var deletedView = this.messageRowViews[model.id];
+        console.info(deletedView);
+        deletedView.$el.remove();
+        delete deletedView;
+    },
     render : function() {
         if (this.model.get('active')) {
             console.info("rendering PackView pack=" + this.model.get('name') + ", active=" + this.model.get('active'));
-            var pack = this.model.get("name");
-            this.messageRowViews = this.model.messages.map(function(message) {
-                return new MessageRowView({
-                    model : message,
-                    pack : pack
-                });
+
+            // if it is a first render
+            if (!this.$messageList.is(":visible")) {
+                this.$el.html(this.$messageList);
+            }
+
+            // hiding all the message views
+            _.each(_.values(this.messageViews), function(mv) {
+                mv.hide();
             });
-            this.$el.html(this.template({
-                rows : this.messageRowViews.map(function(rv) {
-                    return {html : rv.render().$el.prop('outerHTML')};
-                })
-            }));
+
+            // rendering message row view where it belongs
+            _.each(this.model.messages.models, function(model, index) {
+                var view = this.messageRowViews[model.id];
+                if (!view.$el.is(":visible")) {
+                    var existingDOMel = $(".messageRow:nth-child(" + (index + 1) + ")", this.$messageList);
+                    if (existingDOMel.length == 0) {
+                        this.$messageList.append(view.render().$el);
+                    } else {
+                        existingDOMel.before(view.render().$el);
+                    }
+                }
+            }, this);
         } else {
-            console.info("pack render event, but nothing to do. pack=" + this.model.get('name'));
+            console.info("pack=" + this.model.get('name') + " render event, but nothing to do");
         }
         return this;
     },
@@ -127,6 +176,7 @@ var PackView = Backbone.View.extend({
         $(".loader", this.packLiEl).empty();
     },
     showMessage : function(message) {
+        console.info("showing message " + message);
         this.messageViews[message] = this.messageViews[message] || new MessageView({
             model : new MessageFull({
                 id: message
@@ -134,16 +184,12 @@ var PackView = Backbone.View.extend({
         });
         _.each(this.messageViews, function(mv, messageId) {
             if (messageId == message) {
+                console.info("View for " + messageId + " found. show()");
                 mv.show();
             } else {
                 mv.hide();
             }
         }, this);
-        // show message
-         
-        // mark message as read
-        // should we in the MessageView
-        // this.model.messages.get(message).save("unread", false);
     },
 });
 
@@ -155,7 +201,6 @@ var PackListView = Backbone.View.extend({
 
         var self = this;
 
-        //this.model.on("reset add remove", this.render, this);
         this.model.on("change:active", this.updateActive, this);
         this.model.on("add reset", function(model) {
             console.info("mapping to model " + model.get("name"));
@@ -174,8 +219,12 @@ var PackListView = Backbone.View.extend({
         );
         return this;
     },
-    updateDocumentTitle : function(packName) {
-        document.title = packName + " - Curie";
+    updateDocumentTitle : function(packName, badge) {
+        if (badge && badge > 0) {
+            document.title = packName + "(" + badge +") - Curie";
+        } else {
+            document.title = packName + " - Curie";
+        }
     },
     updateActive : function(m) {
         var packName = m.get('name');
@@ -197,12 +246,16 @@ var PackListView = Backbone.View.extend({
         var packName = packModel.get('name');
         function updateBadge(m) {
             console.info("updating badge pack=" + packName + ", message=" + m.get("id"));
+
             var badge = $(".nav a[name=" + packName + "].pack .badge");
             var unread = packModel.messages.getUnreadCount();
             if (unread == 0) {
                 badge.hide();
             } else {
                 badge.html(unread).show();
+            }
+            if (this.model.get("active")) {
+                updateDocumentTitle(packName, unread);
             }
         }
         return updateBadge;
@@ -247,7 +300,7 @@ var AppView = Backbone.View.extend({
         this.packs.map(function(pack) {
             var packName = pack.model.get('name');
             if (message.labels && message.labels.indexOf(packName) > -1) {
-                pack.model.messages.unshift(message);
+                pack.model.messages.add(message);
                 console.info("message " + message.id + " pushed to " + packName);
             }
         });

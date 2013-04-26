@@ -40,8 +40,8 @@ body {
     }
 }
 
-.error-block {
-    display: none;
+.sidebarInfo {
+    margin: 5px 0px;
 }
 
 .packs {
@@ -65,9 +65,21 @@ body {
 .messageRow {
     &.unread {
         font-weight: 800;
-        .date {
+        .dateField {
             font-weight: normal;
         }
+    }
+    .dateField {
+        font-weight: normal;
+        white-space: nowrap;
+    }
+    .emailField {
+        overflow: hidden;
+        white-space: nowrap;
+    }
+    .subjectField {
+        overflow: hidden;
+        white-space: nowrap;
     }
     [class*="span"] {
         min-height: 0px;

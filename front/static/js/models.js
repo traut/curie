@@ -7,6 +7,7 @@ var MessagePreview = Backbone.Model.extend({
         from_email : null,
         subject : null,
         unread : null,
+        received : null,
         labels : []
     },
 });
@@ -20,6 +21,7 @@ var MessageFull = Backbone.Model.extend({
         from_email : null,
         subject : null,
         unread : null,
+        received : null,
         labels : [],
         body : null
     },
@@ -31,6 +33,9 @@ var Messages = Backbone.Collection.extend({
     getUnreadCount : function() {
         return this.where({unread : true}).length;
     },
+    comparator : function(message) {
+        return - message.get("received"); // newest goes first
+    }
 });
 
 var Pack = Backbone.Model.extend({
@@ -54,7 +59,7 @@ var Packs = Backbone.Collection.extend({
     getActive : function() {
         return this.findWhere({active : true});
     },
-    activateOne : function(packName) {
+    activate : function(packName) {
         var requestedPack = this.findWhere({name : packName});
         if (!requestedPack.get("active")) {
             console.info("making " + packName + " active");
@@ -64,6 +69,9 @@ var Packs = Backbone.Collection.extend({
             }
             requestedPack.set("active", true);
         }
+    },
+    renderEvent : function(packName) {
+        this.findWhere({name : packName}).trigger("render");
     }
 });
 
