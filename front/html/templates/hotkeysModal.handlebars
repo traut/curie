@@ -1,0 +1,20 @@
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&#215</button>
+    <h3>Hotkeys</h3>
+</div>
+<div class="modal-body hotkeysHelp">
+    <div class="row-fluid">
+        {{#each actionTypes }}
+        <div class="span6 actionTypeBlock">
+            {{#each this }}
+            <div class="row-fluid">
+                <div class="span2 keyVal">{{ hotkey }}</div>
+                <div class="span10 keyDoc">{{ doc }}</div>
+            </div>
+            {{/each}}
+        </div>
+        {{/each}}
+    </div>
+    
+
+</div>

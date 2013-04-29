@@ -53,3 +53,4 @@ function setCookie(name, value) {
 Handlebars.registerHelper('dateformat', function(stamp, format) {
     return moment(stamp).format(format);
 });
+Handlebars.registerPartial("messageRow", Handlebars.templates.messageRow);

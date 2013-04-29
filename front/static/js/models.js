@@ -38,24 +38,49 @@ var Messages = Backbone.Collection.extend({
     }
 });
 
-var Pack = Backbone.Model.extend({
+
+var Group = Backbone.Model.extend({
     defaults : {
-        name : '',
-        active : false,
-        hashUrl : null
+        value : null,
+        size : null,
+        topMessages : null,
     },
     initialize: function() {
-        this.messages = new Messages();
-        var name = this.get('name');
-        this.messages.url = function() {
-            return '/pack/' + name  + '/messages';
-        }
     },
+});
 
+var Groups = Backbone.Collection.extend({
+    model: Group,
+    initialize: function() {
+    },
+    comparator : function(group) {
+        return - group.get("size"); // biggest goes first
+    }
+});
+
+var Pack = Backbone.Model.extend({
+    defaults : {
+        name : null,
+        active : false,
+        hashUrl : null,
+        groupBy : "from",
+    },
+    initialize: function() {
+        this.groups = new Groups();
+        this.groups.url = '/packs/' + this.get('name')  + '/groups/' + this.get('groupBy');
+
+        this.messages = new Messages();
+        this.messages.url = '/packs/' + this.get('name') + '/messages';
+    },
+    fetchAll: function(options) {
+        this.groups.fetch(options);
+        this.messages.fetch(options);
+    }
 });
 
 var Packs = Backbone.Collection.extend({
     model: Pack,
+    url: '/packs',
     getActive : function() {
         return this.findWhere({active : true});
     },
@@ -70,8 +95,5 @@ var Packs = Backbone.Collection.extend({
             requestedPack.set("active", true);
         }
     },
-    renderEvent : function(packName) {
-        this.findWhere({name : packName}).trigger("render");
-    }
 });
 

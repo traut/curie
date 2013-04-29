@@ -9,8 +9,17 @@ Backbone.sync = function (method, model, options) {
      * This is used on the server to push an event back to the client listener.
      */
     var modelCast = function () {
+    
+
+        var modelUrl;
+        if (typeof(model.url) == "function") {
+            modelUrl = model.url();
+        } else {
+            modelUrl = model.url;
+        }
+
         var obj = { 
-            url : model.url()
+            url : modelUrl
         };
         /*
         if (model.id) {

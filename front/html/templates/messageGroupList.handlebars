@@ -1,0 +1,7 @@
+<div id="message-group-{{ id }}" class="row packGroup">
+    <div class="pull-right counters"><span name="unread" class="{{#unless unread }}hide{{/unless}} badge badge-inverse">{{ unread }}</span> <span class="badge">{{ size }}</span></div>
+    <h4>{{ name }}</h4>
+    {{#each messages }}
+    {{> messageRow }}
+    {{/each}}
+</div>

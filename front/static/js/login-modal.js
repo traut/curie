@@ -19,7 +19,10 @@ LoginModal = function() {
 
                 var email = $(emailInputId, formObjId).val();
                 var password = $(passwordInputId, formObjId).val();
+
                 if (!email || !password) {
+                    $(":input", modalObj).removeAttr("disabled");
+                    $(modalLoader, modalObj).hide();
                     return false;
                 }
                 createConnection({
@@ -27,9 +30,9 @@ LoginModal = function() {
                     password : password
                 }, function() {
                     // success
+                    modal.hide();
                     $(":input", modalObj).removeAttr("disabled");
                     $(modalLoader, modalObj).hide();
-                    modal.hide();
                 }, function() {
                     // fail
                     $(":input", modalObj).removeAttr("disabled");

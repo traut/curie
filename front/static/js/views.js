@@ -94,11 +94,9 @@ var MessageRowView = Backbone.View.extend({
 
 var PackView = Backbone.View.extend({
     el : "#packView",
-    template : Handlebars.templates.messageList,
 
     initialize : function() {
 
-        this.model.on("change:active", this.render, this);
         this.model.on("render", this.render, this);
 
         this.model.messages.on("reset", this.render, this);
@@ -117,12 +115,12 @@ var PackView = Backbone.View.extend({
     },
     addMessage : function(model, collection) {
         console.info("Adding message", model);
-        //FIXME: for now, adding it to the top, but should keep a sorted list of models in memory
         var packName = this.model.get("name");
 
         var modelsWithoutViews = _.filter(collection.models, function(model) {
             return !this.messageRowViews[model.id];
         }, this);
+
         _.each(modelsWithoutViews, function(model) {
             this.messageRowViews[model.id] = new MessageRowView({
                 model : model,
@@ -133,18 +131,22 @@ var PackView = Backbone.View.extend({
         this.render();
     },
     removeMessage : function(model, collection, options) {
+        console.info("deleting message " + model.id);
         var deletedView = this.messageRowViews[model.id];
         console.info(deletedView);
         deletedView.$el.remove();
         delete deletedView;
     },
-    render : function() {
+    render : function(insertIntoTree) {
         if (this.model.get('active')) {
             console.info("rendering PackView pack=" + this.model.get('name') + ", active=" + this.model.get('active'));
 
-            // if it is a first render
-            if (!this.$messageList.is(":visible")) {
-                this.$el.html(this.$messageList);
+
+            if (insertIntoTree) {
+                // if it is a first render
+                if (!this.$messageList.is(":visible")) {
+                    this.$el.html(this.$messageList);
+                }
             }
 
             // hiding all the message views
@@ -153,15 +155,19 @@ var PackView = Backbone.View.extend({
             });
 
             // rendering message row view where it belongs
+            
             _.each(this.model.messages.models, function(model, index) {
                 var view = this.messageRowViews[model.id];
-                if (!view.$el.is(":visible")) {
+                if (view && !view.$el.is(":visible")) {
+                    console.info("showing " + model.id);
                     var existingDOMel = $(".messageRow:nth-child(" + (index + 1) + ")", this.$messageList);
                     if (existingDOMel.length == 0) {
                         this.$messageList.append(view.render().$el);
                     } else {
                         existingDOMel.before(view.render().$el);
                     }
+                } else if (!view) {
+                    console.info("NO VIEW!");
                 }
             }, this);
         } else {
@@ -262,22 +268,38 @@ var PackListView = Backbone.View.extend({
     },
 });
 
+var packViewsWrapper = function(model) {
+    var wrapper = {
+        list : new PackView({ model : model }),
+        tiles : new PackGroupedView({ model : model, groupViewClass : MessageGroupView }),
+        combined : new PackGroupedView({ model : model, groupViewClass : MessageGroupListView }),
+
+        current : "list",
+        getCurrent : function() {
+            return wrapper[wrapper.current];
+        }
+    };
+    return wrapper;
+}
+
 var AppView = Backbone.View.extend({
     el : ".app",
     initialize : function(packsNames) {
         var self = this;
 
         var packModels = this.packModels = new Packs();
-        this.packListView = new PackListView({
-            model : this.packModels
-        });
-        var packViews = this.packViews = [];
+
+        this.packListView = new PackListView({ model : this.packModels });
+
+        var packViews = this.packViews = {};
 
         _.map(packsNames, function(p) {
             var model = new Pack({ name : p });
+            model.on("change:active", this.changeActive, this);
+
             packModels.add(model);
-            packViews.push(new PackView({ model : model }));
-        });
+            packViews[p] = packViewsWrapper(model);
+        }, this);
 
         this.lastFetchTimeEl = $("#lastFetchTime");
     },
@@ -286,14 +308,19 @@ var AppView = Backbone.View.extend({
         this.packListView.render();
         return this;
     },
+    changeActive : function(model, value, options) {
+        if (value == true) {
+            console.info("rendering current view=" + this.packViews[model.get("name")].current + " for  "+ model.get("name"));
+            this.packViews[model.get("name")].getCurrent().render(true);
+        } else {
+        }
+    },
     deactivatePack : function(packName) {
         $(".nav a.pack[name=" + packName + "]", ".app");
         var allLiEls = $(".nav a.pack", ".app").parent();
     },
     getPackViewByName : function(packName) {
-        return _.find(this.packViews, function(p) {
-            return p.model.get('name') == packName;
-        });
+        return this.packViews[packName].getCurrent();
     },
     addMessage : function(message) {
         console.info(message);
@@ -305,22 +332,32 @@ var AppView = Backbone.View.extend({
             }
         });
     },
+    selectBelowPack : function() {
+    },
+    selectAbovePack : function() {
+    },
     updateLastFetchTime : function() {
         this.lastFetchTimeEl.text(moment().format('HH:mm:ss, dddd, MMM Do'));
     },
     fetchPacks : function(callback) {
 
         var self = this;
-        var updateFetchTime = _.after(this.packListView.model.length, function() {
+        var updateFetchTime = _.after(this.packModels.length, function() {
             self.updateLastFetchTime();
         });
 
-        this.packListView.model.models.map(function(model) {
-            model.messages.fetch({update: true});
+        this.packModels.models.map(function(model) {
+            model.fetchAll({update: true});
             updateFetchTime();
         });
+    },
+    showAs : function(viewType) {
+        var activeModel = this.packModels.getActive();
+        var packName = activeModel.get("name");
 
-
+        var wrapper = this.packViews[packName];
+        wrapper.current = viewType;
+        wrapper.getCurrent().render(true);
     }
 });
 

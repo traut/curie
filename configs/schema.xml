@@ -17,7 +17,8 @@
    <field name="header_sender" type="string_email" indexed="true" stored="true"/>
 
    <field name="header_from_name" type="text_ws_lower" indexed="true" stored="true" multiValued="true" />
-   <field name="header_from_email" type="string_email" indexed="true" stored="true" multiValued="true" />
+   <field name="header_from_email" type="string_email" indexed="true" stored="true" />
+   <field name="header_from_email_raw" type="text_ws_lower" indexed="true"/>
 
    <field name="header_to_name" type="text_ws_lower" indexed="true" stored="true" multiValued="true" />
    <field name="header_to_email" type="string_email" indexed="true" stored="true" multiValued="true" />
@@ -34,7 +35,7 @@
 
    <field name="body" type="html_text" indexed="true" stored="false" multiValued="true"/>
 
-   <field name="labels" type="string" indexed="true" stored="true"/>
+   <field name="labels" type="string" indexed="true" stored="true" multiValued="true"/>
 
    <field name="unread" type="boolean" indexed="true" stored="true" default="true"/>
 
@@ -43,6 +44,11 @@
  </fields>
 
  <uniqueKey>id</uniqueKey>
+
+  <!-- copyField commands copy one field to another at the time a document
+        is added to the index.  It's used either to index the same field differently,
+        or to add multiple fields to the same field for easier/faster searching.  -->
+   <copyField source="header_from_email" dest="header_from_email_raw"/>
  
   <types>
 

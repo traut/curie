@@ -3,6 +3,7 @@ var util = require('util'),
     solrLib = require('solr'),
     winston = require('winston'),
     isodate = require("isodate"),
+    crypto = require('crypto'),
     fs = require('fs'),
     async = require('async');
 
@@ -18,7 +19,9 @@ var solr = solrLib.createClient();
 
 var router = new barista.Router();
 
-router.match('/pack/:pack/messages', 'GET').to('packStore.getMessagePreviews');
+router.match('/packs', 'GET').to('packStore.getPacks');
+router.match('/packs/:pack/messages', 'GET').to('packStore.getMessagePreviews');
+router.match('/packs/:pack/groups/:groupfield', 'GET').to('packStore.getGroups');
 router.match('/messages/:messageId', 'GET').to('packStore.getMessage');
 router.match('/messages/:messageId', 'PATCH').to('packStore.patchMessage');
 
@@ -97,6 +100,70 @@ PackStore = function() {
                     });
                 });
             });
+        },
+        getPacks : function(handshake, options, callback) {
+            winston.info("Getting packs list for " + handshake.session.email);
+            solr.query(accessControlQueryPart(handshake.session.email), {
+                rows: 0,
+                facet: true,
+                'facet.field' : "labels"
+            }, function(err, response) {
+                if (err) {
+                    winston.error("Error %s", err);
+                    callback(err, null);
+                    return;
+                }
+                //{"responseHeader":{"status":0,"QTime":1,"params":{"facet":"true","q":" +( header_to_email:\"t@curie.heyheylabs.com\" header_to_email:\"dev@arrr.tv\" header_to_email:\"webmaster@arrr.tv\")","facet.field":"labels","wt":"json","rows":"0"}},"response":{"numFound":8,"start":0,"docs":[]},"facet_counts":{"facet_queries":{},"facet_fields":{"labels":["inbox",8]},"facet_dates":{},"facet_ranges":{}}}
+                var responseObj = JSON.parse(response);
+                console.info(response, responseObj);
+                callback(null, responseObj.response.facet_fields.labels);
+            });
+        },
+        getGroups : function(handshake, options, callback) {
+            var packName = options.pack,
+                groupField = options.groupfield;
+
+            winston.info("Getting groups for pack=" + packName + ", groupField=" + groupField + ", user=" + handshake.session.email);
+
+            var groupFieldMapping = {
+                from : 'header_from_email_raw',
+            };
+
+            if (packName == "inbox2") {
+                packName = "inbox";
+            }
+
+            var groupByFieldRealName = groupFieldMapping[groupField];
+
+            var query = "+labels:" + packName + accessControlQueryPart(handshake.session.email);
+            solr.query(query, {
+                group : true,
+                rows : 10,
+                'group.field' : groupByFieldRealName,
+                'group.limit' : 5,
+                'group.sort' : 'received desc'
+            }, function(err, response) {
+                if (err) {
+                    winston.error("Error %s", err);
+                    callback(err, null);
+                    return;
+                }
+                winston.info("Response", response);
+                var responseObj = JSON.parse(response);
+                if (responseObj.grouped[groupByFieldRealName].matches == 0) {
+                    callback(null, []);
+                }
+                //"groups":[{"groupValue":"sergey@polzunov.com","doclist":{"numFound":1,"start":0,"docs":[{"header_to_email":["t@curie.heyheylabs.com"],"received":"2013-04-27T00:01:24.5Z","labels":["inbox"],"header_orig_date":"2013-04-25T15:16:06Z","header_message_id":"<CABjC=OtioBKThux=4k9F4CGPzG2_2Jj2fSrLu_1s2x8B5wY=MA@mail.gmail.com>","header_from_name":["Sergey Polzunov"],"header_subject":"test email","id":"6520b20e817abff1b5685f8433d9016c0bee1cf55f0f6d413ee93b51cefd150f","header_from_email":"sergey@polzunov.com","header_from_email_raw":"sergey@polzunov.com","_version_":1433417849237405696,"indexed":"2013-04-26T22:03:07.49Z","unread":true}]}}
+                var groups = responseObj.grouped[groupByFieldRealName].groups.map(function(group) {
+                    return {
+                        id : crypto.createHash('md5').update(group.groupValue).digest("hex"),
+                        value : group.groupValue,
+                        size : group.doclist.numFound,
+                        topMessages : group.doclist.docs.map(emailFromDoc)
+                    };
+                }, this);
+                callback(null, groups);
+            });
         }
     }
 };
@@ -105,20 +172,26 @@ var stores = {
     packStore : PackStore()
 }
 
+function accessControlQueryPart(email) {
+    var query = " +(";
+    for(i in MAIL_ACCESS_MAP[email]) {
+        query += ' header_to_email:"' + solrLib.valueEscape(MAIL_ACCESS_MAP[email][i]) + '"';
+    }
+    query += ")";
+    return query;
+}
+
 function queryForLabel(toEmail, label, callback){
     var email = solrLib.valueEscape(toEmail);
 
 
     var query = '+labels:' + label; // +header_to_email:"%s"', label, email);
+    query += accessControlQueryPart(toEmail);
 
-    query += " +(";
-    for(i in MAIL_ACCESS_MAP[toEmail]) {
-        query += ' header_to_email:"' + solrLib.valueEscape(MAIL_ACCESS_MAP[toEmail][i]) + '"';
-    }
-    query += ")";
 
     solr.query(query, {
         sort: "received desc",
+        rows: 30,
     }, function(err, response) {
         if (err) {
             winston.error("Error when querying query=" + query, err);
@@ -167,6 +240,10 @@ var create = function (socket, cast) {
 };
  
 var read = function (socket, cast) {
+    if (!cast.url) {
+        socket.emit("fail", "Badly formed request. No url parameter");            
+        return
+    }
     var params = router.first(cast.url, 'GET');
     stores[params.controller][params.action](socket.handshake, params, function(err, results) {
         if (err) {
