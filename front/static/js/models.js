@@ -62,6 +62,7 @@ var Pack = Backbone.Model.extend({
     defaults : {
         name : null,
         active : false,
+        selected : false,
         hashUrl : null,
         groupBy : "from",
     },

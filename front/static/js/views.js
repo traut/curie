@@ -208,6 +208,8 @@ var PackListView = Backbone.View.extend({
         var self = this;
 
         this.model.on("change:active", this.updateActive, this);
+        this.model.on("change:selected", this.updateSelected, this);
+
         this.model.on("add reset", function(model) {
             console.info("mapping to model " + model.get("name"));
             model.messages.on("change reset add remove", self.badgeUpdaterFor(model), self);
@@ -236,8 +238,6 @@ var PackListView = Backbone.View.extend({
         var packName = m.get('name');
         var activeClass = "active";
 
-        console.info("updating active " + packName);
-
         var el = $("a[name=" + packName + "].pack").parents("li");
         if (m.changed.active == true) {
             if (el && !el.hasClass(activeClass)) {
@@ -246,6 +246,19 @@ var PackListView = Backbone.View.extend({
             }
         } else if (m.changed.active == false) {
             el.removeClass(activeClass);
+        }
+    },
+    updateSelected : function(m) {
+        var packName = m.get('name');
+        var selectedClass = "selected";
+
+        var el = $("a[name=" + packName + "].pack");
+        if (m.changed.selected == true) {
+            if (el && !el.hasClass(selectedClass)) {
+                el.addClass(selectedClass);
+            }
+        } else if (m.changed.selected == false) {
+            el.removeClass(selectedClass);
         }
     },
     badgeUpdaterFor : function(packModel) {
@@ -332,9 +345,40 @@ var AppView = Backbone.View.extend({
             }
         });
     },
+    selectPackAt : function(index) {
+        this.packModels.where({selected : true}).map(function(m) {
+            m.set('selected', false);
+        });
+        this.packModels.at(index).set('selected', true);
+    },
     selectBelowPack : function() {
+        var nextIndex = this.packModels.indexOf(this.packModels.findWhere({selected : true})) + 1;
+        if (nextIndex >= this.packModels.length) {
+            nextIndex = 0;
+        }
+        this.selectPackAt(nextIndex);
     },
     selectAbovePack : function() {
+        var selectedIndex = this.packModels.indexOf(this.packModels.findWhere({selected : true}));
+        if (selectedIndex == undefined) {
+            selectedIndex = this.packModels.length;
+        }
+        var nextIndex = selectedIndex - 1;
+        if (nextIndex < 0) {
+            nextIndex = this.packModels.length - 1;
+        }
+        this.selectPackAt(nextIndex);
+    },
+    showSelectedPack : function() {
+        var selectedPack = this.packModels.findWhere({selected : true});
+        if (selectedPack) {
+            console.info("Showing pack=" + selectedPack.get("name"));
+            window.curie.router.navigateTo("showPack", {
+                pack : selectedPack.get("name")
+            }, {
+                trigger : true
+            });
+        }
     },
     updateLastFetchTime : function() {
         this.lastFetchTimeEl.text(moment().format('HH:mm:ss, dddd, MMM Do'));

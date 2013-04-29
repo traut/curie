@@ -59,6 +59,12 @@ body {
             display: none;
             margin-top: 2px;
         }
+        a.selected {
+            border-left: 2px solid #0088cc;
+        }
+        &.active a.selected {
+            border-left: 2px solid white;
+        }
     }
 }
 

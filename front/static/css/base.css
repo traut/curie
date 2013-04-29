@@ -38,6 +38,10 @@ body {
   float: right;
   display: none;
   margin-top: 2px; }
+.packs li a.selected {
+  border-left: 2px solid #0088cc; }
+.packs li.active a.selected {
+  border-left: 2px solid white; }
 
 .messageRow {
   margin: 5px 0px;

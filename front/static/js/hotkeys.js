@@ -20,20 +20,20 @@ var hotkeys = {
                 window.curie.appView.showSelectedPack();
             }
         },
-        's t' : {
-            doc : 'Show tiles view of the current pack',
+        'v t' : {
+            doc : 'Show current pack as tiles',
             action : function() {
                 window.curie.appView.showAs('tiles');
             }
         },
-        's l' : {
-            doc : 'Show list view of the current pack',
+        'v l' : {
+            doc : 'Show current pack as list',
             action : function() {
                 window.curie.appView.showAs('list');
             }
         },
-        's c' : {
-            doc : 'Show combined view of the current pack',
+        'v c' : {
+            doc : 'Show current pack as combined view',
             action : function() {
                 window.curie.appView.showAs('combined');
             }
@@ -85,7 +85,6 @@ var hotkeys = {
 
 _.each(hotkeys, function(keys, actionType) {
     _.each(keys, function(value, hotkey) {
-        console.info(hotkey);
         Mousetrap.bind(hotkey, function(e, combo) {
             console.info("Hotkey '" + combo + "' pressed");
             value.action();
