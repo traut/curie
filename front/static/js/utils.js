@@ -50,7 +50,12 @@ function setCookie(name, value) {
     document.cookie = "curie." + name + "=" + value;
 }
 
+function isElementInDOM(element) {
+    return jQuery.contains(document.documentElement, element[0]);
+}
+
 Handlebars.registerHelper('dateformat', function(stamp, format) {
-    return moment(stamp).format(format);
+    return (stamp) ? moment(stamp).format(format) : "null";
 });
 Handlebars.registerPartial("messageRow", Handlebars.templates.messageRow);
+Handlebars.registerPartial("messageList", Handlebars.templates.messageList);

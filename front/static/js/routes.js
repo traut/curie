@@ -7,6 +7,7 @@ var AppRouter = Backbone.Router.extend({
         "p/:pack/g/:group": "showGroup",
         "new": "newMessage",
         "search/:query": "search",
+        "": "showDashboard",
     },
 
     initialize : function(appView) {
@@ -34,6 +35,7 @@ var AppRouter = Backbone.Router.extend({
 
     showPack : function(pack) {
         this.view.packModels.activate(pack);
+        this.view.packModels.getActive().trigger("render", pack);
     },
 
     showMessage : function(pack, message) {
@@ -42,7 +44,13 @@ var AppRouter = Backbone.Router.extend({
     },
 
     showGroup : function(pack, group) {
-        console.info("show pack=" + pack + ", group=" + group);
+        this.view.packModels.activate(pack);
+        this.view.showGroup(pack, group);
+    },
+
+    showDashboard : function() {
+        console.info("showing dashboard");
+        this.view.hidePackViews();
     },
 
     newMessage : function(query, page) {

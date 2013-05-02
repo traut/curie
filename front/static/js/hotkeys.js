@@ -58,7 +58,9 @@ var hotkeys = {
         },
         'm n' : {
             doc : 'Create a new message',
-            action : dummy
+            action : function() {
+                window.curie.appView.newMessage();
+            }
         },
         'm u' : {
             doc : 'Mark a message as unread',
@@ -76,9 +78,7 @@ var hotkeys = {
         },
         '?' : {
             doc : 'Show hotkeys description',
-            action : function() {
-                showHotkeysHelp();
-            }
+            action : showHotkeysHelp
         },
     }
 };

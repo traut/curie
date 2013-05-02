@@ -1,8 +1,6 @@
-<div id="message-group-{{ id }}" class="span5 row packGroup">
-    <a href="#{{ url }}">
-        <div class="span3"><img src="http://www.gravatar.com/avatar/{{ id }}?s=80&d=mm" /></div>
+<div id="message-group-{{ id }}" class="span5 packGroup asTile" onClick="javascript:window.curie.router.navigate('{{ url }}', {trigger : true})">
+        <div class="span3"><img src="https://secure.gravatar.com/avatar/{{ id }}?s=80&d=mm" /></div>
         <div class="span9">{{ name }}</div>
-        <div class="rightBottom span3"><span name="unread" class="{{#unless unread }}hide{{/unless}} badge badge-inverse">{{ unread }}</span> <span class="badge">{{ size }}</span></div>
-    </a>
+        <div class="pull-right muted sumCount"><span class="unread {{#unless unread }}hide{{/unless}}">{{ unread }}</span> <span class="{{#unless unread }}hide{{/unless}}">/</span> {{ size }}</div>
 </div>
 

@@ -14,16 +14,26 @@ var MAIL_ACCESS_MAP = {
     "some@curie.heyheylabs.com" : ["some@curie.heyheylabs.com"]
 }
 
+var NUM_ROWS = 30;
+var NUM_GROUPS = 10;
+var NUM_ROWS_IN_GROUP = 5;
+
 
 var solr = solrLib.createClient();
 
 var router = new barista.Router();
 
-router.match('/packs', 'GET').to('packStore.getPacks');
-router.match('/packs/:pack/messages', 'GET').to('packStore.getMessagePreviews');
-router.match('/packs/:pack/groups/:groupfield', 'GET').to('packStore.getGroups');
 router.match('/messages/:messageId', 'GET').to('packStore.getMessage');
 router.match('/messages/:messageId', 'PATCH').to('packStore.patchMessage');
+
+router.match('/packs', 'GET').to('packStore.getPacks');
+router.match('/packs/:pack/messages', 'GET').to('packStore.getMessagePreviews');
+
+router.match('/packs/:pack/groups/:groupfield', 'GET').to('packStore.getGroups');
+
+router.match('/packs/:pack/search/:searchfield/:searchvalue', 'GET').to('packStore.getSearch').where({
+    searchvalue : /.+$/
+});
 
 PackStore = function() {
     return {
@@ -113,7 +123,6 @@ PackStore = function() {
                     callback(err, null);
                     return;
                 }
-                //{"responseHeader":{"status":0,"QTime":1,"params":{"facet":"true","q":" +( header_to_email:\"t@curie.heyheylabs.com\" header_to_email:\"dev@arrr.tv\" header_to_email:\"webmaster@arrr.tv\")","facet.field":"labels","wt":"json","rows":"0"}},"response":{"numFound":8,"start":0,"docs":[]},"facet_counts":{"facet_queries":{},"facet_fields":{"labels":["inbox",8]},"facet_dates":{},"facet_ranges":{}}}
                 var responseObj = JSON.parse(response);
                 console.info(response, responseObj);
                 callback(null, responseObj.response.facet_fields.labels);
@@ -129,40 +138,103 @@ PackStore = function() {
                 from : 'header_from_email_raw',
             };
 
-            if (packName == "inbox2") {
-                packName = "inbox";
-            }
-
             var groupByFieldRealName = groupFieldMapping[groupField];
 
             var query = "+labels:" + packName + accessControlQueryPart(handshake.session.email);
+
+            var facetQuery = query + " +unread:true";
+
+            //+unread:true +( header_to_email:"t@curie.heyheylabs.com" header_to_email:"dev@arrr.tv" header_to_email:"webmaster@arrr.tv")
+            async.parallel({
+                groups : function(callback) {
+                    solr.query(query, {
+                        rows : NUM_GROUPS, 
+                        group : true,
+                        'group.field' : groupByFieldRealName,
+                        'group.limit' : NUM_ROWS_IN_GROUP,
+                        'group.sort' : 'received desc'
+                    }, callback);
+                },
+                unreadCounts : function(callback) {
+                    solr.query(facetQuery, {
+                        rows : 0,
+                        facet : true,
+                        'facet.field' : groupByFieldRealName,
+                    }, callback);
+                }
+            }, function(err, results) {
+                if (err) {
+                    winston.error("Error %s", err);
+                    callback(err, null);
+                    return;
+                }
+                var groupsResult = JSON.parse(results.groups);
+                if (groupsResult.grouped[groupByFieldRealName].matches == 0) {
+                    callback(null, []);
+                }
+                var unreadResult = JSON.parse(results.unreadCounts);
+                var unreadCounts = flatToDict(unreadResult.facet_counts.facet_fields[groupByFieldRealName]);
+
+                var groups = groupsResult.grouped[groupByFieldRealName].groups.map(function(group) {
+                    return {
+                        id : crypto.createHash('md5').update(group.groupValue).digest("hex"),
+                        value : group.groupValue,
+                        groupBy : groupField,
+                        pack : packName,
+                        size : group.doclist.numFound,
+                        unread : unreadCounts[group.groupValue] || null,
+                        topMessages : group.doclist.docs.map(emailFromDoc),
+                    };
+                }, this);
+                callback(null, groups);
+            });
+        },
+        getSearch : function(handshake, options, callback) {
+            var packName = options.pack,
+                searchField = options.searchfield,
+                searchValue = options.searchvalue,
+                format = options.format;
+
+
+            var searchFieldMapping = {
+                from : 'header_from_email_raw',
+            };
+
+            var searchByFieldRealName = searchFieldMapping[searchField];
+
+            var query = "+labels:" + packName + accessControlQueryPart(handshake.session.email);
+            query += util.format(' +%s:"%s"', searchByFieldRealName, solrLib.valueEscape(searchValue));
+
+            winston.info("Getting search for pack=" + packName + ", searchField=" + searchField + ", searchValue=" + searchValue + ", query=" + query);
+
+            var numRows = (format == 'light') ? 0 : NUM_ROWS;
+
             solr.query(query, {
-                group : true,
-                rows : 10,
-                'group.field' : groupByFieldRealName,
-                'group.limit' : 5,
-                'group.sort' : 'received desc'
+                rows : numRows,
+                facet : true,
+                'facet.field' : 'unread',
+                sort : 'received desc'
             }, function(err, response) {
                 if (err) {
                     winston.error("Error %s", err);
                     callback(err, null);
                     return;
                 }
-                winston.info("Response", response);
                 var responseObj = JSON.parse(response);
-                if (responseObj.grouped[groupByFieldRealName].matches == 0) {
-                    callback(null, []);
+                var messages = responseObj.response.docs.map(emailFromDoc);
+                var unreadCounts = flatToDict(responseObj.facet_counts.facet_fields.unread);
+
+                var response = {
+                    id : crypto.createHash('md5').update(searchValue).digest("hex"),
+                    pack : packName,
+                    searchField : searchField,
+                    searchValue : searchValue,
+                    messages : messages,
+                    size : responseObj.response.numFound,
+                    unread : unreadCounts[true] || 0,
                 }
-                //"groups":[{"groupValue":"sergey@polzunov.com","doclist":{"numFound":1,"start":0,"docs":[{"header_to_email":["t@curie.heyheylabs.com"],"received":"2013-04-27T00:01:24.5Z","labels":["inbox"],"header_orig_date":"2013-04-25T15:16:06Z","header_message_id":"<CABjC=OtioBKThux=4k9F4CGPzG2_2Jj2fSrLu_1s2x8B5wY=MA@mail.gmail.com>","header_from_name":["Sergey Polzunov"],"header_subject":"test email","id":"6520b20e817abff1b5685f8433d9016c0bee1cf55f0f6d413ee93b51cefd150f","header_from_email":"sergey@polzunov.com","header_from_email_raw":"sergey@polzunov.com","_version_":1433417849237405696,"indexed":"2013-04-26T22:03:07.49Z","unread":true}]}}
-                var groups = responseObj.grouped[groupByFieldRealName].groups.map(function(group) {
-                    return {
-                        id : crypto.createHash('md5').update(group.groupValue).digest("hex"),
-                        value : group.groupValue,
-                        size : group.doclist.numFound,
-                        topMessages : group.doclist.docs.map(emailFromDoc)
-                    };
-                }, this);
-                callback(null, groups);
+                winston.info("Found " + responseObj.response.numFound + " docs, pack=" + packName + ", searchField=" + searchField + ", searchValue=" + searchValue);
+                callback(null, response);
             });
         }
     }
@@ -191,7 +263,7 @@ function queryForLabel(toEmail, label, callback){
 
     solr.query(query, {
         sort: "received desc",
-        rows: 30,
+        rows: NUM_ROWS,
     }, function(err, response) {
         if (err) {
             winston.error("Error when querying query=" + query, err);
@@ -245,6 +317,11 @@ var read = function (socket, cast) {
         return
     }
     var params = router.first(cast.url, 'GET');
+    if (!params) {
+        winston.error("Can't get parse '" + cast.url + "'");
+        socket.emit('err', null);
+        return;
+    }
     stores[params.controller][params.action](socket.handshake, params, function(err, results) {
         if (err) {
             socket.emit(eventSignature('err', cast), []); // FIXME: will not be handled properly on client-side
@@ -317,6 +394,19 @@ function emailFromDoc(doc) {
         labels : as_list(doc.labels),
         body : as_list(doc.body)
     }
+}
+
+function flatToDict(flatMap) {
+    var result = {};
+    if (!flatMap) {
+        return result;
+    }
+    for (var i = 0; i < flatMap.length; i++) {
+        if (i % 2 == 0) {
+            result[flatMap[i]] = flatMap[i + 1];
+        }
+    };
+    return result;
 }
  
 module.exports = {

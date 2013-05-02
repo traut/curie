@@ -68,9 +68,19 @@ body {
     }
 }
 
+.unread {
+    font-weight: 800;
+    color: black;
+}
+
 .messageRow {
+    a {
+        color: black;
+    }
+    .muted {
+        font-weight: normal;
+    }
     &.unread {
-        font-weight: 800;
         .dateField {
             font-weight: normal;
         }
@@ -104,12 +114,6 @@ body {
 
 .messageList {
     margin-top: 10px;
-    a {
-        color: black;
-        .muted {
-            font-weight: normal;
-        }
-    }
 }
 
 .messageView {
@@ -128,6 +132,17 @@ body {
     }
 }
 
+@mixin shadowed {
+    border: 1px solid white;
+    border-radius: 4px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+
+    -moz-box-shadow: 0px 1px 5px #ccc;
+    -webkit-box-shadow: 0px 1px 5px #ccc;
+    box-shadow: 0px 1px 5px #ccc;
+}
+
 .packGroups {
     padding-top: 9px;
     [class*="span"] {
@@ -135,28 +150,36 @@ body {
         vertical-align: middle;
     }
     .packGroup {
+        cursor : pointer;
         .counters {
             padding: 3px;
         }
+        .sumCount {
+            bottom: 5px;
+            font-size: 18px;
+            position: absolute;
+            right: 5px;
+            padding-right: 5px;
+        }
         .messageRow {
-            background-color: white;
         }
         .rightBottom {
             padding: 10px 0px;
         }
+
+        &.asRow {
+            margin: 0px 0px 15px !important;
+        }
+        &.asTile {
+            margin: 0px 10px 15px !important;
+        }
         padding: 5px;
-        margin: 0px 10px 15px !important;
-        border: 1px solid white;
-        -webkit-border-radius: 4px;
-        -moz-border-radius: 4px;
-
         position: relative;
-
-        border-radius: 4px;
-        -moz-box-shadow: 0px 1px 5px #ccc;
-        -webkit-box-shadow: 0px 1px 5px #ccc;
-        box-shadow: 0px 1px 5px #ccc;
+        @include shadowed;
     }
+}
+.groupView {
+    padding-top: 9px;
 }
 
 .hotkeysHelp {
@@ -171,6 +194,24 @@ body {
             padding: 5px 0px;
         }
     }
+}
+
+/*
+.draftPopup {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    min-height: 400px;
+    width: 85%;
+    overflow: auto;
+    background-color: white;
+    padding: 10px;
+    @include shadowed;
+}
+*/
+
+#packView {
+    position: relative;
 }
 
 #loginModal {

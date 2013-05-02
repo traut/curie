@@ -43,6 +43,10 @@ body {
 .packs li.active a.selected {
   border-left: 2px solid white; }
 
+.unread {
+  font-weight: 800;
+  color: black; }
+
 .messageRow {
   margin: 5px 0px;
   padding: 0px 5px;
@@ -52,10 +56,12 @@ body {
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px; }
-  .messageRow.unread {
-    font-weight: 800; }
-    .messageRow.unread .dateField {
-      font-weight: normal; }
+  .messageRow a {
+    color: black; }
+  .messageRow .muted {
+    font-weight: normal; }
+  .messageRow.unread .dateField {
+    font-weight: normal; }
   .messageRow .dateField {
     font-weight: normal;
     white-space: nowrap; }
@@ -71,10 +77,6 @@ body {
 
 .messageList {
   margin-top: 10px; }
-  .messageList a {
-    color: black; }
-    .messageList a .muted {
-      font-weight: normal; }
 
 .messageView {
   padding: 10px;
@@ -93,22 +95,33 @@ body {
     min-height: 0px;
     vertical-align: middle; }
   .packGroups .packGroup {
+    cursor: pointer;
     padding: 5px;
-    margin: 0px 10px 15px !important;
+    position: relative;
     border: 1px solid white;
+    border-radius: 4px;
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
-    position: relative;
-    border-radius: 4px;
     -moz-box-shadow: 0px 1px 5px #cccccc;
     -webkit-box-shadow: 0px 1px 5px #cccccc;
     box-shadow: 0px 1px 5px #cccccc; }
     .packGroups .packGroup .counters {
       padding: 3px; }
-    .packGroups .packGroup .messageRow {
-      background-color: white; }
+    .packGroups .packGroup .sumCount {
+      bottom: 5px;
+      font-size: 18px;
+      position: absolute;
+      right: 5px;
+      padding-right: 5px; }
     .packGroups .packGroup .rightBottom {
       padding: 10px 0px; }
+    .packGroups .packGroup.asRow {
+      margin: 0px 0px 15px !important; }
+    .packGroups .packGroup.asTile {
+      margin: 0px 10px 15px !important; }
+
+.groupView {
+  padding-top: 9px; }
 
 .hotkeysHelp .actionTypeBlock {
   margin-left: 0px; }
@@ -118,6 +131,22 @@ body {
     padding: 5px 0px; }
   .hotkeysHelp .actionTypeBlock .keyDoc {
     padding: 5px 0px; }
+
+/*
+.draftPopup {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    min-height: 400px;
+    width: 85%;
+    overflow: auto;
+    background-color: white;
+    padding: 10px;
+    @include shadowed;
+}
+*/
+#packView {
+  position: relative; }
 
 #loginModal {
   width: 300px;

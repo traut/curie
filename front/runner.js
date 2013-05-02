@@ -110,7 +110,7 @@ io.configure(function (){
                     });
                 });
 
-                feed.subscribe(channel, newMessagesSocketName, socket);
+                //feed.subscribe(channel, newMessagesSocketName, socket);
             });
         }
         callback(null, true);

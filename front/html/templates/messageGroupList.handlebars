@@ -1,7 +1,11 @@
-<div id="message-group-{{ id }}" class="row packGroup">
-    <div class="pull-right counters"><span name="unread" class="{{#unless unread }}hide{{/unless}} badge badge-inverse">{{ unread }}</span> <span class="badge">{{ size }}</span></div>
-    <h4>{{ name }}</h4>
+<div id="message-group-{{ id }}" class="row packGroup asRow" onClick="javascript:window.curie.router.navigate('{{ url }}', {trigger : true})">
+    <div class="pull-right counters muted"><span class="unread {{#unless unread }}hide{{/unless}}">{{ unread }}</span> <span class="{{#unless unread }}hide{{/unless}}">/</span> {{ size }}</div>
+    <span class="lead">{{ name }}</span>
     {{#each messages }}
     {{> messageRow }}
     {{/each}}
+
+    {{#if thereIsMore }}
+    <p class="text-center">&hellip;</p>
+    {{/if}}
 </div>

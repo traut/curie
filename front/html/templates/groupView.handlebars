@@ -1,0 +1,10 @@
+<div class="groupView">
+    <ul class="breadcrumb">
+        <li><a href="#">Home</a> <span class="divider">/</span></li>
+        <li><a href="#{{ packUrl }}">{{ pack }}</a> <span class="divider">/</span></li>
+        <li class="active">{{ value }}</li>
+        <li class="active pull-right counters"><span class="unread {{#unless unread }}hide{{/unless}}">{{ unread }}</span> <span class="{{#unless unread }}hide{{/unless}}">/</span> {{ size }}</li>
+    </ul>
+    <div id="messages-list" class="messageList">
+</div>
+

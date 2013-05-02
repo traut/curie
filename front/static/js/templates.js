@@ -15,11 +15,11 @@ function program1(depth0,data) {
   if (stack1 = helpers.id) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "\" class=\"span5 row packGroup\">\n    <a href=\"#";
+    + "\" class=\"span5 packGroup asTile\" onClick=\"javascript:window.curie.router.navigate('";
   if (stack1 = helpers.url) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.url; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "\">\n        <div class=\"span3\"><img src=\"http://www.gravatar.com/avatar/";
+    + "', {trigger : true})\">\n        <div class=\"span3\"><img src=\"https://secure.gravatar.com/avatar/";
   if (stack1 = helpers.id) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
@@ -27,18 +27,61 @@ function program1(depth0,data) {
   if (stack1 = helpers.name) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.name; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "</div>\n        <div class=\"rightBottom span3\"><span name=\"unread\" class=\"";
+    + "</div>\n        <div class=\"pull-right muted sumCount\"><span class=\"unread ";
   stack1 = helpers.unless.call(depth0, depth0.unread, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += " badge badge-inverse\">";
+  buffer += "\">";
   if (stack1 = helpers.unread) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.unread; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "</span> <span class=\"badge\">";
+    + "</span> <span class=\"";
+  stack1 = helpers.unless.call(depth0, depth0.unread, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\">/</span> ";
   if (stack1 = helpers.size) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.size; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "</span></div>\n    </a>\n</div>\n\n";
+    + "</div>\n</div>\n\n";
+  return buffer;
+  });
+templates['groupView'] = template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [2,'>= 1.0.0-rc.3'];
+helpers = helpers || Handlebars.helpers; data = data || {};
+  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression, self=this;
+
+function program1(depth0,data) {
+  
+  
+  return "hide";
+  }
+
+  buffer += "<div class=\"groupView\">\n    <ul class=\"breadcrumb\">\n        <li><a href=\"#\">Home</a> <span class=\"divider\">/</span></li>\n        <li><a href=\"#";
+  if (stack1 = helpers.packUrl) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.packUrl; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\">";
+  if (stack1 = helpers.pack) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.pack; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</a> <span class=\"divider\">/</span></li>\n        <li class=\"active\">";
+  if (stack1 = helpers.value) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.value; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</li>\n        <li class=\"active pull-right counters\"><span class=\"unread ";
+  stack1 = helpers.unless.call(depth0, depth0.unread, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\">";
+  if (stack1 = helpers.unread) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.unread; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</span> <span class=\"";
+  stack1 = helpers.unless.call(depth0, depth0.unread, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\">/</span> ";
+  if (stack1 = helpers.size) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.size; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</li>\n    </ul>\n    <div id=\"messages-list\" class=\"messageList\">\n</div>\n\n";
   return buffer;
   });
 templates['messageList'] = template(function (Handlebars,depth0,helpers,partials,data) {
@@ -157,6 +200,17 @@ function program1(depth0,data) {
 function program3(depth0,data) {
   
   var buffer = "", stack1;
+  buffer += "\n        <a href=\"#";
+  if (stack1 = helpers.url) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.url; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\">\n        ";
+  return buffer;
+  }
+
+function program5(depth0,data) {
+  
+  var buffer = "", stack1;
   buffer += "\n            <div class=\"span4 emailField\">";
   if (stack1 = helpers.from_name) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.from_name; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
@@ -169,7 +223,7 @@ function program3(depth0,data) {
   return buffer;
   }
 
-function program5(depth0,data) {
+function program7(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\n            <div class=\"span4 emailField\">";
@@ -180,10 +234,16 @@ function program5(depth0,data) {
   return buffer;
   }
 
-function program7(depth0,data) {
+function program9(depth0,data) {
   
   var buffer = "";
   return buffer;
+  }
+
+function program11(depth0,data) {
+  
+  
+  return "\n        </a>\n        ";
   }
 
   buffer += "    <div id=\"message-row-";
@@ -193,22 +253,24 @@ function program7(depth0,data) {
     + "\" class=\"row messageRow ";
   stack1 = helpers['if'].call(depth0, depth0.unread, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "\">\n        <a href=\"#";
-  if (stack1 = helpers.url) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.url; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1)
-    + "\">\n        ";
-  stack1 = helpers['if'].call(depth0, depth0.from_name, {hash:{},inverse:self.program(5, program5, data),fn:self.program(3, program3, data),data:data});
+  buffer += "\">\n        ";
+  stack1 = helpers['if'].call(depth0, depth0.url, {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n        ";
+  stack1 = helpers['if'].call(depth0, depth0.from_name, {hash:{},inverse:self.program(7, program7, data),fn:self.program(5, program5, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\n            <div class=\"span5 subjectField\">";
   if (stack1 = helpers.subject) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.subject; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
     + "</div>\n            <div class=\"span3 dateField\">";
-  options = {hash:{},inverse:self.noop,fn:self.program(7, program7, data),data:data};
+  options = {hash:{},inverse:self.noop,fn:self.program(9, program9, data),data:data};
   stack2 = ((stack1 = helpers.dateformat),stack1 ? stack1.call(depth0, depth0.received, "HH:mm, dddd, MMM Do", options) : helperMissing.call(depth0, "dateformat", depth0.received, "HH:mm, dddd, MMM Do", options));
   if(stack2 || stack2 === 0) { buffer += stack2; }
-  buffer += "</div>\n        </a>\n    </div>\n";
+  buffer += "</div>\n        ";
+  stack2 = helpers['if'].call(depth0, depth0.url, {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data});
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\n    </div>\n";
   return buffer;
   });
 templates['message'] = template(function (Handlebars,depth0,helpers,partials,data) {
@@ -326,6 +388,23 @@ function program13(depth0,data) {
   buffer += "\n</div>\n";
   return buffer;
   });
+templates['draft'] = template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [2,'>= 1.0.0-rc.3'];
+helpers = helpers || Handlebars.helpers; data = data || {};
+  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
+
+
+  buffer += "<div class=\"draftPopup modal\" style=\"position: absolute; top: 5%; left: 5%; right: auto; margin: 0 auto 20px; z-index: 1; max-width: 100%;\">\n    <div class=\"modal-body\">\n        <button type=\"button\" class=\"close\" aria-hidden=\"true\" onClick=\"javascript:$(this).parents('.modal').hide()\">&times;</button>\n        <p>\n            <strong>";
+  if (stack1 = helpers.created) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.created; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + " / ";
+  if (stack1 = helpers.saved) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.saved; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</strong>\n            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.\n        </p>\n    </div>\n    <div class=\"modal-footer\">\n        <button onClick=\"javascript:$(this).parents('.modal').hide()\" class=\"btn\">Cancel</button>\n        <button onClick=\"javascript:console.info('Sending the message')\" class=\"btn btn-primary\">Send</button>\n    </div>\n</div>\n";
+  return buffer;
+  });
 templates['messageGroupList'] = template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [2,'>= 1.0.0-rc.3'];
 helpers = helpers || Handlebars.helpers; partials = partials || Handlebars.partials; data = data || {};
@@ -347,27 +426,43 @@ function program3(depth0,data) {
   return buffer;
   }
 
+function program5(depth0,data) {
+  
+  
+  return "\n    <p class=\"text-center\">&hellip;</p>\n    ";
+  }
+
   buffer += "<div id=\"message-group-";
   if (stack1 = helpers.id) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "\" class=\"row packGroup\">\n    <div class=\"pull-right counters\"><span name=\"unread\" class=\"";
+    + "\" class=\"row packGroup asRow\" onClick=\"javascript:window.curie.router.navigate('";
+  if (stack1 = helpers.url) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.url; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "', {trigger : true})\">\n    <div class=\"pull-right counters muted\"><span class=\"unread ";
   stack1 = helpers.unless.call(depth0, depth0.unread, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += " badge badge-inverse\">";
+  buffer += "\">";
   if (stack1 = helpers.unread) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.unread; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "</span> <span class=\"badge\">";
+    + "</span> <span class=\"";
+  stack1 = helpers.unless.call(depth0, depth0.unread, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\">/</span> ";
   if (stack1 = helpers.size) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.size; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "</span></div>\n    <h4>";
+    + "</div>\n    <span class=\"lead\">";
   if (stack1 = helpers.name) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.name; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "</h4>\n    ";
+    + "</span>\n    ";
   stack1 = helpers.each.call(depth0, depth0.messages, {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n\n    ";
+  stack1 = helpers['if'].call(depth0, depth0.thereIsMore, {hash:{},inverse:self.noop,fn:self.program(5, program5, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\n</div>\n";
   return buffer;

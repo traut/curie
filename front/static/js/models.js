@@ -1,3 +1,25 @@
+var Draft = Backbone.Model.extend({
+    defaults: {
+        id : null,
+        to_name : null,
+        to_email : null,
+        from_name : null,
+        from_email : null,
+        subject : null,
+        body : null,
+        created : null,
+        saved : null
+    },
+});
+
+var Drafts = Backbone.Collection.extend({
+    model : Draft,
+    comparator : function(draft) {
+        return - draft.get("saved"); // newest goes first
+    }
+});
+
+
 var MessagePreview = Backbone.Model.extend({
     defaults: {
         id : null,
@@ -39,18 +61,48 @@ var Messages = Backbone.Collection.extend({
 });
 
 
-var Group = Backbone.Model.extend({
+var GroupPreview = Backbone.Model.extend({
     defaults : {
+        id : null,
+        groupBy : null,
         value : null,
         size : null,
-        topMessages : null,
+        unread : null,
+        pack : null,
+        topMessages : new Messages(),
     },
     initialize: function() {
+        this.url = "/packs/" + this.get("pack") + "/groups/" + this.get("groupBy") + "/" + this.get("value") + "/light";
+    },
+    parse : function(response, options) {
+        response.topMessages = new Messages(response.topMessages);
+        return response;
+    }
+});
+
+var SimpleSearchResults = Backbone.Model.extend({
+    defaults : {
+        id : null,
+        searchField : null,
+        searchValue : null,
+        size : null,
+        unread : null,
+        pack : null,
+        messages : new Messages(),
+    },
+    messages : new Messages(), // dummy
+    initialize: function() {
+        this.url = "/packs/" + this.get("pack") + "/search/" + this.get("searchField") + "/" + this.get("searchValue");
+    },
+    parse : function(response, options) {
+        response.messages = new Messages(response.messages);
+        this.messages = response.messages;
+        return response;
     },
 });
 
 var Groups = Backbone.Collection.extend({
-    model: Group,
+    model: GroupPreview,
     initialize: function() {
     },
     comparator : function(group) {
@@ -61,10 +113,11 @@ var Groups = Backbone.Collection.extend({
 var Pack = Backbone.Model.extend({
     defaults : {
         name : null,
-        active : false,
         selected : false,
         hashUrl : null,
         groupBy : "from",
+
+        active : false,
     },
     initialize: function() {
         this.groups = new Groups();
