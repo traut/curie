@@ -315,7 +315,7 @@ var PackListView = Backbone.View.extend({
 
         this.model.on("add reset", function(model) {
             console.info("mapping to model " + model.get("name"));
-            model.messages.on("change reset add remove", self.badgeUpdaterFor(model), self);
+            model.messages.on("change:unread reset add remove", self.badgeUpdaterFor(model), self);
         });
     },
     render : function(selectedPack) {

@@ -42,19 +42,39 @@ var hotkeys = {
     messageActions : {
         'j' : {
             doc : 'Choose a message/group below',
-            action : dummy
+            action : function() {
+                window.curie.appView.propagateActionToPack("down");
+            }
         },
         'k' : {
             doc : 'Choose a message/group above',
-            action : dummy
+            action : function() {
+                window.curie.appView.propagateActionToPack("up");
+            }
         },
         'l' : {
-            doc : 'Show selected message/group',
-            action : dummy
+            doc : 'Show/hide selected message/group',
+            action : function () {
+                window.curie.appView.getActivePackView().toggleSelectedMessage();
+            }
         },
         'x' : {
-            doc : 'Mark a message/group as selected',
-            action : dummy
+            doc : 'Mark/unmark a message/group as selected',
+            action : function() {
+                window.curie.appView.propagateActionToPack("mark");
+            }
+        },
+        'g g' : {
+            doc : 'Choose the latest message',
+            action : function() {
+                window.curie.appView.propagateActionToPack("first");
+            }
+        },
+        'G' : {
+            doc : 'Choose the earliest message',
+            action : function() {
+                window.curie.appView.propagateActionToPack("last");
+            }
         },
         'm n' : {
             doc : 'Create a new message',
@@ -79,6 +99,10 @@ var hotkeys = {
         '?' : {
             doc : 'Show hotkeys description',
             action : showHotkeysHelp
+        },
+        'q q' : {
+            doc : 'Logout',
+            action : dummy
         },
     }
 };

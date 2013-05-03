@@ -54,6 +54,36 @@ function isElementInDOM(element) {
     return jQuery.contains(document.documentElement, element[0]);
 }
 
+function updateElementClass(el, value, cls) {
+    if (value == true) {
+        if (el && !el.hasClass(cls)) {
+            el.addClass(cls);
+        }
+    } else if (value == false) {
+        el.removeClass(cls);
+    }
+}
+
+function elementInViewport(el) {
+    var top = el.offsetTop;
+    var left = el.offsetLeft;
+    var width = el.offsetWidth;
+    var height = el.offsetHeight;
+
+    while(el.offsetParent) {
+        el = el.offsetParent;
+        top += el.offsetTop;
+        left += el.offsetLeft;
+    }
+
+    return (
+        top >= window.pageYOffset &&
+        left >= window.pageXOffset &&
+        (top + height) <= (window.pageYOffset + window.innerHeight) &&
+        (left + width) <= (window.pageXOffset + window.innerWidth)
+    );
+}
+
 Handlebars.registerHelper('dateformat', function(stamp, format) {
     return (stamp) ? moment(stamp).format(format) : "null";
 });

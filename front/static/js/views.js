@@ -65,7 +65,9 @@ var MessageView = Backbone.View.extend({
 var MessageRowView = Backbone.View.extend({
     template : Handlebars.templates.messageRow,
     initialize : function() {
-        this.model.bind("change:unread", this.renderUnread, this);
+        this.model.on("change:unread", this.updateUnread, this);
+        this.model.on("change:selected", this.updateSelected, this);
+        this.model.on("change:marked", this.updateMarked, this);
     },
     render : function() {
         console.info("rendering messageRowView " + this.model.get("id"));
@@ -82,13 +84,17 @@ var MessageRowView = Backbone.View.extend({
         this.$el = $(html);
         return this;
     },
-    renderUnread : function(e) {
-        if (e.changed.unread == true) {
-            $("#message-row-" + this.model.id).addClass("unread");
-        } else if (e.changed.unread == false) {
-            $("#message-row-" + this.model.id).removeClass("unread");
+    updateUnread : function(m, value) {
+        updateElementClass(this.$el, value, "unread");
+    },
+    updateSelected : function(m, value) {
+        updateElementClass(this.$el, value, "selected");
+        if (value && !elementInViewport(this.$el[0])) {
+            $('html, body').animate({scrollTop : this.$el.offset().top - 200}, 10);
         }
-
+    },
+    updateMarked : function(m, value) {
+        updateElementClass(this.$el, value, "marked");
     }
 });
 
@@ -193,6 +199,22 @@ var PackView = Backbone.View.extend({
             }
         }, this);
     },
+    toggleSelectedMessage : function() {
+        var selected = this.model.messages.findWhere({selected : true});
+        if (selected) {
+            //this.showMessage(selected.id);
+            var messageUrl = window.curie.router.reverse("showMessage", {
+                pack : this.model.get("name"),
+                message : selected.id
+            });
+            var packUrl = window.curie.router.reverse('showPack', {pack : this.model.get("name")});
+            if (window.location.hash == "#" + messageUrl) {
+                window.curie.router.navigate(packUrl, {trigger : true})
+            } else {
+                window.curie.router.navigate(messageUrl, {trigger : true})
+            }
+        }
+    }
 });
 
 
@@ -201,15 +223,13 @@ var PackListView = Backbone.View.extend({
     template : Handlebars.templates.packList,
     initialize : function() {
 
-        var self = this;
-
         this.model.on("change:active", this.updateActive, this);
         this.model.on("change:selected", this.updateSelected, this);
 
         this.model.on("add reset", function(model) {
-            console.info("mapping to model " + model.get("name"));
-            model.messages.on("change reset add remove", self.badgeUpdaterFor(model), self);
-        });
+            console.info("PackListView: mapping listeners to model " + model.get("name"));
+            model.messages.on("change reset add remove", this.badgeUpdaterFor(model), this);
+        }, this);
     },
     render : function(selectedPack) {
         console.info("rendering PackListView");
@@ -230,35 +250,24 @@ var PackListView = Backbone.View.extend({
             document.title = packName + " - Curie";
         }
     },
-    updateActive : function(m) {
+    updateActive : function(m, value) {
         var packName = m.get('name');
-        var activeClass = "active";
 
         var el = $("a[name=" + packName + "].pack").parents("li");
-        if (m.changed.active == true) {
-            if (el && !el.hasClass(activeClass)) {
-                el.addClass(activeClass);
-                this.updateDocumentTitle(packName);
-            }
-        } else if (m.changed.active == false) {
-            el.removeClass(activeClass);
+        updateElementClass(el, value, "active");
+
+        if (value == true) {
+            console.info("setting title " + packName + " " + m.messages.getUnreadCount());
+            this.updateDocumentTitle(packName, m.messages.getUnreadCount());
         }
     },
-    updateSelected : function(m) {
-        var packName = m.get('name');
-        var selectedClass = "selected";
-
-        var el = $("a[name=" + packName + "].pack");
-        if (m.changed.selected == true) {
-            if (el && !el.hasClass(selectedClass)) {
-                el.addClass(selectedClass);
-            }
-        } else if (m.changed.selected == false) {
-            el.removeClass(selectedClass);
-        }
+    updateSelected : function(m, value) {
+        var el = $("a[name=" + m.get("name") + "].pack");
+        updateElementClass(el, value, "selected");
     },
     badgeUpdaterFor : function(packModel) {
         var packName = packModel.get('name');
+        var self = this;
         function updateBadge(m) {
             console.info("updating badge pack=" + packName + ", message=" + m.get("id"));
 
@@ -268,9 +277,7 @@ var PackListView = Backbone.View.extend({
                 badge.hide();
             } else {
                 badge.html(unread).show();
-            }
-            if (this.model.get("active")) {
-                updateDocumentTitle(packName, unread);
+                self.updateDocumentTitle(packName, m.messages.getUnreadCount());
             }
         }
         return updateBadge;
@@ -332,6 +339,11 @@ var AppView = Backbone.View.extend({
         $(".nav a.pack[name=" + packName + "]", ".app");
         var allLiEls = $(".nav a.pack", ".app").parent();
     },
+    getActivePackView : function() {
+        var activeModel = this.packModels.getActive();
+        return this.getPackViewByName(activeModel.get("name"));
+
+    },
     getPackViewByName : function(packName) {
         return this.packViews[packName].getCurrent();
     },
@@ -380,7 +392,8 @@ var AppView = Backbone.View.extend({
             });
         }
     },
-    selectMessageAt : function(index) {
+    propagateActionToPack : function(actionType) {
+        this.packModels.getActive().propagateEvent(actionType);
     },
     updateLastFetchTime : function() {
         this.lastFetchTimeEl.text(moment().format('HH:mm:ss, dddd, MMM Do'));
@@ -427,10 +440,7 @@ var AppView = Backbone.View.extend({
             model : new Draft({
             })
         });
-        var activeModel = this.packModels.getActive();
-        var packName = activeModel.get("name");
-
-        this.packViews[packName].getCurrent().$el.append(draftView.render().$el);
+        this.getActivePackView().$el.append(draftView.render().$el);
     }
 });
 

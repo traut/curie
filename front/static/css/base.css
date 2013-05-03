@@ -62,6 +62,14 @@ body {
     font-weight: normal; }
   .messageRow.unread .dateField {
     font-weight: normal; }
+  .messageRow.selected {
+    border-left: 2px solid #0088cc; }
+  .messageRow.marked {
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+    background-color: #fcf8e3;
+    border: 1px solid #fbeed5; }
+  .messageRow.marked.selected {
+    border-left: 2px solid #0088cc; }
   .messageRow .dateField {
     font-weight: normal;
     white-space: nowrap; }

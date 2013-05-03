@@ -7,8 +7,12 @@ var Draft = Backbone.Model.extend({
         from_email : null,
         subject : null,
         body : null,
+
+        // dates
         created : null,
-        saved : null
+        saved : null,
+        
+        labels : ['drafts'],
     },
 });
 
@@ -30,7 +34,11 @@ var MessagePreview = Backbone.Model.extend({
         subject : null,
         unread : null,
         received : null,
-        labels : []
+        labels : [],
+
+        // volatile
+        selected : false,
+        marked : false
     },
 });
 
@@ -113,22 +121,65 @@ var Groups = Backbone.Collection.extend({
 var Pack = Backbone.Model.extend({
     defaults : {
         name : null,
-        selected : false,
         hashUrl : null,
         groupBy : "from",
 
         active : false,
+        selected : false,
+
     },
-    initialize: function() {
+    initialize : function() {
         this.groups = new Groups();
         this.groups.url = '/packs/' + this.get('name')  + '/groups/' + this.get('groupBy');
 
         this.messages = new Messages();
         this.messages.url = '/packs/' + this.get('name') + '/messages';
+
+        this.activeType = "list"; // FIXME: ugly
     },
-    fetchAll: function(options) {
+    fetchAll : function(options) {
         this.groups.fetch(options);
         this.messages.fetch(options);
+    },
+    propagateEvent : function(actionType) {
+        if (this.activeType == "list") {
+            var current = this.messages.findWhere({ selected : true });
+            var currentIndex = this.messages.indexOf(current);
+
+            var nextIndex = null;
+            var markIndex = null;
+            switch (actionType) {
+                case "up": 
+                    nextIndex = currentIndex - 1;
+                    nextIndex = (nextIndex < 0) ? (this.messages.length - 1) : nextIndex;
+                    break;
+                case "down":
+                    nextIndex = currentIndex + 1;
+                    nextIndex = (nextIndex >= this.messages.length) ? 0 : nextIndex;
+                    break;
+                case "mark":
+                    markIndex = currentIndex;
+                    break;
+                case "last":
+                    nextIndex = this.messages.length - 1;
+                    break;
+                case "first":
+                    nextIndex = 0;
+                    break;
+            }
+            if (nextIndex != null) {
+                this.messages.where({selected : true}).forEach(function(m) {
+                    m.set('selected', false);
+                });
+                this.messages.at(nextIndex).set('selected', true);
+            }
+            if (markIndex != null) {
+                var model = this.messages.at(markIndex);
+                model.set('marked', !model.get("marked"));
+                console.info(this.messages.at(markIndex), model.get("marked"));
+            }
+
+        }
     }
 });
 
