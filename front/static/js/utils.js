@@ -1,3 +1,6 @@
+
+function dummy() {};
+
 (function ($) {
     $.fn.shake = function (options) {
         // defaults
@@ -46,6 +49,19 @@
     window.readCookie = readCookie; // or expose it however you want
 }(jQuery));
 
+function VolatileModel(properties) {
+    var core = properties;
+    _.extend(core, Backbone.Events);
+
+    this.on = this.bind = core.on;
+    this.trigger = core.trigger;
+
+    this.set = function(key, value) {
+        core[key] = value;
+        core.trigger("change:" + key, value);
+    }
+}
+
 function setCookie(name, value) {
     document.cookie = "curie." + name + "=" + value;
 }
@@ -63,6 +79,11 @@ function updateElementClass(el, value, cls) {
         el.removeClass(cls);
     }
 }
+
+function getUrl(object) {
+    if (!(object && object.url)) return null;
+    return _.isFunction(object.url) ? object.url() : object.url;
+};
 
 function elementInViewport(el) {
     var top = el.offsetTop;

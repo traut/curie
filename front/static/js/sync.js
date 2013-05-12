@@ -3,24 +3,15 @@ Backbone.sync = function (method, model, options) {
     console.info("Backbone.sync", method, model, options);
 
     var socket = window.curie.socket; // grab active socket from global namespace; io.connect() was used to create socket
+
  
     /*
      * Create signature object that will emitted to server with every request. 
      * This is used on the server to push an event back to the client listener.
      */
     var modelCast = function () {
-    
 
-        var modelUrl;
-        if (typeof(model.url) == "function") {
-            modelUrl = model.url();
-        } else {
-            modelUrl = model.url;
-        }
-
-        var obj = { 
-            url : modelUrl
-        };
+        var obj = { url : getUrl(model) };
         /*
         if (model.id) {
             obj.url += "/" + model.id;

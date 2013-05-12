@@ -5,37 +5,39 @@ var hotkeys = {
         't j' : {
             doc : 'Choose a pack below',
             action : function() {
-                window.curie.appView.selectBelowPack();
+                stateModel.trigger("selectPack", "below");
             }
         },
         't k' : {
             doc : 'Choose a pack above',
             action : function() {
-                window.curie.appView.selectAbovePack();
+                stateModel.trigger("selectPack", "above");
             }
         },
+        /*
         't l' : {
             doc : 'Show choosed pack',
             action : function() {
-                window.curie.appView.showSelectedPack();
+                stateModel.trigger("activateSelectedPack");
             }
         },
+        */
         'v t' : {
             doc : 'Show current pack as tiles',
             action : function() {
-                window.curie.appView.showAs('tiles');
+                stateModel.trigger("showPackAs", "tiles");
             }
         },
         'v l' : {
             doc : 'Show current pack as list',
             action : function() {
-                window.curie.appView.showAs('list');
+                stateModel.trigger("showPackAs", "list");
             }
         },
         'v c' : {
             doc : 'Show current pack as combined view',
             action : function() {
-                window.curie.appView.showAs('combined');
+                stateModel.trigger("showPackAs", "combined");
             }
         },
     },
@@ -78,8 +80,9 @@ var hotkeys = {
         },
         'm n' : {
             doc : 'Create a new message',
-            action : function() {
-                window.curie.appView.newMessage();
+            action : function(e) {
+                e.preventDefault();
+                window.curie.router.navigate("#new", {trigger : true});
             }
         },
         'm u' : {
@@ -111,7 +114,7 @@ _.each(hotkeys, function(keys, actionType) {
     _.each(keys, function(value, hotkey) {
         Mousetrap.bind(hotkey, function(e, combo) {
             console.info("Hotkey '" + combo + "' pressed");
-            value.action();
+            value.action(e);
         });
     });
 });

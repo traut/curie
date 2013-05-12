@@ -113,19 +113,45 @@ PackStore = function() {
         },
         getPacks : function(handshake, options, callback) {
             winston.info("Getting packs list for " + handshake.session.email);
-            solr.query(accessControlQueryPart(handshake.session.email), {
-                rows: 0,
-                facet: true,
-                'facet.field' : "labels"
-            }, function(err, response) {
+            async.parallel({
+                packs : function(callback) {
+                    solr.query(accessControlQueryPart(handshake.session.email), {
+                        rows: 0,
+                        facet: true,
+                        'facet.field' : "labels"
+                    }, callback);
+                },
+                unreadCounts : function(callback) {
+                    var query = "+unread:true " + accessControlQueryPart(handshake.session.email);
+                    solr.query(query, {
+                        rows: 0,
+                        facet: true,
+                        'facet.field' : "labels"
+                    }, callback);
+                }
+            }, function(err, results) {
                 if (err) {
                     winston.error("Error %s", err);
                     callback(err, null);
                     return;
                 }
-                var responseObj = JSON.parse(response);
-                console.info(response, responseObj);
-                callback(null, responseObj.response.facet_fields.labels);
+                var packsResult = JSON.parse(results.packs);
+                var unreadsResult = JSON.parse(results.unreadCounts);
+
+                var labelsMap = flatToDict(packsResult.facet_counts.facet_fields.labels);
+                var unreadsMap = flatToDict(unreadsResult.facet_counts.facet_fields.labels);
+
+                var packs = [];
+                Object.keys(labelsMap).forEach(function(key) {
+                    packs.push({
+                        id : crypto.createHash('md5').update(key).digest("hex"),
+                        name : key,
+                        size : labelsMap[key],
+                        unread : unreadsMap[key]
+                    });
+                });
+
+                callback(null, packs);
             });
         },
         getGroups : function(handshake, options, callback) {

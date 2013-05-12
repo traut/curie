@@ -125,7 +125,7 @@ function program1(depth0,data) {
   buffer += "\n<li ";
   stack1 = helpers['if'].call(depth0, depth0.active, {hash:{},inverse:self.noop,fn:self.program(2, program2, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "><a href=\"#";
+  buffer += ">\n    <a href=\"#";
   if (stack1 = helpers.hashUrl) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.hashUrl; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
@@ -137,13 +137,26 @@ function program1(depth0,data) {
   if (stack1 = helpers.name) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.name; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + " <span class=\"badge badge-inverse\"></span><span class=\"loader\"></span></a></li>\n";
+    + " \n    \n    <span class=\"pull-right counters unread ";
+  stack1 = helpers.unless.call(depth0, depth0.unread, {hash:{},inverse:self.noop,fn:self.program(4, program4, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\">";
+  if (stack1 = helpers.unread) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.unread; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</span>\n    </a>\n    </li>\n";
   return buffer;
   }
 function program2(depth0,data) {
   
   
   return "class=\"active\"";
+  }
+
+function program4(depth0,data) {
+  
+  
+  return "hide";
   }
 
   stack1 = helpers.each.call(depth0, depth0.packs, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
@@ -391,18 +404,33 @@ function program13(depth0,data) {
 templates['draft'] = template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [2,'>= 1.0.0-rc.3'];
 helpers = helpers || Handlebars.helpers; data = data || {};
-  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
+  var buffer = "", stack1, stack2, options, self=this, helperMissing=helpers.helperMissing;
 
+function program1(depth0,data) {
+  
+  var buffer = "";
+  return buffer;
+  }
 
-  buffer += "<div class=\"draftPopup modal\" style=\"position: absolute; top: 5%; left: 5%; right: auto; margin: 0 auto 20px; z-index: 1; max-width: 100%;\">\n    <div class=\"modal-body\">\n        <button type=\"button\" class=\"close\" aria-hidden=\"true\" onClick=\"javascript:$(this).parents('.modal').hide()\">&times;</button>\n        <p>\n            <strong>";
-  if (stack1 = helpers.created) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.created; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1)
-    + " / ";
-  if (stack1 = helpers.saved) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.saved; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1)
-    + "</strong>\n            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.\n        </p>\n    </div>\n    <div class=\"modal-footer\">\n        <button onClick=\"javascript:$(this).parents('.modal').hide()\" class=\"btn\">Cancel</button>\n        <button onClick=\"javascript:console.info('Sending the message')\" class=\"btn btn-primary\">Send</button>\n    </div>\n</div>\n";
+function program3(depth0,data) {
+  
+  var buffer = "", stack1, stack2, options;
+  buffer += "\n            / <span class=\"muted\">Saved:</span> \n            ";
+  options = {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data};
+  stack2 = ((stack1 = helpers.dateformat),stack1 ? stack1.call(depth0, depth0.saved, "HH:mm, dddd, MMM Do", options) : helperMissing.call(depth0, "dateformat", depth0.saved, "HH:mm, dddd, MMM Do", options));
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\n            ";
+  return buffer;
+  }
+
+  buffer += "<div class=\"draftView\" >\n    <div class=\"draftBody\">\n        <form class=\"form-horizontal\">\n            <div class=\"control-group\">\n                <input name=\"to\" type=\"text\" data-provide=\"typeahead\" placeholder=\"To\">\n            </div>\n            <div class=\"control-group\">\n                <input name=\"subject\" type=\"text\" data-provide=\"typeahead\" placeholder=\"Subject\">\n            </div>\n            <div class=\"control-group\">\n                <textarea rows=\"6\" name=\"body\"></textarea>\n            </div>\n        </form>\n    </div>\n    <div class=\"modal-footer draftFooter\">\n        <div class=\"pull-left\">\n            <span class=\"muted\">Created:</span> ";
+  options = {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data};
+  stack2 = ((stack1 = helpers.dateformat),stack1 ? stack1.call(depth0, depth0.created, "HH:mm, dddd, MMM Do", options) : helperMissing.call(depth0, "dateformat", depth0.created, "HH:mm, dddd, MMM Do", options));
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\n            ";
+  stack2 = helpers['if'].call(depth0, depth0.saved, {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data});
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\n        </div>\n        <button onClick=\"javascript:console.info('Sending the message');alert('Ta-da!');\" class=\"btn btn-primary\">Send</button>\n    </div>\n</div>\n";
   return buffer;
   });
 templates['messageGroupList'] = template(function (Handlebars,depth0,helpers,partials,data) {

@@ -1,3 +1,8 @@
 {{#each packs}}
-<li {{#if active }}class="active"{{/if}}><a href="#{{ hashUrl }}" class="pack" name="{{ name }}">{{ name }} <span class="badge badge-inverse"></span><span class="loader"></span></a></li>
+<li {{#if active }}class="active"{{/if}}>
+    <a href="#{{ hashUrl }}" class="pack" name="{{ name }}">{{ name }} 
+    
+    <span class="pull-right counters unread {{#unless unread }}hide{{/unless}}">{{ unread }}</span>
+    </a>
+    </li>
 {{/each}}

@@ -5,13 +5,16 @@ var AppRouter = Backbone.Router.extend({
         "p/:pack": "showPack",
         "p/:pack/:message": "showMessage",
         "p/:pack/g/:group": "showGroup",
-        "new": "newMessage",
+
+        "new/:draftid": "newDraft",
+        "new": "newDraft",
+
         "search/:query": "search",
         "": "showDashboard",
     },
 
-    initialize : function(appView) {
-        this.view = appView;
+    initialize : function(controller) {
+        this.controller = controller;
     },
 
     reverse : function(name, options) {
@@ -34,26 +37,27 @@ var AppRouter = Backbone.Router.extend({
     // views
 
     showPack : function(pack) {
-        this.view.packModels.activate(pack);
-        this.view.packModels.getActive().trigger("render", pack);
+        console.info("Showing pack " + pack);
+        stateModel.set("activePackName", pack);
     },
 
     showMessage : function(pack, message) {
-        this.view.packModels.activate(pack);
-        this.view.getPackViewByName(pack).showMessage(message);
+        this.controller.packModels.activate(pack);
+        this.controller.getPackViewByName(pack).showMessage(message);
     },
 
     showGroup : function(pack, group) {
-        this.view.packModels.activate(pack);
-        this.view.showGroup(pack, group);
+        this.controller.packModels.activate(pack);
+        this.controller.showGroup(pack, group);
     },
 
     showDashboard : function() {
         console.info("showing dashboard");
-        this.view.hidePackViews();
+        stateModel.set("activePackName", null);
     },
 
-    newMessage : function(query, page) {
+    newDraft : function(draftId) {
+        stateModel.trigger("newDraft", draftId);
     },
 
     search : function() {

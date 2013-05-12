@@ -24,7 +24,7 @@ var Drafts = Backbone.Collection.extend({
 });
 
 
-var MessagePreview = Backbone.Model.extend({
+var MessageLight = Backbone.Model.extend({
     defaults: {
         id : null,
         to_name : null,
@@ -35,14 +35,12 @@ var MessagePreview = Backbone.Model.extend({
         unread : null,
         received : null,
         labels : [],
-
-        // volatile
-        selected : false,
-        marked : false
     },
+    initialize: function() {
+    }
 });
 
-var MessageFull = Backbone.Model.extend({
+var Message = Backbone.Model.extend({
     defaults: {
         id : null,
         to_name : null,
@@ -55,17 +53,23 @@ var MessageFull = Backbone.Model.extend({
         labels : [],
         body : null
     },
-    urlRoot: "/messages"
+    urlRoot: "/messages",
 });
 
 var Messages = Backbone.Collection.extend({
-    model : MessagePreview,
+    model : MessageLight,
     getUnreadCount : function() {
         return this.where({unread : true}).length;
     },
     comparator : function(message) {
         return - message.get("received"); // newest goes first
-    }
+    },
+    parse : function(resp, options) {
+        var models = resp.map(function(m) {
+            return initEntity("MessageLight", MessageLight, m);
+        });
+        return models;
+    },
 });
 
 
@@ -77,13 +81,13 @@ var GroupPreview = Backbone.Model.extend({
         size : null,
         unread : null,
         pack : null,
-        topMessages : new Messages(),
+        messages : new Messages(),
     },
     initialize: function() {
         this.url = "/packs/" + this.get("pack") + "/groups/" + this.get("groupBy") + "/" + this.get("value") + "/light";
     },
     parse : function(response, options) {
-        response.topMessages = new Messages(response.topMessages);
+        response.messages = new Messages(response.topMessages);
         return response;
     }
 });
@@ -120,29 +124,28 @@ var Groups = Backbone.Collection.extend({
 
 var Pack = Backbone.Model.extend({
     defaults : {
+        id : null,
         name : null,
-        hashUrl : null,
-        groupBy : "from",
-
-        active : false,
-        selected : false,
+        size : null,
+        unread : null,
 
     },
     initialize : function() {
+        var packName = this.get('name');
+
         this.groups = new Groups();
-        this.groups.url = '/packs/' + this.get('name')  + '/groups/' + this.get('groupBy');
+        this.groups.url = '/packs/' + packName  + '/groups/from';
 
         this.messages = new Messages();
-        this.messages.url = '/packs/' + this.get('name') + '/messages';
+        this.messages.url = '/packs/' + packName + '/messages';
 
-        this.activeType = "list"; // FIXME: ugly
     },
     fetchAll : function(options) {
         this.groups.fetch(options);
         this.messages.fetch(options);
     },
     propagateEvent : function(actionType) {
-        if (this.activeType == "list") {
+        if (this.get("activeViewType") == "list") {
             var current = this.messages.findWhere({ selected : true });
             var currentIndex = this.messages.indexOf(current);
 
@@ -185,20 +188,14 @@ var Pack = Backbone.Model.extend({
 
 var Packs = Backbone.Collection.extend({
     model: Pack,
-    url: '/packs',
-    getActive : function() {
-        return this.findWhere({active : true});
-    },
-    activate : function(packName) {
-        var requestedPack = this.findWhere({name : packName});
-        if (!requestedPack.get("active")) {
-            console.info("making " + packName + " active");
-            var active = this.getActive();
-            if (active) {
-                active.set("active", false);
-            }
-            requestedPack.set("active", true);
-        }
-    },
 });
 
+
+var StateModel = Backbone.Model.extend({
+    defaults: {
+        activePackName : null,
+        selectedPackName : null,
+        selectedMessage : null,
+    },
+    markedMessages : new Messages(),
+});

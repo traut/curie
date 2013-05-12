@@ -2,12 +2,24 @@
 body {
   font-family: "Open Sans", sans-serif; }
 
-.sidebar-nav {
-  padding: 9px 0; }
+.container-fluid {
+  padding-left: 0px; }
+
+.sidebarNav {
+  padding: 9px 0;
+  -webkit-overflow-scrolling: touch;
+  padding: 15px 0 30px 30px;
+  border-right: 1px solid #bbbbbb;
+  box-shadow: 0 0 20px #cccccc;
+  -webkit-box-shadow: 0 0 20px #cccccc;
+  -moz-box-shadow: 0 0 20px #cccccc;
+  height: 100%;
+  z-index: 99; }
 
 .sidebar-nav-fixed {
   position: fixed;
-  width: 21.97%; }
+  width: 20%;
+  padding: 10px 0px 10px 10px; }
 
 @media (max-width: 767px) {
   .sidebar-nav-fixed {
@@ -28,20 +40,29 @@ body {
 .sidebarInfo {
   margin: 5px 0px; }
 
-.packs li .loader {
-  float: right;
-  padding: 0px 10px; }
-  .packs li .loader img {
-    display: inline;
-    vertical-align: middle; }
-.packs li .badge {
-  float: right;
-  display: none;
-  margin-top: 2px; }
-.packs li a.selected {
-  border-left: 2px solid #0088cc; }
-.packs li.active a.selected {
-  border-left: 2px solid white; }
+#packBlocks {
+  z-index: 99; }
+
+.packs {
+  margin-bottom: 15px;
+  border-right: 0px; }
+  .packs li {
+    /*
+    a.selected {
+        border-left: 2px solid #0088cc;
+    }
+    &.active a.selected {
+        border-left: 2px solid white;
+    }
+    */ }
+    .packs li .loader {
+      float: right;
+      padding: 0px 10px; }
+      .packs li .loader img {
+        display: inline;
+        vertical-align: middle; }
+    .packs li.active .counters {
+      color: white; }
 
 .unread {
   font-weight: 800;
@@ -140,21 +161,39 @@ body {
   .hotkeysHelp .actionTypeBlock .keyDoc {
     padding: 5px 0px; }
 
-/*
+.draftView .draftBody {
+  padding: 15px 15px 20px 0px; }
+  .draftView .draftBody form {
+    margin: 0px; }
+    .draftView .draftBody form .control-group {
+      margin-bottom: 5px; }
+      .draftView .draftBody form .control-group input, .draftView .draftBody form .control-group textarea {
+        border: 1px solid #e6e6e6;
+        width: 400px; }
+        .draftView .draftBody form .control-group input[name=body], .draftView .draftBody form .control-group textarea[name=body] {
+          width: 90%;
+          height: 300px; }
+.draftView .draftFooter {
+  max-width: 500px; }
+
 .draftPopup {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    min-height: 400px;
-    width: 85%;
-    overflow: auto;
-    background-color: white;
-    padding: 10px;
-    @include shadowed;
-}
-*/
+  width: 600px;
+  height: 100%;
+  background-color: white;
+  position: absolute;
+  left: auto;
+  right: -622px;
+  top: 0px;
+  padding: 10px;
+  z-index: 99 !important;
+  overflow: auto;
+  border-left: 0px;
+  border-right: 1px solid #bbbbbb;
+  border-bottom: 1px solid #bbbbbb; }
+
 #packView {
-  position: relative; }
+  position: relative;
+  margin-left: 0px; }
 
 #loginModal {
   width: 300px;

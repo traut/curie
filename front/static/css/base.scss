@@ -4,13 +4,26 @@ body {
     font-family: 'Open Sans', sans-serif;
 }
 
-.sidebar-nav {
+.container-fluid {
+    padding-left: 0px;
+}
+
+.sidebarNav {
     padding :  9px 0;
+    -webkit-overflow-scrolling: touch;
+    padding: 15px 0 30px 30px;
+    border-right: 1px solid #bbb;
+    box-shadow: 0 0 20px #ccc;
+    -webkit-box-shadow: 0 0 20px #ccc;
+    -moz-box-shadow: 0 0 20px #ccc;
+    height: 100%;
+    z-index: 99;
 }
 
 .sidebar-nav-fixed {
     position : fixed;
-    width : 21.97%;
+    width : 20%;
+    padding: 10px 0px 10px 10px;
 }
 
 @media (max-width :  767px) {
@@ -44,6 +57,10 @@ body {
     margin: 5px 0px;
 }
 
+#packBlocks {
+    z-index: 99;
+}
+
 .packs {
     li {
         .loader {
@@ -54,18 +71,20 @@ body {
                 vertical-align: middle;
             }
         }
-        .badge {
-            float: right;
-            display: none;
-            margin-top: 2px;
-        }
+        /*
         a.selected {
             border-left: 2px solid #0088cc;
         }
         &.active a.selected {
             border-left: 2px solid white;
         }
+        */
+        &.active .counters {
+            color: white;
+        }
     }
+    margin-bottom: 15px;
+    border-right: 0px;
 }
 
 .unread {
@@ -207,22 +226,53 @@ body {
     }
 }
 
-/*
-.draftPopup {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    min-height: 400px;
-    width: 85%;
-    overflow: auto;
-    background-color: white;
-    padding: 10px;
-    @include shadowed;
+.draftView {
+    .draftBody {
+        padding: 15px 15px 20px 0px;
+        form {
+            margin: 0px;
+            .control-group {
+                margin-bottom: 5px;
+                input,textarea {
+                    border: 1px solid lighten(#ccc, 10%);
+                    width: 400px;
+                    &[name=to]:not(focused) {
+                    }
+                    &[name=subject] {
+                    }
+                    &[name=body] {
+                        width: 90%;
+                        height: 300px;
+                    }
+                }
+            }
+        }
+    }
+    .draftFooter {
+        max-width: 500px;
+    }
 }
-*/
+
+.draftPopup {
+    width: 600px;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 1);
+    position: absolute;
+    left: auto;
+    right: -622px;
+    top: 0px;
+    padding: 10px;
+    z-index: 99 !important;
+    overflow: auto;
+
+    border-left: 0px;
+    border-right: 1px solid #bbb;
+    border-bottom: 1px solid #bbb;
+}
 
 #packView {
     position: relative;
+    margin-left: 0px;
 }
 
 #loginModal {

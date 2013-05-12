@@ -1,351 +1,76 @@
-function dummy() {};
-
-var MessageView = Backbone.View.extend({
-    tagName : 'div',
-    template : Handlebars.templates.message,
-    initialize : function() {
-        this.model.on("change", this.render, this);
-        this.model.fetch();
-    },
-    render : function(e) {
-        console.info("rendering message " + this.model.id);
-
-        var data = this.model.toJSON();
-
-        //FIXME: create a separate formatter class
-        data.body = _.map(data.body, function(b) {
-            return b.replace(/\n{2}/g, "<br/>").replace(/\n/g, "<br/>");
-        });
-
-        this.$el.html(this.template(data));
-
-
-        var markUnreadButton = $("button[name=markUnread]", this.$el);
-        var self = this;
-        markUnreadButton.click(function() {
-            var markUnreadButton = $("button[name=markUnread]", self.$el);
-            self.setToUnreadTrue = true;
-
-            self.setUnreadTo(true, function() {
-                console.info("unread update success");
-            }, function() {
-                console.info("unread update error");
-            });
-        });
-
-        if (this.$el.is(":visible") && this.model.get("unread") && !this.setToUnreadTrue) {
-            //FIXME: this is causing 'change' event and render() again
-            setTimeout(function() {
-                self.setUnreadTo(false);
-            }, 100);
-        };
-    },
-    setUnreadTo : function(bool, successCallback, errorCallback) {
-        this.model.save({unread : bool}, {
-            patch : true,
-            success : successCallback || dummy,
-            error : errorCallback || dummy
-        });
-    },
-    hide : function() {
-        this.setToUnreadTrue = false;
-        this.$el.hide();
-    },
-    show : function() {
-        console.info("Show called for message " + this.model.id);
-        if (!jQuery.contains(document.documentElement, this.$el[0])) { // the element removed from DOM
-            console.info("Message " + this.model.id + " is not in DOM. adding");
-            $("#message-row-" + this.model.id).after(this.$el.hide());
-        }
-        this.$el.show();
-
-    }
-});
-
-var MessageRowView = Backbone.View.extend({
-    template : Handlebars.templates.messageRow,
-    initialize : function() {
-        this.model.on("change:unread", this.updateUnread, this);
-        this.model.on("change:selected", this.updateSelected, this);
-        this.model.on("change:marked", this.updateMarked, this);
-    },
-    render : function() {
-        console.info("rendering messageRowView " + this.model.get("id"));
-        var data = this.model.toJSON();
-
-        if (!this.hashUrl) {
-            this.hashUrl = window.curie.router.reverse("showMessage", {
-                pack : this.options.pack,
-                message : this.model.get("id")
-            });
-        }
-        data.url = this.hashUrl;
-        var html = this.template(data);
-        this.$el = $(html);
-        return this;
-    },
-    updateUnread : function(m, value) {
-        updateElementClass(this.$el, value, "unread");
-    },
-    updateSelected : function(m, value) {
-        updateElementClass(this.$el, value, "selected");
-        if (value && !elementInViewport(this.$el[0])) {
-            $('html, body').animate({scrollTop : this.$el.offset().top - 200}, 10);
-        }
-    },
-    updateMarked : function(m, value) {
-        updateElementClass(this.$el, value, "marked");
-    }
-});
-
-var PackView = Backbone.View.extend({
-    el : "#packView",
-
-    initialize : function() {
-
-        this.model.messages.on("add", this.addMessage, this);
-        this.model.messages.on("remove", this.removeMessage, this);
-
-        this.messageRowViews = {};
-        this.messageViews = {};
-
-        this.$messageList = $('<div id="messages-list" class="messageList">');
-
-        //this.model.messages.on("change:unread", this.showLoader, this);
-        //this.model.messages.on("fetch:end", this.hideLoader, this);
-        
-    },
-    prepareNewModel : function(model, collection) {
-        collection = collection || this.model.messages;
-
-        var modelsWithoutViews = _.filter(collection.models, function(model) {
-            return !this.messageRowViews[model.id];
-        }, this);
-        _.each(modelsWithoutViews, function(model) {
-            this.messageRowViews[model.id] = new MessageRowView({
-                model : model,
-                pack : this.model.get("name")
-            });
-            console.info("View added for " + model.id);
-        }, this);
-        return this.messageRowViews[model.id];
-    },
-    addMessage : function(model, collection) {
-        console.info("Adding message", model);
-        this.prepareNewModel(model);
-        this.render();
-    },
-    removeMessage : function(model, collection, options) {
-        console.info("deleting message " + model.id);
-        var deletedView = this.messageRowViews[model.id];
-        console.info(deletedView);
-        deletedView.$el.remove();
-        delete deletedView;
-    },
-    render : function() {
-        if (this.model.get('active')) {
-            console.info("rendering PackView pack=" + this.model.get('name') + ", active=" + this.model.get('active'));
-
-            if (!isElementInDOM(this.$messageList)) {
-                this.$el.html(this.$messageList);
-            }
-
-            // hiding all the message views
-            _.each(_.values(this.messageViews), function(mv) {
-                mv.hide();
-            });
-
-            // rendering message row view where it belongs
-            
-            _.each(this.model.messages.models, function(model, index) {
-                var view = this.messageRowViews[model.id];
-                if (!view) {
-                    view = this.prepareNewModel(model);
-                }
-                if (!isElementInDOM(view.$el)) {
-                    console.info("showing " + model.id);
-                    var existingDOMel = $(".messageRow:nth-child(" + (index + 1) + ")", this.$messageList);
-                    if (existingDOMel.length == 0) {
-                        this.$messageList.append(view.render().$el);
-                    } else {
-                        existingDOMel.before(view.render().$el);
-                    }
-                }
-            }, this);
-        } else {
-            console.info("pack=" + this.model.get('name') + " render event, but nothing to do");
-        }
-        return this;
-    },
-    showLoader : function() {
-        $(".loader", this.packLiEl).html("<img src='/static/img/loader.gif'/>");
-    },
-    hideLoader : function() {
-        $(".loader", this.packLiEl).empty();
-    },
-    showMessage : function(message) {
-        console.info("showing message " + message);
-        this.messageViews[message] = this.messageViews[message] || new MessageView({
-            model : new MessageFull({
-                id: message
-            })
-        });
-        _.each(this.messageViews, function(mv, messageId) {
-            if (messageId == message) {
-                console.info("View for " + messageId + " found. show()");
-                mv.show();
-            } else {
-                mv.hide();
-            }
-        }, this);
-    },
-    toggleSelectedMessage : function() {
-        var selected = this.model.messages.findWhere({selected : true});
-        if (selected) {
-            //this.showMessage(selected.id);
-            var messageUrl = window.curie.router.reverse("showMessage", {
-                pack : this.model.get("name"),
-                message : selected.id
-            });
-            var packUrl = window.curie.router.reverse('showPack', {pack : this.model.get("name")});
-            if (window.location.hash == "#" + messageUrl) {
-                window.curie.router.navigate(packUrl, {trigger : true})
-            } else {
-                window.curie.router.navigate(messageUrl, {trigger : true})
-            }
-        }
-    }
-});
-
 
 var PackListView = Backbone.View.extend({
-    el : "#packList",
     template : Handlebars.templates.packList,
+
     initialize : function() {
 
-        this.model.on("change:active", this.updateActive, this);
-        this.model.on("change:selected", this.updateSelected, this);
+        this.$el = $('<ul class="nav nav-list well packs"></ul>');
 
-        this.model.on("add reset", function(model) {
-            console.info("PackListView: mapping listeners to model " + model.get("name"));
-            model.messages.on("change reset add remove", this.badgeUpdaterFor(model), this);
-        }, this);
+        stateModel.on("change:activePackName", this.updateActive, this);
+        stateModel.on("change:selectedPackName", this.updateSelected, this);
+
+        this.model.on("change:unread", this.updateBadge, this);
+        this.model.on("add reset", this.render, this);
+
     },
-    render : function(selectedPack) {
-        console.info("rendering PackListView");
-        this.model.models.map(function(p) {
-            if (!p.get('hashUrl')) {
-                p.set('hashUrl', window.curie.router.reverse('showPack', {pack : p.get('name')}));
-            }
+    render : function() {
+        console.info("rendering PackListView", this.model.toJSON());
+
+        var renderData = _.map(this.model.toJSON(), function(el) {
+            el.hashUrl = window.curie.router.reverse('showPack', {pack : el.name});
+            return el;
         });
-        this.$el.html(
-            this.template({ packs : this.model.toJSON() })
-        );
+        this.$el.html(this.template({ packs : renderData }));
         return this;
     },
     updateDocumentTitle : function(packName, badge) {
         if (badge && badge > 0) {
-            document.title = packName + "(" + badge +") - Curie";
+            document.title = packName + " (" + badge +") - Curie";
         } else {
             document.title = packName + " - Curie";
         }
     },
-    updateActive : function(m, value) {
-        var packName = m.get('name');
+    updateActive : function(i, packName) {
+        var cls = "active";
+        $("a.pack:not([name=" + packName + "])", this.$el).parents("li").removeClass(cls);
 
-        var el = $("a[name=" + packName + "].pack").parents("li");
-        updateElementClass(el, value, "active");
+        var packFound = this.model.findWhere({name : packName});
+        if (packFound) {
+            $("a[name=" + packName + "].pack", this.$el).parents("li").addClass(cls);
+            this.updateDocumentTitle(packName, packFound.get("unread"));
+        }
 
-        if (value == true) {
-            console.info("setting title " + packName + " " + m.messages.getUnreadCount());
-            this.updateDocumentTitle(packName, m.messages.getUnreadCount());
+    },
+    updateSelected : function(i, packName) {
+        var cls = "selected";
+        $("a.pack:not([name=" + packName + "])", this.$el).removeClass(cls);
+
+        var packFound = this.model.findWhere({name : packName});
+        if (packFound) {
+            $("a[name=" + packName + "].pack", this.$el).addClass(cls);
         }
     },
-    updateSelected : function(m, value) {
-        var el = $("a[name=" + m.get("name") + "].pack");
-        updateElementClass(el, value, "selected");
-    },
-    badgeUpdaterFor : function(packModel) {
-        var packName = packModel.get('name');
-        var self = this;
-        function updateBadge(m) {
-            console.info("updating badge pack=" + packName + ", message=" + m.get("id"));
-
-            var badge = $(".nav a[name=" + packName + "].pack .badge");
-            var unread = packModel.messages.getUnreadCount();
-            if (unread == 0) {
-                badge.hide();
-            } else {
-                badge.html(unread).show();
-                self.updateDocumentTitle(packName, m.messages.getUnreadCount());
-            }
+    updateBadge : function(model, value) {
+        var packName = model.get('name');
+        var badge = $(".nav a[name=" + packName + "].pack .counters");
+        if (value == 0) {
+            badge.hide();
+        } else {
+            badge.html(value).show();
+            this.updateDocumentTitle(packName, value);
         }
-        return updateBadge;
     },
 });
 
-var packViewsWrapper = function(model) {
-    var wrapper = {
-        list : new PackView({ model : model }),
-        tiles : new PackGroupedView({ model : model, groupViewClass : MessageGroupView }),
-        combined : new PackGroupedView({ model : model, groupViewClass : MessageGroupListView }),
-
-        current : "list",
-        getCurrent : function() {
-            return wrapper[wrapper.current];
-        }
-    };
-    return wrapper;
-}
-
 var AppView = Backbone.View.extend({
     el : ".app",
-    initialize : function(packsNames) {
-        var self = this;
+    initialize : function() {
 
-        var packModels = this.packModels = new Packs();
+        stateModel.on("fetchFinished", this.updateFetchTime, this);
 
-        this.packListView = new PackListView({ model : this.packModels });
-
-        var packViews = this.packViews = {};
-
-        _.map(packsNames, function(p) {
-            var model = new Pack({ name : p });
-            model.on("change:active", this.changeActive, this);
-            model.on("render", this.renderPackView, this);
-
-            packModels.add(model);
-            packViews[p] = packViewsWrapper(model);
-        }, this);
-
-        this.lastFetchTimeEl = $("#lastFetchTime");
     },
     render : function(selectedPack) {
-        console.info("rendering appView");
-        this.packListView.render();
         return this;
-    },
-    renderPackView : function(packName) {
-        this.packViews[packName].getCurrent().render();
-    },
-    changeActive : function(model, value, options) {
-        console.info("active=" + value + " for ", model);
-        if (value == true) {
-            //this.renderPackView(model.get("name"));
-        } else {
-        }
-    },
-    deactivatePack : function(packName) {
-        $(".nav a.pack[name=" + packName + "]", ".app");
-        var allLiEls = $(".nav a.pack", ".app").parent();
-    },
-    getActivePackView : function() {
-        var activeModel = this.packModels.getActive();
-        return this.getPackViewByName(activeModel.get("name"));
-
-    },
-    getPackViewByName : function(packName) {
-        return this.packViews[packName].getCurrent();
     },
     addMessage : function(message) {
         console.info(message);
@@ -357,67 +82,23 @@ var AppView = Backbone.View.extend({
             }
         });
     },
-    selectPackAt : function(index) {
-        this.packModels.where({selected : true}).map(function(m) {
-            m.set('selected', false);
-        });
-        this.packModels.at(index).set('selected', true);
-    },
-    selectBelowPack : function() {
-        var nextIndex = this.packModels.indexOf(this.packModels.findWhere({selected : true})) + 1;
-        if (nextIndex >= this.packModels.length) {
-            nextIndex = 0;
-        }
-        this.selectPackAt(nextIndex);
-    },
-    selectAbovePack : function() {
-        var selectedIndex = this.packModels.indexOf(this.packModels.findWhere({selected : true}));
-        if (selectedIndex == undefined) {
-            selectedIndex = this.packModels.length;
-        }
-        var nextIndex = selectedIndex - 1;
-        if (nextIndex < 0) {
-            nextIndex = this.packModels.length - 1;
-        }
-        this.selectPackAt(nextIndex);
-    },
-    showSelectedPack : function() {
-        var selectedPack = this.packModels.findWhere({selected : true});
-        if (selectedPack) {
-            console.info("Showing pack=" + selectedPack.get("name"));
-            window.curie.router.navigateTo("showPack", {
-                pack : selectedPack.get("name")
-            }, {
-                trigger : true
-            });
-        }
-    },
-    propagateActionToPack : function(actionType) {
-        this.packModels.getActive().propagateEvent(actionType);
-    },
     updateLastFetchTime : function() {
-        this.lastFetchTimeEl.text(moment().format('HH:mm:ss, dddd, MMM Do'));
+        $("#lastFetchTime", this.$el).text(moment().format('HH:mm:ss, dddd, MMM Do'));
     },
-    fetchPacks : function(callback) {
-
-        var self = this;
-        var updateFetchTime = _.after(this.packModels.length, function() {
-            self.updateLastFetchTime();
-        });
-
-        this.packModels.models.map(function(model) {
-            model.fetchAll({update: true});
-            updateFetchTime();
-        });
-    },
+    //FIXME: should go to generic pack view (with different layouts)
     showAs : function(viewType) {
         var activeModel = this.packModels.getActive();
+        if (!activeModel) {
+            console.info("No pack selected");
+            return;
+        }
         var packName = activeModel.get("name");
 
         var wrapper = this.packViews[packName];
         wrapper.current = viewType;
         wrapper.getCurrent().render();
     },
+    //FIXME: something completely different. stacked views
     showGroup : function(packName, groupValue) {
         var view = new GroupView({
             model : new SimpleSearchResults({
@@ -433,15 +114,6 @@ var AppView = Backbone.View.extend({
             }
         });
     },
-    hidePackViews : function() {
-    },
-    newMessage : function() {
-        var draftView = new DraftView({
-            model : new Draft({
-            })
-        });
-        this.getActivePackView().$el.append(draftView.render().$el);
-    }
 });
 
 
