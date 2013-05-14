@@ -45,7 +45,9 @@ body {
 
 .packs {
   margin-bottom: 15px;
-  border-right: 0px; }
+  border-right: 0px;
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px; }
   .packs li {
     /*
     a.selected {
@@ -108,8 +110,16 @@ body {
   margin-top: 10px; }
 
 .messageView {
-  padding: 10px;
-  margin: 5px; }
+  padding: 15px;
+  margin: 5px;
+  width: 95%;
+  background-color: white;
+  position: absolute;
+  top: 0;
+  left: 2%;
+  box-shadow: 5px 5px 10px #cccccc;
+  border-radius: 5px;
+  border: 1px solid #bbbbbb; }
   .messageView .body1 {
     color: #999999;
     margin-left: 10px;
@@ -191,9 +201,24 @@ body {
   border-right: 1px solid #bbbbbb;
   border-bottom: 1px solid #bbbbbb; }
 
+.searchPopup {
+  background-color: rgba(82, 168, 236, 0.1);
+  position: fixed;
+  top: 10px;
+  right: 80px;
+  padding: 10px;
+  border-radius: 6px; }
+  .searchPopup form {
+    margin: 0px; }
+    .searchPopup form input {
+      margin: 0px;
+      width: 200px; }
+
 #packView {
   position: relative;
   margin-left: 0px; }
+  #packView .title {
+    margin: 10px 0px; }
 
 #loginModal {
   width: 300px;
@@ -206,9 +231,9 @@ body {
     margin-left: 0px; }
 
 #hotkeysModal {
-  width: 600px;
-  margin-left: -300px;
-  margin-right: -300px; }
+  width: 800px;
+  margin-left: -400px;
+  margin-right: -400px; }
 
 /* Bootstrap improvements */
 .modal-backdrop {

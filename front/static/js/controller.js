@@ -3,6 +3,19 @@ var stateModel = new StateModel();
 
 function Controller() {
 
+    var draftController = new DraftController();
+    var searchController = new SearchController();
+
+    var loginPopup = LoginModal().create();
+
+    //example
+    var storedSearches = new Searches([
+        { query : "+unread:true",},
+        { query : "+received:[NOW/DAY TO NOW/DAY+1DAY]",},
+    ]);
+
+
+    // models
     var serverPacks = new Packs([], {
         url : '/packs',
     });
@@ -14,11 +27,7 @@ function Controller() {
     });
 
     predefinedPacks.fetch = function(options) {
-        predefinedPacks.each(function(m) {
-            m.fetch();
-        });
         (options.success || dummy)();
-        predefinedPacks.trigger("reset");
     };
 
     var packBlocks = [serverPacks, predefinedPacks];
@@ -27,44 +36,6 @@ function Controller() {
         $("#packBlocks").append(new PackListView({ model : packs }).$el);
     });
 
-    this.draftModel = null;
-    this.draftView = null;
-    stateModel.on("newDraft", function() {
-        stateModel.set("activePackName", null);
-        $("#newMessageLi").addClass("active");
-    });
-    stateModel.on("hideDraft", function() {
-        $("#newMessageLi").removeClass("active");
-    });
-    stateModel.on("newDraft", function(draftId) {
-
-        console.info("creating new draft view");
-
-        var draft;
-        if (draftId) {
-            draft = new Draft({ id : draftId });
-        } else {
-            draft = new Draft({ created : new Date() });
-        }
-        this.draftModel = draft;
-        this.draftView = new DraftView({
-            model : this.draftModel
-        });
-
-        this.draftModel.on("change:id", function(m, value) {
-            if (value) {
-                window.curie.router.navigate("#new/" + value);
-            }
-        });
-
-        $("#packView").html(this.draftView.render().$el);
-        this.draftView.initialFocus();
-
-    }, this);
-
-    stateModel.on("change:activePackName", function(i, activePackName) {
-        stateModel.trigger("hideDraft");
-    }, this);
 
     stateModel.on("selectPack", function(movement) {
 
@@ -106,10 +77,71 @@ function Controller() {
         }
     }, this);
 
-    this.fetchPacks = function(callback) {
+    stateModel.on("navigateToActivePack", function() {
+        var activeName = stateModel.get("activePackName");
+        //FIXME: come up with the better solution
+        if (activeName.indexOf("search/") == 0) {
+            var query = activeName.split("search/")[1];
+            window.curie.router.navigate(
+                window.curie.router.reverse('search', {encodedquery : query}),
+                {trigger : true}
+            );
+        } else {
+            window.curie.router.navigate(
+                window.curie.router.reverse('showPack', {pack : activeName}),
+                {trigger : true}
+            );
+        }
+    }, this);
+
+
+    stateModel.on("showMessage", function(messageId) {
+        var message = new Message({
+            id : messageId
+        });
+
+        message.fetch({
+            success : function() {
+                var view = new MessageView({
+                    model : message
+                });
+                $("#messageViews").html(view.render(window.pageYOffset).$el);
+            }
+        });
+
+    }, this);
+
+    stateModel.on("login", function(email, channel) {
+        loginPopup.hide();
+
+        setCookie("curie.stream", channel);
+        setCookie("curie.account", email);
+    });
+
+    stateModel.on("logout", function() {
+
+        delCookie("curie.session");
+        delCookie("curie.stream");
+        delCookie("curie.account");
+
+        window.curie.socket && window.curie.socket.disconnect();
+        window.curie.router.navigate("#");
+
+        //FIXME: add all entities to entityMap and delete them there
+        serverPacks.models.map(function(pack) {
+            pack.messages.remove(pack.messages.models)
+            pack.groups.remove(pack.groups.models)
+        });
+        serverPacks.remove(serverPacks.models);
+
+        loginPopup.show();
+    });
+
+    new AppView();
+
+    this.refetch = function(callback) {
         var packsFetched = _.after(packBlocks.length, function() {
             stateModel.trigger("fetchFinished");
-
             (callback || dummy)();
         });
 
@@ -117,7 +149,27 @@ function Controller() {
             packs.fetch({
                 success : function() {
                     packs.each(function(model) {
-                        new PackView({ model : model }).model.fetchAll({update: true});
+                        model.fetchAll({update: true});
+                    });
+                    packsFetched();
+                }
+            });
+        });
+    }
+
+    this.firstFetch = function(callback) {
+        var packsFetched = _.after(packBlocks.length, function() {
+            stateModel.trigger("fetchFinished");
+            (callback || dummy)();
+        });
+
+        packBlocks.map(function(packs) {
+            packs.trigger("reset");
+            packs.fetch({
+                success : function() {
+                    packs.each(function(model) {
+                        new PackView({ model : model });
+                        model.fetchAll({ update: true });
                     });
                     packsFetched();
                 }

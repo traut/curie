@@ -31,9 +31,10 @@ router.match('/packs/:pack/messages', 'GET').to('packStore.getMessagePreviews');
 
 router.match('/packs/:pack/groups/:groupfield', 'GET').to('packStore.getGroups');
 
-router.match('/packs/:pack/search/:searchfield/:searchvalue', 'GET').to('packStore.getSearch').where({
-    searchvalue : /.+$/
-});
+router.match('/search', 'GET').to('packStore.getSearch');
+//.where({
+//    searchvalue : /.+$/
+//});
 
 PackStore = function() {
     return {
@@ -131,7 +132,7 @@ PackStore = function() {
                 }
             }, function(err, results) {
                 if (err) {
-                    winston.error("Error %s", err);
+                    winston.error("Error " + err);
                     callback(err, null);
                     return;
                 }
@@ -190,7 +191,7 @@ PackStore = function() {
                 }
             }, function(err, results) {
                 if (err) {
-                    winston.error("Error %s", err);
+                    winston.error("Error " + err);
                     callback(err, null);
                     return;
                 }
@@ -216,22 +217,13 @@ PackStore = function() {
             });
         },
         getSearch : function(handshake, options, callback) {
-            var packName = options.pack,
-                searchField = options.searchfield,
-                searchValue = options.searchvalue,
-                format = options.format;
+            var searchQuery = options.ctx.query,
+                format = options.ctx.format;
 
+            //FIXME: security hole
+            var query = accessControlQueryPart(handshake.session.email) + searchQuery; //solrLib.valueEscape(searchQuery);
 
-            var searchFieldMapping = {
-                from : 'header_from_email_raw',
-            };
-
-            var searchByFieldRealName = searchFieldMapping[searchField];
-
-            var query = "+labels:" + packName + accessControlQueryPart(handshake.session.email);
-            query += util.format(' +%s:"%s"', searchByFieldRealName, solrLib.valueEscape(searchValue));
-
-            winston.info("Getting search for pack=" + packName + ", searchField=" + searchField + ", searchValue=" + searchValue + ", query=" + query);
+            winston.info("Getting search for searchQuery=" + query);
 
             var numRows = (format == 'light') ? 0 : NUM_ROWS;
 
@@ -242,7 +234,7 @@ PackStore = function() {
                 sort : 'received desc'
             }, function(err, response) {
                 if (err) {
-                    winston.error("Error %s", err);
+                    winston.error("Error " + err);
                     callback(err, null);
                     return;
                 }
@@ -251,15 +243,13 @@ PackStore = function() {
                 var unreadCounts = flatToDict(responseObj.facet_counts.facet_fields.unread);
 
                 var response = {
-                    id : crypto.createHash('md5').update(searchValue).digest("hex"),
-                    pack : packName,
-                    searchField : searchField,
-                    searchValue : searchValue,
+                    id : crypto.createHash('md5').update(query).digest("hex"),
+                    query : searchQuery,
                     messages : messages,
                     size : responseObj.response.numFound,
                     unread : unreadCounts[true] || 0,
                 }
-                winston.info("Found " + responseObj.response.numFound + " docs, pack=" + packName + ", searchField=" + searchField + ", searchValue=" + searchValue);
+                winston.info("Found " + responseObj.response.numFound + " docs, query=" + query);
                 callback(null, response);
             });
         }
@@ -275,7 +265,7 @@ function accessControlQueryPart(email) {
     for(i in MAIL_ACCESS_MAP[email]) {
         query += ' header_to_email:"' + solrLib.valueEscape(MAIL_ACCESS_MAP[email][i]) + '"';
     }
-    query += ")";
+    query += ") ";
     return query;
 }
 
@@ -348,9 +338,11 @@ var read = function (socket, cast) {
         socket.emit('err', null);
         return;
     }
+    params.ctx = cast.ctx;
+    winston.info("read params", { params : params, cast : cast });
     stores[params.controller][params.action](socket.handshake, params, function(err, results) {
         if (err) {
-            socket.emit(eventSignature('err', cast), []); // FIXME: will not be handled properly on client-side
+            socket.emit(eventSignature('err', cast), []);
             return
         }
         socket.emit(eventSignature('read', cast), results);

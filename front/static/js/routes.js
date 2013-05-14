@@ -4,12 +4,13 @@ var AppRouter = Backbone.Router.extend({
     routes : {
         "p/:pack": "showPack",
         "p/:pack/:message": "showMessage",
-        "p/:pack/g/:group": "showGroup",
 
         "new/:draftid": "newDraft",
         "new": "newDraft",
 
-        "search/:query": "search",
+        "search/:encodedquery/:message": "showSearchMessage",
+        "search/:encodedquery": "search",
+
         "": "showDashboard",
     },
 
@@ -42,13 +43,17 @@ var AppRouter = Backbone.Router.extend({
     },
 
     showMessage : function(pack, message) {
-        this.controller.packModels.activate(pack);
-        this.controller.getPackViewByName(pack).showMessage(message);
+        stateModel.set("activePackName", pack);
+        stateModel.trigger("showMessage", message);
+    },
+
+    showSearchMessage : function(encodedquery, message) {
+        this.search(encodedquery);
+        stateModel.trigger("showMessage", message);
     },
 
     showGroup : function(pack, group) {
-        this.controller.packModels.activate(pack);
-        this.controller.showGroup(pack, group);
+        stateModel.set("activePackName", pack);
     },
 
     showDashboard : function() {
@@ -60,6 +65,7 @@ var AppRouter = Backbone.Router.extend({
         stateModel.trigger("newDraft", draftId);
     },
 
-    search : function() {
+    search : function(encodedquery) {
+        stateModel.trigger("searchRequest", encodedquery);
     }
 });

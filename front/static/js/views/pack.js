@@ -1,3 +1,8 @@
+var PACK_STYLES = {
+    LIST : "list",
+    COMBINED : "combined",
+    TILES : "tiles"
+};
 
 var PackView = Backbone.View.extend({
     initialize : function() {
@@ -6,17 +11,20 @@ var PackView = Backbone.View.extend({
         stateModel.on("showPackAs", this.changePackStyle, this);
 
         this.model.messages.on("add", this.addMessage, this);
-        this.model.messages.on("remove", this.removeMessage, this);
-
         this.model.groups.on("add", this.addGroup, this);
-        this.model.groups.on("remove", this.removeGroup, this);
 
-        this.activeStyle = "list";
+        this.model.messages.on("reset", this.render, this);
+        this.model.groups.on("reset", this.render, this);
+        this.model.on("reset", this.render, this);
+
+        this.activeStyle = PACK_STYLES.LIST;
+
+        this.showMessageFunction = this.options.showMessageFunction || "showMessage"; // to reverse to a proper link (pack vs search links)
 
         this.styles = {
             list : {
                 models : this.model.messages,
-                el : $('<div id="messages-list" class="messageList">'),
+                el : $('<div id="messages-list" class="messageList"></div>'),
                 selector : ".messageRow",
                 idPrefix : "message-row-",
                 views : {},
@@ -24,7 +32,7 @@ var PackView = Backbone.View.extend({
             },
             tiles : {
                 models : this.model.groups,
-                el : $('<div id="pack-groups" class="packGroups">'),
+                el : $('<div id="pack-groups" class="packGroups"></div>'),
                 selector : ".packGroup",
                 idPrefix : "message-group-",
                 views : {},
@@ -33,7 +41,7 @@ var PackView = Backbone.View.extend({
             },
             combined : {
                 models : this.model.groups,
-                el : $('<div id="pack-groups" class="packGroups">'),
+                el : $('<div id="pack-groups" class="packGroups"></div>'),
                 selector : ".packGroup",
                 idPrefix : "message-group-",
                 views : {},
@@ -41,7 +49,20 @@ var PackView = Backbone.View.extend({
             },
         };
 
+        if (this.options.title) {
+            _.each(this.styles, function(value, key) {
+
+                var title = $("<div class='lead title'>" + this.options.title + "</div>");
+                //var wrapper = $("<div></div>");
+                //wrapper.append(title);
+                //wrapper.append(value.el);
+                value.el.append(title);
+            }, this);
+        }
+
         console.info("PackView for " + this.model.get("name") + " initialized");
+
+        this.rootUrl = this.options.rootUrl || window.curie.router.reverse('showPack', { pack : this.model.get("name") })
     },
 
     getActiveStyle : function() {
@@ -58,7 +79,7 @@ var PackView = Backbone.View.extend({
         _.each(modelsWithoutViews, function(model) {
             style.views[model.id] = new style.viewClass({
                 model : model,
-                pack : this.model.get("name")
+                rootUrl : this.rootUrl
             });
             console.info("subview added for " + model.id + " to style " + this.activeStyle);
         }, this);
@@ -66,7 +87,7 @@ var PackView = Backbone.View.extend({
     },
 
     changePackStyle : function(newStyle) {
-        if (newStyle != this.activeStyle) {
+        if (newStyle != this.activeStyle && stateModel.get("activePackName") == this.model.get("name")) {
             this.activeStyle = newStyle;
             this.insertElement();
             this.render();
@@ -74,7 +95,7 @@ var PackView = Backbone.View.extend({
     },
 
     addMessage : function(model, collection) {
-        if (this.activeStyle == "list") {
+        if (this.activeStyle == PACK_STYLES.LIST) {
             console.info("Adding message", model);
             this.createSubView(model, collection);
             this.render();
@@ -82,42 +103,48 @@ var PackView = Backbone.View.extend({
     },
 
     addGroup : function(model, collection) {
-        if (this.activeStyle == "combined" || this.activeStle == "tiles") {
+        if (this.activeStyle == PACK_STYLES.COMBINED || this.activeStle == PACK_STYLES.TILES) {
             console.info("Adding group", model);
             this.createSubView(model, collection);
             this.render();
         }
     },
 
-    removeMessage : function(model, collection, options) {
-        // FIXME: broken
-        console.info("deleting message " + model.id);
-        var deletedView = this.messageRowViews[model.id];
-        console.info(deletedView);
-        deletedView.$el.remove();
-        delete deletedView;
+    removeView : function() {
+        // remove all DOM elements
+        _.map(this.styles, function(val, key) {
+            val.el.remove();
+        }, this);
+
+        this.remove();
     },
 
     insertElement : function() {
+        _.map(this.styles, function(val, key) {
+            if (this.activeStyle != key) {
+                val.el.remove();
+            }
+        }, this);
         var style = this.getActiveStyle();
         if (!isElementInDOM(style.el)) {
             console.info("adding PackView to DOM: pack=" + this.model.get('name') + ", " + this.activeStyle);
-            $("#packView").html(style.el);
+            $("#messageLists", "#packView").html(style.el);
+        } else {
+            console.info("DOM element for PackView name=" + this.model.get('name') + " is in tree already");
         }
     },
 
     changeActivePack : function(i, activePackName) {
         var style = this.getActiveStyle();
-
-        console.info(this.model.get("name"), this.activeStyle, activePackName, (this.model.get("name") == activePackName), isElementInDOM(style.el));
-
         if (this.model.get("name") == activePackName) {
             this.insertElement();
-        } else if (i && this.model.get("name") != activePackName && isElementInDOM(style.el)) {
-            style.el.remove();
+        } else if (i && this.model.get("name") != activePackName) {
+            console.info("REMOVING pack " + this.model.get("name") + " because active=" + activePackName);
+            _.map(this.styles, function(val, key) {
+                val.el.remove();
+            }, this);
             return;
         }
-
         this.render();
     },
 
@@ -130,13 +157,12 @@ var PackView = Backbone.View.extend({
             if (!view) {
                 view = this.createSubView(model);
             }
-            if ($("#" + style.idPrefix + model.id, style.el).length == 0){
-                console.info("adding view for " + model.id + " to element", style.el);
+            if ($("#" + style.idPrefix + model.id, style.el).length == 0) {
                 var existingDOMel = $(style.selector + ":nth-child(" + (index + 1) + ")", style.el);
                 if (existingDOMel.length == 0) {
                     style.el.append(view.render().$el);
                 } else {
-                    existingDOMel.before(view.render().$el);
+                    existingDOMel.after(view.render().$el);
                 }
             }
 

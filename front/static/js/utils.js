@@ -63,7 +63,10 @@ function VolatileModel(properties) {
 }
 
 function setCookie(name, value) {
-    document.cookie = "curie." + name + "=" + value;
+    document.cookie = name + "=" + value;
+}
+function delCookie(name) {
+    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 }
 
 function isElementInDOM(element) {
@@ -84,6 +87,28 @@ function getUrl(object) {
     if (!(object && object.url)) return null;
     return _.isFunction(object.url) ? object.url() : object.url;
 };
+
+function escapeSelector(str) {
+    if (str) {
+        return str.replace(/([ #;?%&,.+*~\':"!^$[\]()=>|\/@])/g,'\\$1');
+    } else {
+        return str;
+    }
+}
+function slugifySelector(str) {
+    if (str) {
+        return str.replace(/([ #;?%&,.+*~\':"!^$[\]()=>|\/@])/g,'__');
+    } else {
+        return str;
+    }
+}
+function utf8_to_b64(str) {
+    return encodeURIComponent(window.btoa(unescape(encodeURIComponent(str))));
+}
+ 
+function b64_to_utf8(str) {
+    return decodeURIComponent(escape(window.atob(decodeURIComponent(str))));
+}
 
 function elementInViewport(el) {
     var top = el.offsetTop;
@@ -107,6 +132,15 @@ function elementInViewport(el) {
 
 Handlebars.registerHelper('dateformat', function(stamp, format) {
     return (stamp) ? moment(stamp).format(format) : "null";
+});
+Handlebars.registerHelper('shortify', function(value, maxlength) {
+    if (value.length > maxlength) {
+        return value.slice(0, maxlength) + "...";
+    }
+    return value;
+});
+Handlebars.registerHelper('slugifySelector', function(value) {
+    return slugifySelector(value);
 });
 Handlebars.registerPartial("messageRow", Handlebars.templates.messageRow);
 Handlebars.registerPartial("messageList", Handlebars.templates.messageList);

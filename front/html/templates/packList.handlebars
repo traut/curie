@@ -1,6 +1,6 @@
 {{#each packs}}
 <li {{#if active }}class="active"{{/if}}>
-    <a href="#{{ hashUrl }}" class="pack" name="{{ name }}">{{ name }} 
+    <a href="#{{ hashUrl }}" class="pack" name="{{#slugifySelector name }}{{/slugifySelector}}">{{#shortify name 23 }}{{/shortify}}
     
     <span class="pull-right counters unread {{#unless unread }}hide{{/unless}}">{{ unread }}</span>
     </a>

@@ -26,6 +26,9 @@
 
         <script src="/static/js/templates.js" type="text/javascript"></script>
         <script src="/static/js/models.js" type="text/javascript"></script>
+
+        <script src="/static/js/draftController.js" type="text/javascript"></script>
+        <script src="/static/js/searchController.js" type="text/javascript"></script>
         <script src="/static/js/controller.js" type="text/javascript"></script>
 
         <script src="/static/js/views.js" type="text/javascript"></script>
@@ -48,6 +51,21 @@
 
     </head>
     <body>
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-19186351-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+
+
     <div class="container-fluid app">
         <div class="row-fluid">
             <div class="span3">
@@ -57,24 +75,26 @@
                     <ul class="nav nav-list packs">
                         <li id="newMessageLi"><a href="#new">new message</a></li>
                     </ul>
-                    <div class="muted text-center sidebarInfo" id="lastFetchTime"></div>
-                    <div class="text-center muted">Hotkeys help: "?"</div>
                     <div class="text-center">
                         <br/>
                         <div class="btn-group">
-                            <button class="btn" onClick="javascript:window.curie.appView.showAs('list');"><i class="icon-align-justify"></i></button>
-                            <button class="btn" onClick="javascript:window.curie.appView.showAs('combined');"><i class="icon-th-list"></i></button>
-                            <button class="btn" onClick="javascript:window.curie.appView.showAs('tiles');"><i class="icon-th-large"></i></button>
+                            <button class="btn" name="showAs" data-value="LIST"><i class="icon-align-justify"></i></button>
+                            <button class="btn" name="showAs" data-value="COMBINED"><i class="icon-th-list"></i></button>
+                            <button class="btn" name="showAs" data-value="TILES"><i class="icon-th-large"></i></button>
                         </div>
                     </div>
                     <div class="muted text-center alert alert-error hide sidebarInfo" id="errorAlert"></div>
+                    <br/>
+                    <div class="muted text-center sidebarInfo" id="accountInfo"></div>
+                    <div class="muted text-center sidebarInfo" id="lastFetchTime"></div>
+                    <div class="text-center muted">Hotkeys help: "?"</div>
                 </div>
             </div>
             <script>
 
                 window.curie = window.curie || {};
 
-                var PERIODIC_FETCH = 0; //20 * 1000;
+                var PERIODIC_FETCH = 0;//20 * 1000;
                 var RECONNECT_TIMEOUT_START = 100;
 
                 function dummy() {};
@@ -89,16 +109,11 @@
 
                 var reconnectInterval = RECONNECT_TIMEOUT_START;
 
-                function createConnection(options, successCallback, failCallback) {
-
-
-                    successCallback = successCallback || dummy;
-                    failCallback = failCallback || dummy;
+                function createConnection(options) {
 
                     var email = options.email || null,
                         password = options.password || null,
                         channel = options.channel || new jsSHA(email, "TEXT").getHash("SHA-512", "HEX");
-
 
                     var initialData = {
                         secure: true,
@@ -113,43 +128,42 @@
 
                     socket.on('error', function() {
                         showAlert("Socket error");
-                        //FIXME: drop all models from memory 
-                        failCallback();
+                        stateModel.trigger("logout");
                     });
                     socket.on('session-id', function(sessionId) {
-                        console.info("Setting session to " + sessionId);
-                        setCookie("session", sessionId);
+                        setCookie("curie.session", sessionId);
                     });
                     socket.on('connect', function() {
                         reconnectInterval = RECONNECT_TIMEOUT_START;
                         hideAlert(); // maybe we were showing some connection-related alerts
+
                         console.info("Connection to " + channel + " created");
 
-                        setCookie("stream", channel);
+                        stateModel.trigger("login", email, channel);
+
+                        //FIXME: move to controller
                         initDataLoad();
-                        successCallback();
                     });
                     socket.on("disconnect", function() {
-                        showAlert("Disconneted");
+                        showAlert("Disconnected");
+                        stateModel.trigger("disconnected");
                     });
                 }
 
                 function initInterface() {
-                    //window.curie.appView = new AppView(["inbox", "sent", "facebook"]);
                     window.curie.controller = new Controller();
                     window.curie.router = new AppRouter(window.curie.controller);
-
                 }
 
                 function initDataLoad() {
-                    window.curie.controller.fetchPacks(function() {
+                    window.curie.controller.firstFetch(function() {
                         // we will start routing when the data schema is ready
 
                         Backbone.history.stop();
                         Backbone.history.start();
                         if (PERIODIC_FETCH) {
                             setInterval(function() {
-                                window.curie.controller.fetchPacks();
+                                window.curie.controller.refetch();
                             }, PERIODIC_FETCH); 
                         }
                     });
@@ -157,31 +171,30 @@
 
             </script>
             <div class="span9" id="packView">
+                <div id="messageViews"></div>
+                <div id="messageLists"></div>
             </div>
         </div>
-    </div>
-
 
         <div class="modal hide" id="loginModal" data-backdrop="static" data-keyboard="false" data-show="false"></div>
         <div class="modal hide" id="hotkeysModal" data-backdrop="true" data-keyboard="true" data-show="true" tabindex="-1"></div>
 
+        <div class="searchPopup hide" id="searchPopup"><form id="searchForm"><input type="text" name="search"/></form></div>
+    </div>
+
+
+
         <script>
 
             function reconnect() {
-                window.curie.loginModal = window.curie.loginModal || LoginModal().create();
                 if (window.readCookie("curie.stream")) {
                     console.info("Stream exists! " + window.readCookie("curie.stream"));
                     createConnection({
-                        channel : window.readCookie("curie.stream")
-                    }, function() {
-                        console.info("Connection created");
-                        window.curie.loginModal.hide();
-                    }, function() {
-                        console.info("Stream is dead, showing loginModal");
-                        window.curie.loginModal.show();
+                        channel : window.readCookie("curie.stream"),
+                        email : window.readCookie("curie.account"),
                     });
                 } else {
-                    window.curie.loginModal.show();
+                    stateModel.trigger("logout");
                 }
             }
 

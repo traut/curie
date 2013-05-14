@@ -97,7 +97,10 @@ var hotkeys = {
     globalActions : {
         '/' : {
             doc : 'Activate search',
-            action : dummy
+            action : function(e) {
+                e.preventDefault();
+                stateModel.trigger("showSearch");
+            }
         },
         '?' : {
             doc : 'Show hotkeys description',
@@ -105,7 +108,16 @@ var hotkeys = {
         },
         'q q' : {
             doc : 'Logout',
-            action : dummy
+            action : function(e) {
+                e.preventDefault();
+                stateModel.trigger("logout");
+            }
+        },
+        'esc' : {
+            doc : 'Go one level up',
+            action : function() {
+                stateModel.trigger("escPressed");
+            }
         },
     }
 };

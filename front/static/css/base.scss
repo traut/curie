@@ -85,6 +85,8 @@ body {
     }
     margin-bottom: 15px;
     border-right: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
 }
 
 .unread {
@@ -147,8 +149,17 @@ body {
 }
 
 .messageView {
-    padding: 10px;
+    padding: 15px;
     margin: 5px;
+    width: 95%;
+    background-color: white;
+    position: absolute;
+    top: 0;
+    left: 2%;
+    box-shadow: 5px 5px 10px #ccc;
+    border-radius: 5px;
+    border: 1px solid #bbb;
+
     .body0 {
     }
     .body1 {
@@ -270,9 +281,28 @@ body {
     border-bottom: 1px solid #bbb;
 }
 
+.searchPopup {
+    background-color: rgba(82, 168, 236, 0.1);
+    position: fixed;
+    top: 10px;
+    right: 80px;
+    padding: 10px;
+    border-radius: 6px;
+    form {
+        margin: 0px;
+        input {
+            margin: 0px;
+            width: 200px;
+        }
+    }
+}
+
 #packView {
     position: relative;
     margin-left: 0px;
+    .title {
+        margin: 10px 0px;
+    }
 }
 
 #loginModal {
@@ -289,9 +319,9 @@ body {
 }
 
 #hotkeysModal {
-    width: 600px;
-    margin-left: -300px;
-    margin-right: -300px;
+    width: 800px;
+    margin-left: -400px;
+    margin-right: -400px;
 }
 
 

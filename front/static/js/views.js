@@ -10,7 +10,7 @@ var PackListView = Backbone.View.extend({
         stateModel.on("change:selectedPackName", this.updateSelected, this);
 
         this.model.on("change:unread", this.updateBadge, this);
-        this.model.on("add reset", this.render, this);
+        this.model.on("add reset remove", this.render, this);
 
     },
     render : function() {
@@ -18,6 +18,9 @@ var PackListView = Backbone.View.extend({
 
         var renderData = _.map(this.model.toJSON(), function(el) {
             el.hashUrl = window.curie.router.reverse('showPack', {pack : el.name});
+            if (el.name == stateModel.get("activePackName")) {
+                el.active = true;
+            }
             return el;
         });
         this.$el.html(this.template({ packs : renderData }));
@@ -32,27 +35,36 @@ var PackListView = Backbone.View.extend({
     },
     updateActive : function(i, packName) {
         var cls = "active";
-        $("a.pack:not([name=" + packName + "])", this.$el).parents("li").removeClass(cls);
 
+        var packSelector = slugifySelector(packName);
+        $("a.pack:not([name=" + packSelector + "])", this.$el).parents("li").removeClass(cls);
+
+        // checking if this pack is in this PackList
         var packFound = this.model.findWhere({name : packName});
+
         if (packFound) {
-            $("a[name=" + packName + "].pack", this.$el).parents("li").addClass(cls);
+            console.info("UPDATE ACTIVE", packName, packSelector, packFound, this.model);
+            $("a[name=" + packSelector + "].pack", this.$el).parents("li").addClass(cls);
+            console.info("CLASS ADDED TO", $("a[name=" + packSelector + "].pack", this.$el));
             this.updateDocumentTitle(packName, packFound.get("unread"));
         }
-
     },
     updateSelected : function(i, packName) {
         var cls = "selected";
-        $("a.pack:not([name=" + packName + "])", this.$el).removeClass(cls);
 
+        var packSelector = slugifySelector(packName);
+
+        $("a.pack:not([name=" + packSelector + "])", this.$el).removeClass(cls);
         var packFound = this.model.findWhere({name : packName});
         if (packFound) {
-            $("a[name=" + packName + "].pack", this.$el).addClass(cls);
+            $("a[name=" + packSelector + "].pack", this.$el).addClass(cls);
         }
     },
     updateBadge : function(model, value) {
         var packName = model.get('name');
-        var badge = $(".nav a[name=" + packName + "].pack .counters");
+        var packSelector = slugifySelector(packName);
+        var badge = $(".nav a[name=" + packSelector + "].pack .counters");
+        console.warn("BADGE: ", badge);
         if (value == 0) {
             badge.hide();
         } else {
@@ -64,41 +76,61 @@ var PackListView = Backbone.View.extend({
 
 var AppView = Backbone.View.extend({
     el : ".app",
+    events : {
+        "click button[name=showAs]" : "showPackAs",
+        "focusout input[name=search]" : "hideSearch",
+        "submit form#searchForm" : "makeSearchEvent"
+    },
     initialize : function() {
+        stateModel.on("fetchFinished", this.updateLastFetchTime, this);
+        stateModel.on("login", this.updateAccountInfo, this);
 
-        stateModel.on("fetchFinished", this.updateFetchTime, this);
+        stateModel.on("showSearch", this.showSearch, this);
+        stateModel.on("hideSearch", this.hideSearch, this);
+        stateModel.on("escPressed", this.hideSearch, this);
 
+        stateModel.on("newDraft", function() {
+            $("#newMessageLi").addClass("active");
+        });
+
+        stateModel.on("hideDraft", function() {
+            $("#newMessageLi").removeClass("active");
+        });
     },
     render : function(selectedPack) {
         return this;
     },
-    addMessage : function(message) {
-        console.info(message);
-        this.packs.map(function(pack) {
-            var packName = pack.model.get('name');
-            if (message.labels && message.labels.indexOf(packName) > -1) {
-                pack.model.messages.add(message);
-                console.info("message " + message.id + " pushed to " + packName);
-            }
-        });
+    showPackAs : function(e) {
+        var style = $(e.currentTarget).data("value");
+        if (PACK_STYLES[style]) {
+            stateModel.trigger("showPackAs", PACK_STYLES[style]);
+        }
+    },
+    showSearch : function() {
+        $("#searchPopup").show();
+        $("input", "#searchPopup").focus();
+    },
+    hideSearch : function() {
+        $("#searchPopup").hide();
+        $("input", "#searchPopup").val('');
+
     },
     updateLastFetchTime : function() {
         $("#lastFetchTime", this.$el).text(moment().format('HH:mm:ss, dddd, MMM Do'));
     },
-    //FIXME: should go to generic pack view (with different layouts)
-    showAs : function(viewType) {
-        var activeModel = this.packModels.getActive();
-        if (!activeModel) {
-            console.info("No pack selected");
-            return;
-        }
-        var packName = activeModel.get("name");
-
-        var wrapper = this.packViews[packName];
-        wrapper.current = viewType;
-        wrapper.getCurrent().render();
+    updateAccountInfo : function(email) {
+        $("#accountInfo", this.$el).text(email);
     },
-    //FIXME: something completely different. stacked views
+    makeSearchEvent : function(e) {
+        e.preventDefault();
+        var query = $("#searchPopup form input[name=search]").val();
+        if (query) {
+            window.curie.router.navigate(window.curie.router.reverse("search", {
+                encodedquery : utf8_to_b64(query)
+            }), {trigger : true});
+        }
+        return false;
+    },
     showGroup : function(packName, groupValue) {
         var view = new GroupView({
             model : new SimpleSearchResults({

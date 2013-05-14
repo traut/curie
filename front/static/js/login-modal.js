@@ -11,6 +11,7 @@ LoginModal = function() {
     var modal = {
         create : function () {
             modalObj.html(Handlebars.templates.loginModal());
+
             $(formObjId).submit(function(e) {
                 e.preventDefault();
 
@@ -25,20 +26,14 @@ LoginModal = function() {
                     $(modalLoader, modalObj).hide();
                     return false;
                 }
+
+                stateModel.once("disconnected", function() {
+                    modal.shake();
+                });
+
                 createConnection({
                     email : email,
                     password : password
-                }, function() {
-                    // success
-                    modal.hide();
-                    $(":input", modalObj).removeAttr("disabled");
-                    $(modalLoader, modalObj).hide();
-                }, function() {
-                    // fail
-                    $(":input", modalObj).removeAttr("disabled");
-                    $(modalLoader, modalObj).hide();
-                    modal.show();
-                    modal.shake();
                 });
                 return false;
             });
@@ -46,16 +41,23 @@ LoginModal = function() {
             return modal;
         },
         show : function () {
+
+            $(modalLoader, modalObj).hide();
+            $(":input", modalObj).removeAttr("disabled");
+            $(emailInputId, formObjId).val('');
+            $(passwordInputId, formObjId).val('');
+
             modalObj.modal('show');
             $(emailInputId, formObjId).focus();
-
         },
         hide : function () {
             modalObj.modal('hide');
+            $(":input", modalObj).removeAttr("disabled");
+            $(modalLoader, modalObj).hide();
         },
         shake : function () {
+            modal.show();
             modalObj.shake();
-            $(emailInputId, formObjId).focus();
         }
     }
     return modal;

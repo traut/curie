@@ -85,7 +85,7 @@ io.configure(function (){
                 });
                 socket.on('read', function(data) {
                     winston.info("read", data);
-                    store.read(socket, data.cast);
+                    store.read(socket, data.cast, data.ctx);
                 });  
                 socket.on('update', function(data) {
                     winston.info("update", data);

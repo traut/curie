@@ -92,25 +92,35 @@ var GroupPreview = Backbone.Model.extend({
     }
 });
 
-var SimpleSearchResults = Backbone.Model.extend({
+var SearchResults = Backbone.Model.extend({
+    url : "/search",
     defaults : {
         id : null,
-        searchField : null,
-        searchValue : null,
+        query : null,
         size : null,
         unread : null,
-        pack : null,
-        messages : new Messages(),
+        name : "search",
     },
-    messages : new Messages(), // dummy
     initialize: function() {
-        this.url = "/packs/" + this.get("pack") + "/search/" + this.get("searchField") + "/" + this.get("searchValue");
+        this.messages = new Messages();
+        this.groups = new Groups();
+
+        this.ctx = {
+            query : this.get("query")
+        }
+        this.set("name", this.generateName());
+    },
+    generateName : function(query) {
+        return "search/" + utf8_to_b64(query || this.get("query")); 
     },
     parse : function(response, options) {
-        response.messages = new Messages(response.messages);
-        this.messages = response.messages;
+        this.messages.reset(response.messages);
+        response.name = this.generateName(response.query);
         return response;
     },
+    fetchAll : function(options) {
+        this.fetch(options);
+    }
 });
 
 var Groups = Backbone.Collection.extend({
@@ -128,7 +138,6 @@ var Pack = Backbone.Model.extend({
         name : null,
         size : null,
         unread : null,
-
     },
     initialize : function() {
         var packName = this.get('name');
@@ -190,6 +199,9 @@ var Packs = Backbone.Collection.extend({
     model: Pack,
 });
 
+var Searches = Backbone.Collection.extend({
+    model: SearchResults,
+});
 
 var StateModel = Backbone.Model.extend({
     defaults: {

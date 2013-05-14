@@ -1,13 +1,19 @@
 
 var MessageView = Backbone.View.extend({
-    tagName : 'div',
     template : Handlebars.templates.message,
+    events : {
+        "click button.close" : "closeMessage",
+    },
     initialize : function() {
         this.model.on("change", this.render, this);
-        this.model.fetch();
+        stateModel.on("escPressed", this.closeOnEsc, this);
+
+        this.$el = $('<div id="message-' + this.model.id + '" class="row messageView"></div>');
     },
-    render : function(e) {
+    render : function(yOffset) {
         console.info("rendering message " + this.model.id);
+
+        var topOffset = yOffset || 15;
 
         var data = this.model.toJSON();
 
@@ -18,26 +24,26 @@ var MessageView = Backbone.View.extend({
 
         this.$el.html(this.template(data));
 
-
-        var markUnreadButton = $("button[name=markUnread]", this.$el);
         var self = this;
-        markUnreadButton.click(function() {
-            var markUnreadButton = $("button[name=markUnread]", self.$el);
-            self.setToUnreadTrue = true;
-
-            self.setUnreadTo(true, function() {
-                console.info("unread update success");
-            }, function() {
-                console.info("unread update error");
-            });
-        });
-
-        if (this.$el.is(":visible") && this.model.get("unread") && !this.setToUnreadTrue) {
-            //FIXME: this is causing 'change' event and render() again
-            setTimeout(function() {
+        setTimeout(function() {
+            if (isElementInDOM(self.$el) && self.model.get("unread")) {
+                //FIXME: this is causing 'change' event and render() again
                 self.setUnreadTo(false);
-            }, 100);
-        };
+            }
+        }, 1000);
+
+        this.$el.css("top", topOffset);
+
+        return this;
+    },
+    closeMessage : function() {
+        this.$el.remove();
+        stateModel.trigger("navigateToActivePack");
+    },
+    closeOnEsc : function() {
+        if (isElementInDOM(this.$el)) {
+            this.closeMessage();
+        }
     },
     setUnreadTo : function(bool, successCallback, errorCallback) {
         this.model.save({unread : bool}, {
@@ -69,23 +75,26 @@ var MessageRowView = Backbone.View.extend({
         stateModel.markedMessages.on("add", this.setMarked, this);
         stateModel.markedMessages.on("remove", this.unsetMarked, this);
 
-
         this.model.on("change:unread", this.updateUnread, this);
+        this.model.on("remove", this.removeMessage, this);
+
+        this.hashUrl = this.options.rootUrl + "/" + this.model.id;
     },
     render : function() {
         console.info("rendering messageRowView " + this.model.get("id"));
-        var data = this.model.toJSON();
 
-        if (!this.hashUrl) {
-            this.hashUrl = window.curie.router.reverse("showMessage", {
-                pack : this.options.pack,
-                message : this.model.get("id")
-            });
-        }
+        var data = this.model.toJSON();
         data.url = this.hashUrl;
         var html = this.template(data);
         this.$el = $(html);
         return this;
+    },
+    removeMessage : function(m, collection, options) {
+        this.$el.remove();
+
+        stateModel.off("change:selectedMessage", this.updateSelected);
+        stateModel.markedMessages.off("add", this.setMarked);
+        stateModel.markedMessages.off("remove", this.unsetMarked);
     },
     updateUnread : function(m, value) {
         updateElementClass(this.$el, value, "unread");
@@ -116,17 +125,16 @@ var MessageRowView = Backbone.View.extend({
 var MessageGroupView = Backbone.View.extend({
     template : Handlebars.templates.messageGroup,
     initialize : function() {
-        //this.model.messages.bind("change:unread", this.updateBadge, this);
+        this.model.on("change:unread", this.updateBadge, this);
+        this.model.on("remove", this.removeGroup, this);
+
+        var query = "+header_from_email_raw:" + this.model.get("value");
+        this.hashUrl = window.curie.router.reverse("search", {
+            encodedquery : btoa(query)
+        });
     },
     render : function() {
         console.info("rendering messageGroupView " + this.model.get("id"));
-
-        if (!this.hashUrl) {
-            this.hashUrl = window.curie.router.reverse("showGroup", {
-                pack : this.options.pack,
-                group : this.model.get("value")
-            });
-        }
 
         var html = this.template({
             id : this.model.id,
@@ -138,8 +146,10 @@ var MessageGroupView = Backbone.View.extend({
         this.$el = $(html);
         return this;
     },
-    updateBadge : function(e) {
-        var unreads = 2; //this.model.messages.getUnreadCount();
+    removeGroup : function(m, collection, options) {
+        this.$el.remove();
+    },
+    updateBadge : function(m, unreads) {
         if (unreads > 0) {
             $("span[name=unread] span[name=value]", this.$el).text(unreads);
             $("span[name=unread]").show();
@@ -153,8 +163,15 @@ var MessageGroupView = Backbone.View.extend({
 var MessageGroupListView = Backbone.View.extend({
     template : Handlebars.templates.messageGroupList,
     initialize : function() {
-        //this.model.messages.bind("change:unread", this.updateBadge, this);
         this.messageRowViews = {};
+
+        this.model.on("change:unread", this.updateBadge, this);
+        this.model.on("remove", this.removeGroup, this);
+
+        var query = "+header_from_email_raw:" + this.model.get("value");
+        this.hashUrl = window.curie.router.reverse("search", {
+            encodedquery : btoa(query)
+        });
 
         //FIXME: should reuse MessageRowView if only 1 message in a group
 //            if (model.get("size") < 2 && style.viewClass == MessageGroupListView) {
@@ -167,13 +184,6 @@ var MessageGroupListView = Backbone.View.extend({
     },
     render : function() {
         console.info("rendering messageGroupView " + this.model.get("id"));
-
-        if (!this.hashUrl) {
-            this.hashUrl = window.curie.router.reverse("showGroup", {
-                pack : this.options.pack,
-                group : this.model.get("value")
-            });
-        }
 
         var html = this.template({
             id : this.model.id,
@@ -190,8 +200,7 @@ var MessageGroupListView = Backbone.View.extend({
 
         return this;
     },
-    updateBadge : function(e) {
-        var unreads = 2; //this.model.messages.getUnreadCount();
+    updateBadge : function(m, unreads) {
         if (unreads > 0) {
             $("span[name=unread] span[name=value]", this.$el).text(unreads);
             $("span[name=unread]").show();
@@ -199,5 +208,8 @@ var MessageGroupListView = Backbone.View.extend({
             $("span[name=unread]").hide();
             $("span[name=unread] span[name=value]", this.$el).text('');
         }
-    }
+    },
+    removeGroup : function(m, collection, options) {
+        this.$el.remove();
+    },
 });
