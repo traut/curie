@@ -37,8 +37,11 @@ Backbone.sync = function (method, model, options) {
         var signature = eventSignature('create', cast);
 
         socket.once(signature, function (data) {
-            model.id = data.id;  
-            //console.log(model, data, "created");                     
+            if (data.error) {
+                console.error("Error with sync.create", data.error);
+                return;
+            }
+            options.success(data.response);
         });                           
 
         socket.emit('create', {'cast' : cast, item : model.attributes }); 
@@ -50,7 +53,11 @@ Backbone.sync = function (method, model, options) {
         var signature = eventSignature('read', cast);
 
         socket.once(signature, function (data) {
-            options.success(data); // updates collection, model; fetch                      
+            if (data.error) {
+                console.error("Error with sync.read", data.error);
+                return;
+            }
+            options.success(data.response); // updates collection, model; fetch                      
         });   
         socket.emit('read', {'cast' : cast});  
     }; 
@@ -58,11 +65,17 @@ Backbone.sync = function (method, model, options) {
     // Save an existing model to the server.
     var update = function () {
         var cast = modelCast(model); 
-        var e = eventSignature('update', cast);
+        var signature = eventSignature('update', cast);
+
         socket.emit('update', {'cast' : cast, item : model.attributes }); // model.attribues is the model data
-        socket.once(e, function (data) { 
-            //console.log(data);
-        });                           
+        console.info("emitted!", {'cast' : cast, item : model.attributes });
+        socket.once(signature, function (data) { 
+            if (data.error) {
+                console.error("Error with sync.update", data.error);
+                return;
+            }
+            options.success(data.response);
+        });
     };  
 
     // Patch an existing model on the server.
@@ -81,7 +94,7 @@ Backbone.sync = function (method, model, options) {
         var e = eventSignature('delete', cast);
         socket.emit('delete', {'cast' : cast, item : model.attributes }); // model.attribues is the model data
         socket.once(e, function (data) { 
-            //console.log(data);                     
+            options.success(data);
         });                           
     };             
        

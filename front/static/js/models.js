@@ -11,18 +11,13 @@ var Draft = Backbone.Model.extend({
         // dates
         created : null,
         saved : null,
-        
-        labels : ['drafts'],
     },
-});
+    urlRoot : "/draft",
 
-var Drafts = Backbone.Collection.extend({
-    model : Draft,
-    comparator : function(draft) {
-        return - draft.get("saved"); // newest goes first
+    initialize: function() {
+        this.changedByUser = false;
     }
 });
-
 
 var MessageLight = Backbone.Model.extend({
     defaults: {
@@ -81,7 +76,7 @@ var GroupPreview = Backbone.Model.extend({
         size : null,
         unread : null,
         pack : null,
-        messages : new Messages(),
+        messages : null,
     },
     initialize: function() {
         this.url = "/packs/" + this.get("pack") + "/groups/" + this.get("groupBy") + "/" + this.get("value") + "/light";

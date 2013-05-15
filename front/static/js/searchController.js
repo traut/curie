@@ -27,7 +27,7 @@ function SearchController() {
 
     stateModel.on("change:activePackName", function(i, activePackName) {
         if (searchModel && searchModel.get("name") != activePackName) {
-            searchView && searchView.removeView();
+            searchView && searchView.close();
         }
     }, this);
 }

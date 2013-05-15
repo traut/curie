@@ -252,7 +252,7 @@ body {
                     &[name=subject] {
                     }
                     &[name=body] {
-                        width: 90%;
+                        width: 100%;
                         height: 300px;
                     }
                 }
@@ -260,7 +260,12 @@ body {
         }
     }
     .draftFooter {
-        max-width: 500px;
+        .created {
+            padding-top: 3px;
+        }
+        .saved {
+            padding: 18px 0px 15px;
+        }
     }
 }
 

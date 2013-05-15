@@ -131,7 +131,13 @@ function elementInViewport(el) {
 }
 
 Handlebars.registerHelper('dateformat', function(stamp, format) {
-    return (stamp) ? moment(stamp).format(format) : "null";
+    return (stamp) ? moment(stamp).format(format) : "";
+});
+Handlebars.registerHelper('date_ago', function(stamp) {
+    if (stamp) {
+        return moment(stamp).fromNow()
+    }
+    return '';
 });
 Handlebars.registerHelper('shortify', function(value, maxlength) {
     if (value.length > maxlength) {
@@ -144,3 +150,12 @@ Handlebars.registerHelper('slugifySelector', function(value) {
 });
 Handlebars.registerPartial("messageRow", Handlebars.templates.messageRow);
 Handlebars.registerPartial("messageList", Handlebars.templates.messageList);
+
+Backbone.View.prototype.close = function () {
+    if (this.beforeClose) {
+        this.beforeClose();
+    }
+    this.remove();
+    this.unbind();
+};
+

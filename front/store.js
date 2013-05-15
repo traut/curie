@@ -321,10 +321,13 @@ function readMessageFromFile(path, callback) {
 }
 
 
-var create = function (socket, cast) {
-    winston.info("create", cast);
-    var e = eventSignature('create', cast), data = [];
-    socket.emit(e, {id : 1});            
+var create = function (socket, cast, item) {
+    var e = eventSignature('create', cast), data = item;
+    data.id = crypto.createHash('md5').update(data + "").digest("hex");
+    if (data.saved || data.saved == null) {
+        data.saved = new Date();
+    }
+    socket.emit(e, {success : true, response : data});
 };
  
 var read = function (socket, cast) {
@@ -334,25 +337,28 @@ var read = function (socket, cast) {
     }
     var params = router.first(cast.url, 'GET');
     if (!params) {
-        winston.error("Can't get parse '" + cast.url + "'");
-        socket.emit('err', null);
+        var error = "Can't get parse '" + cast.url + "'";
+        winston.error(error);
+        socket.emit(eventSignature('read', cast), {error : error});
         return;
     }
     params.ctx = cast.ctx;
     winston.info("read params", { params : params, cast : cast });
     stores[params.controller][params.action](socket.handshake, params, function(err, results) {
         if (err) {
-            socket.emit(eventSignature('err', cast), []);
+            socket.emit(eventSignature('read', cast), {error : err});
             return
         }
-        socket.emit(eventSignature('read', cast), results);
+        socket.emit(eventSignature('read', cast), {success : true, response : results});
     });
 };
  
-var update = function (socket, cast) {
-    winston.info("update", cast);
-    var e = eventSignature('update', cast), data = [];
-    socket.emit(e, {success : true});            
+var update = function (socket, cast, item) {
+    var e = eventSignature('update', cast), data = item;
+    if (data.saved || data.saved == null) {
+        data.saved = new Date();
+    }
+    socket.emit(e, {success : true, response : item});
 };
 
 var patch = function (socket, cast, changed) {

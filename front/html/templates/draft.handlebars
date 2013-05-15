@@ -12,14 +12,14 @@
             </div>
         </form>
     </div>
-    <div class="modal-footer draftFooter">
-        <div class="pull-left">
-            <span class="muted">Created:</span> {{#dateformat created 'HH:mm, dddd, MMM Do'}}{{/dateformat}}
-            {{#if saved }}
-            / <span class="muted">Saved:</span> 
-            {{#dateformat saved 'HH:mm, dddd, MMM Do'}}{{/dateformat}}
-            {{/if}}
+    <div class="draftFooter row-fluid">
+        <div class="span8 modal-footer">
+            <div class="pull-left created">
+                <span class="muted">Created:</span> {{#dateformat created 'HH:mm, dddd, MMM Do'}}{{/dateformat}}
+            </div>
+            <a href="#new" class="btn">Discard</a>
+            <button onClick="javascript:console.info('Sending the message');alert('Ta-da!');" class="btn btn-primary">Send</button>
         </div>
-        <button onClick="javascript:console.info('Sending the message');alert('Ta-da!');" class="btn btn-primary">Send</button>
+        <div class="span4 {{#unless saved}}hide{{/unless}} saved muted">Saved <span class="savedValue">{{#date_ago saved }}{{/date_ago}}</span></div>
     </div>
 </div>

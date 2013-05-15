@@ -1,38 +1,36 @@
 
 function DraftController() {
 
-    var draftModel = null;
-    var draftView = null;
-
-    stateModel.on("newDraft", function() {
-        stateModel.set("activePackName", null);
-    });
 
     stateModel.on("newDraft", function(draftId) {
 
+        stateModel.set("activePackName", "draft/" + (draftId || ""));
+
         console.info("creating new draft view");
 
-        if (draftId) {
-            draftModel = new Draft({ id : draftId });
-        } else {
-            draftModel = new Draft({ created : new Date() });
-        }
-        draftView = new DraftView({
+        var draftModel = (draftId) ? new Draft({ id : draftId }) : new Draft({ created : new Date() });
+
+        var draftView = new DraftView({
             model : draftModel
         });
 
         draftModel.on("change:id", function(m, value) {
             if (value) {
+                console.info("new draft id, navigating!");
                 window.curie.router.navigate("#new/" + value);
+                stateModel.set("activePackName", "draft/" + value);
             }
         });
 
-        $("#packView").append(draftView.render().$el);
-        draftView.initialFocus();
+        draftView.render();
+
     }, this);
 
     stateModel.on("change:activePackName", function(i, activePackName) {
-        stateModel.trigger("hideDraft");
+        if (activePackName && activePackName.indexOf("draft") == -1) {
+            console.info("triggering hideDraft!");
+            stateModel.trigger("hideDraft");
+        }
     }, this);
 
 }

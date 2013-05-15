@@ -81,7 +81,7 @@ io.configure(function (){
 
                 socket.on('create', function(data) {
                     winston.info("create", data);
-                    store.create(socket, data.cast);       
+                    store.create(socket, data.cast, data.item);
                 });
                 socket.on('read', function(data) {
                     winston.info("read", data);
@@ -89,7 +89,7 @@ io.configure(function (){
                 });  
                 socket.on('update', function(data) {
                     winston.info("update", data);
-                    store.update(socket, data.cast);       
+                    store.update(socket, data.cast, data.item);
                 }); 
                 socket.on('patch', function(data) {
                     store.patch(socket, data.cast, data.changed);

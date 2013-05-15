@@ -13,7 +13,6 @@ var MessageView = Backbone.View.extend({
     render : function(yOffset) {
         console.info("rendering message " + this.model.id);
 
-        var topOffset = yOffset || 15;
 
         var data = this.model.toJSON();
 
@@ -32,12 +31,13 @@ var MessageView = Backbone.View.extend({
             }
         }, 1000);
 
+        var topOffset = yOffset || 15;
         this.$el.css("top", topOffset);
 
         return this;
     },
     closeMessage : function() {
-        this.$el.remove();
+        this.close();
         stateModel.trigger("navigateToActivePack");
     },
     closeOnEsc : function() {
@@ -90,11 +90,11 @@ var MessageRowView = Backbone.View.extend({
         return this;
     },
     removeMessage : function(m, collection, options) {
-        this.$el.remove();
+        this.close();
 
-        stateModel.off("change:selectedMessage", this.updateSelected);
-        stateModel.markedMessages.off("add", this.setMarked);
-        stateModel.markedMessages.off("remove", this.unsetMarked);
+        stateModel.off("change:selectedMessage", this.updateSelected, this);
+        stateModel.markedMessages.off("add", this.setMarked, this);
+        stateModel.markedMessages.off("remove", this.unsetMarked, this);
     },
     updateUnread : function(m, value) {
         updateElementClass(this.$el, value, "unread");
@@ -147,7 +147,7 @@ var MessageGroupView = Backbone.View.extend({
         return this;
     },
     removeGroup : function(m, collection, options) {
-        this.$el.remove();
+        this.close();
     },
     updateBadge : function(m, unreads) {
         if (unreads > 0) {
@@ -210,6 +210,6 @@ var MessageGroupListView = Backbone.View.extend({
         }
     },
     removeGroup : function(m, collection, options) {
-        this.$el.remove();
+        this.close();
     },
 });

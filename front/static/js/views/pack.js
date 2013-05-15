@@ -110,13 +110,11 @@ var PackView = Backbone.View.extend({
         }
     },
 
-    removeView : function() {
+    beforeClose : function() {
         // remove all DOM elements
         _.map(this.styles, function(val, key) {
             val.el.remove();
         }, this);
-
-        this.remove();
     },
 
     insertElement : function() {

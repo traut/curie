@@ -412,23 +412,22 @@ function program1(depth0,data) {
 
 function program3(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
-  buffer += "\n            / <span class=\"muted\">Saved:</span> \n            ";
-  options = {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data};
-  stack2 = ((stack1 = helpers.dateformat),stack1 ? stack1.call(depth0, depth0.saved, "HH:mm, dddd, MMM Do", options) : helperMissing.call(depth0, "dateformat", depth0.saved, "HH:mm, dddd, MMM Do", options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
-  buffer += "\n            ";
-  return buffer;
+  
+  return "hide";
   }
 
-  buffer += "<div class=\"draftView\" >\n    <div class=\"draftBody\">\n        <form class=\"form-horizontal\">\n            <div class=\"control-group\">\n                <input name=\"to\" type=\"text\" data-provide=\"typeahead\" placeholder=\"To\">\n            </div>\n            <div class=\"control-group\">\n                <input name=\"subject\" type=\"text\" data-provide=\"typeahead\" placeholder=\"Subject\">\n            </div>\n            <div class=\"control-group\">\n                <textarea rows=\"6\" name=\"body\"></textarea>\n            </div>\n        </form>\n    </div>\n    <div class=\"modal-footer draftFooter\">\n        <div class=\"pull-left\">\n            <span class=\"muted\">Created:</span> ";
+  buffer += "<div class=\"draftView\" >\n    <div class=\"draftBody\">\n        <form class=\"form-horizontal\">\n            <div class=\"control-group\">\n                <input name=\"to\" type=\"text\" data-provide=\"typeahead\" placeholder=\"To\">\n            </div>\n            <div class=\"control-group\">\n                <input name=\"subject\" type=\"text\" data-provide=\"typeahead\" placeholder=\"Subject\">\n            </div>\n            <div class=\"control-group\">\n                <textarea rows=\"6\" name=\"body\"></textarea>\n            </div>\n        </form>\n    </div>\n    <div class=\"draftFooter row-fluid\">\n        <div class=\"span8 modal-footer\">\n            <div class=\"pull-left created\">\n                <span class=\"muted\">Created:</span> ";
   options = {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data};
   stack2 = ((stack1 = helpers.dateformat),stack1 ? stack1.call(depth0, depth0.created, "HH:mm, dddd, MMM Do", options) : helperMissing.call(depth0, "dateformat", depth0.created, "HH:mm, dddd, MMM Do", options));
   if(stack2 || stack2 === 0) { buffer += stack2; }
-  buffer += "\n            ";
-  stack2 = helpers['if'].call(depth0, depth0.saved, {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data});
+  buffer += "\n            </div>\n            <a href=\"#new\" class=\"btn\">Discard</a>\n            <button onClick=\"javascript:console.info('Sending the message');alert('Ta-da!');\" class=\"btn btn-primary\">Send</button>\n        </div>\n        <div class=\"span4 ";
+  stack2 = helpers.unless.call(depth0, depth0.saved, {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data});
   if(stack2 || stack2 === 0) { buffer += stack2; }
-  buffer += "\n        </div>\n        <button onClick=\"javascript:console.info('Sending the message');alert('Ta-da!');\" class=\"btn btn-primary\">Send</button>\n    </div>\n</div>\n";
+  buffer += " saved muted\">Saved <span class=\"savedValue\">";
+  options = {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data};
+  stack2 = ((stack1 = helpers.date_ago),stack1 ? stack1.call(depth0, depth0.saved, options) : helperMissing.call(depth0, "date_ago", depth0.saved, options));
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "</span></div>\n    </div>\n</div>\n";
   return buffer;
   });
 templates['messageGroupList'] = template(function (Handlebars,depth0,helpers,partials,data) {
