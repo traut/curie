@@ -1,0 +1,31 @@
+MIME-Version: 1.0
+Sender: polzunov@gmail.com
+Received: by 10.194.78.165 with HTTP; Wed, 24 Apr 2013 05:46:24 -0700 (PDT)
+In-Reply-To: <CABjC=OvyZGUndcycTsYxLiBXugYpiJYt4Lf0uNQ-p4O=Y3-sRg@mail.gmail.com>
+References: <-7396897477517178863@unknownmsgid>
+	<CABjC=OvyZGUndcycTsYxLiBXugYpiJYt4Lf0uNQ-p4O=Y3-sRg@mail.gmail.com>
+Date: Wed, 24 Apr 2013 14:46:24 +0200
+Delivered-To: polzunov@gmail.com
+X-Google-Sender-Auth: RsDjdnJM9cIJdhGfAV8CSAlwKZU
+Message-ID: <CABjC=OuCw=7jroWHUc-tyW+V8urZs4=m3=3a2BRfh34UWm2=OA@mail.gmail.com>
+Subject: Fwd: Why No One Has Tamed Email
+From: Sergey Polzunov <sergey@polzunov.com>
+To: some@curie.heyheylabs.com
+Content-Type: text/plain; charset=UTF-8
+
+Another test email
+
+Sergey
+
+
+
+---------- Forwarded message ----------
+From: Sergey Polzunov <sergey@polzunov.com>
+Date: Mon, Aug 20, 2012 at 2:16 PM
+Subject: Re: Why No One Has Tamed Email
+To: Alex Zhukov <zhukov.alex@gmail.com>
+
+
+thanks
+
+Sergey

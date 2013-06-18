@@ -1,0 +1,36 @@
+Return-Path: <polzunov@gmail.com>
+X-Original-To: some@curie.heyheylabs.com
+Delivered-To: curie@fomich.heyheylabs.com
+Received: from mail-we0-f179.google.com (mail-we0-f179.google.com [74.125.82.179])
+        by fomich (Postfix) with ESMTPS id 3E77E16601D0
+        for <some@curie.heyheylabs.com>; Mon, 11 Mar 2013 00:07:51 +0100 (CET)
+Received: by mail-we0-f179.google.com with SMTP id p43so2974056wea.10
+        for <some@curie.heyheylabs.com>; Sun, 10 Mar 2013 16:07:51 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20120113;
+        h=x-received:mime-version:sender:from:date:x-google-sender-auth
+         :message-id:subject:to:content-type;
+        bh=7CwcaIIEyyr/6G8dqEENrGjx3OAgQsiK28kBL5aBvtE=;
+        b=S4J46D+vMf+kC9D2CAEl8RiMqwe6fMMPE2fMBXy/+vz+T8vSBP8VzlTpo1prmJ0hLm
+         pC8BOz9tSZMDhMPscSjSNiIFkYuKh0JRDKbmgdUdKeMhCdYNkjDCUn4R+55IUn6ADukK
+         y9VhAW3Q2rd5MqJprDquegkX6sCoa/Fe62JQCtslw5P9uaCaRiaPrDbiBgeE/iGrZjAw
+         CvIOk/3fJhz4bzuviMs0D96uaDaoni2Ej9uAFxljxI2JN5R+2TSIDwEddA7QkG+OfJzl
+         52UAGbPszjlP7eutx9+F3B2ndXiqxbijsZceLL+Tir24Vr/Yytqj7wJJb6I6VvXSAZFy
+         bvEQ==
+X-Received: by 10.194.58.202 with SMTP id t10mr15732372wjq.4.1362956870940;
+ Sun, 10 Mar 2013 16:07:50 -0700 (PDT)
+MIME-Version: 1.0
+Sender: polzunov@gmail.com
+Received: by 10.194.121.5 with HTTP; Sun, 10 Mar 2013 16:07:30 -0700 (PDT)
+From: Sergey Polzunov <sergey@polzunov.com>
+Date: Mon, 11 Mar 2013 00:07:30 +0100
+X-Google-Sender-Auth: OvAPPGxpkqH0dnN_GWWQF3bH_Z8
+Message-ID: <CABjC=OuD7e4mGwokiWtoqYVX_s2KayE7n=vRw2dXrJ9anhJXqA@mail.gmail.com>
+Subject: test email
+To: some@curie.heyheylabs.com
+Content-Type: text/plain; charset=UTF-8
+
+Hey, testing queue
+
+
+Sergey

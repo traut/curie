@@ -1,0 +1,376 @@
+Return-Path: <polzunov+caf_=t=curie.heyheylabs.com@gmail.com>
+X-Original-To: t@curie.heyheylabs.com
+Delivered-To: curie@fomich.heyheylabs.com
+Received: from mail-ob0-f173.google.com (mail-ob0-f173.google.com [209.85.214.173])
+	by fomich (Postfix) with ESMTPS id CB2DD166084E
+	for <t@curie.heyheylabs.com>; Thu,  9 May 2013 21:13:46 +0200 (CEST)
+Received: by mail-ob0-f173.google.com with SMTP id 6so3345034oba.18
+        for <t@curie.heyheylabs.com>; Thu, 09 May 2013 12:13:45 -0700 (PDT)
+X-Received: by 10.60.115.103 with SMTP id jn7mr4954889oeb.136.1368126825461;
+        Thu, 09 May 2013 12:13:45 -0700 (PDT)
+X-Forwarded-To: t@curie.heyheylabs.com
+X-Forwarded-For: polzunov@gmail.com t@curie.heyheylabs.com
+Delivered-To: polzunov@gmail.com
+Received: by 10.182.42.138 with SMTP id o10csp29514obl;
+        Thu, 9 May 2013 12:13:44 -0700 (PDT)
+X-Received: by 10.15.23.69 with SMTP id g45mr32283902eeu.25.1368126821644;
+        Thu, 09 May 2013 12:13:41 -0700 (PDT)
+Received: from mail-ee0-f53.google.com (mail-ee0-f53.google.com [74.125.83.53])
+        by mx.google.com with ESMTPS id u1si6222104eeo.102.2013.05.09.12.13.41
+        for <polzunov@gmail.com>
+        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
+        Thu, 09 May 2013 12:13:41 -0700 (PDT)
+Received-SPF: neutral (google.com: 74.125.83.53 is neither permitted nor denied by best guess record for domain of sergey+caf_=polzunov=gmail.com@polzunov.com) client-ip=74.125.83.53;
+Authentication-Results: mx.google.com;
+       spf=neutral (google.com: 74.125.83.53 is neither permitted nor denied by best guess record for domain of sergey+caf_=polzunov=gmail.com@polzunov.com) smtp.mail=sergey+caf_=polzunov=gmail.com@polzunov.com;
+       dkim=pass header.i=@paypal.nl;
+       dmarc=pass (p=REJECT dis=none) d=paypal.nl
+Received: by mail-ee0-f53.google.com with SMTP id d49so1763357eek.26
+        for <polzunov@gmail.com>; Thu, 09 May 2013 12:13:41 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20120113;
+        h=x-received:x-forwarded-to:x-forwarded-for:delivered-to:x-received
+         :received-spf:dkim-signature:date:message-id:subject
+         :x-maxcode-template:to:from:x-email-type-id:reply-to:x-xpt-xsl-name
+         :content-type:mime-version:x-gm-message-state;
+        bh=CB2h28/UvPgifdfm3xJGC4VfQ3NoGCH9ieYjruVkt/4=;
+        b=KAb2b8SmRaJlbdZHHQ0ap2Wjf7KK4UrFoKqY9YwLfiEoIR80Z6fZt5b6dcau0hj3d+
+         pO3+hRyK5I2OPHVGhqJ2J+TGD28M38stcyeJZVF6ttAtaeRuBVVkEhKV9jko8FOfRLwh
+         jkhfpE30/yVyhR5ENseRsy2W18TbU1AGQS0Tf2Thui5c/pdDnyj2IJNHr24I3c0tIDpZ
+         rPS8p/GG5PxLulq5299D8NXhqGIXm7dOAcUx16WE2zs/1LwASsZh43A22QLhe/hjSJQO
+         yl3+f2Ej2QOnPgoJFD/Dlh/Mrzv0qDUFITMeFsihW+ToIQjrmmzvgUrQdqRNQ186W5rR
+         FHOA==
+X-Received: by 10.15.48.193 with SMTP id h41mr32318958eew.23.1368126821128;
+        Thu, 09 May 2013 12:13:41 -0700 (PDT)
+X-Forwarded-To: polzunov@gmail.com
+X-X-Forwarded-For: sergey@polzunov.com polzunov@gmail.com
+Delivered-To: sergey@polzunov.com
+Received: by 10.223.87.3 with SMTP id u3csp35101fal;
+        Thu, 9 May 2013 12:13:39 -0700 (PDT)
+X-Received: by 10.112.2.166 with SMTP id 6mr6129097lbv.35.1368126818939;
+        Thu, 09 May 2013 12:13:38 -0700 (PDT)
+Received: from mail.webparking.net.ua (mail.webparking.net.ua. [62.149.14.206])
+        by mx.google.com with ESMTP id or8si1617421lbb.253.2013.05.09.12.13.37
+        for <sergey@polzunov.com>;
+        Thu, 09 May 2013 12:13:38 -0700 (PDT)
+Received-SPF: softfail (google.com: domain of transitioning member@paypal.nl does not designate 62.149.14.206 as permitted sender) client-ip=62.149.14.206;
+Received: from mx0.slc.paypal.com (mx1.slc.paypal.com [173.0.84.226])
+	by mail.webparking.net.ua (Postfix) with ESMTP id 939DD48914C
+	for <webmaster@arrr.tv>; Thu,  9 May 2013 22:10:55 +0300 (EEST)
+DKIM-Signature: v=1; a=rsa-sha256; d=paypal.nl; s=pp-dkim1; c=relaxed/relaxed;
+	q=dns/txt; i=@paypal.nl; t=1368126654;
+	h=From:From:Subject:Date:To:MIME-Version:Content-Type;
+	bh=CB2h28/UvPgifdfm3xJGC4VfQ3NoGCH9ieYjruVkt/4=;
+	b=WmXzNZb+GcWurGUd3PkuK76/CZ2+Naxmkq/+epWDg/4/2W/4Vig1L5xDYwZJsqWP
+	kPQdtJrdmI0UiPx1TN1V96dWrckDGGc5Obo7jWCc+WokAH1shlHfZYKXqiX+P/Cd
+	ZVpNBKu0jq4SGF+Nwwwt2RDV1420uBcy3x413GfiYrZpVkHv8OASgsJnS/DBPRCH
+	e8ViW526UIjVynoz4NfDCXy0K2huM9520skpyGIj7hWeM7ljGI3HW3G6HLA/8jmH
+	gqhQ4djNkVXjuTyiQeHgJopMyVhNkBNdXvrxuKpzDzgQGP46AEe3zr54LYZ/2KlH
+	TcwHhMvUYWCZ/1cRJ9EcqQ==;
+Received: (qmail 20087 invoked by uid 993); 9 May 2013 19:10:54 -0000
+Date: Thu, 09 May 2013 12:10:54 -0700
+Message-Id: <1368126654.20087@paypal.com>
+Subject: Notification of Payment Received
+X-MaxCode-Template: email-xclick-payment-notification
+To: "ARRR.tv webservice" <webmaster@arrr.tv>
+From: Oleg Ryazhenov-Siems via PayPal <member@paypal.nl>
+X-Email-Type-Id: PP341
+Reply-To: oryazhenov@yahoo.com
+X-XPT-XSL-Name: email_pimp/NL/en_US/xclick/XClickPaymentNotification.xsl
+Content-Type: multipart/alternative;
+ boundary=--NextPart_048F8BC8A2197DE2036A
+MIME-Version: 1.0
+X-Gm-Message-State: ALoCoQmb1S+a0lHFBC1auHqlX5QVeUKHMl85Lo5gxwqUDPfXa6Ln0c1YekYN1yJHLVTfzuFnRiCP
+
+----NextPart_048F8BC8A2197DE2036A
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=windows-1252
+
+9 May 2013 21:10:34 GMT+02:00 =7C Transaction ID: 6WH313479H190372D
+
+
+Dear ARRR.tv webservice,
+
+You received a payment of =249,00 USD from Oleg Ryazhenov-Siems =
+(oryazhenov=40yahoo.com)
+You can now ship the items. To see all the transaction details, log in to =
+your PayPal account.
+
+It may take a few moments for this transaction to appear in your account.
+
+Seller Protection - Not Eligible
+
+----------------------------------------------------------------
+
+Buyer:
+Oleg Ryazhenov-Siems
+oryazhenov=40yahoo.com
+
+Instructions to merchant:
+The buyer hasn't entered any instructions.
+-----------------------------------
+Purchase Details
+-----------------------------------
+Description: , Abonnement: 6 months
+Unit price: =249,00 USD
+Qty: 1
+Amount: =249,00 USD
+
+Subtotal: =249,00 USD
+Total: 9.00 USD
+
+Payment: 9.00 USD
+Payment sent to: webmaster=40arrr.tv
+
+
+
+
+----------------------------------------------------------------
+
+Questions? Go to the Help Center at: www.paypal.com/nl/help.
+
+Lift your withdrawal and receiving limits. Log in to your PayPal account =
+and click View limits on your Account Overview page.
+
+Please do not reply to this email. This mailbox is not monitored and you =
+will not receive a response. For assistance, log in to your PayPal account =
+and click Help in the top right corner of any PayPal page.
+
+You can receive plain text emails instead of HTML emails. To change your =
+Notifications preferences, log in to your  account, go to your Profile, =
+and click Account settings.
+
+Copyright =A9 1999-2013 PayPal. All rights reserved.
+
+PayPal (Europe) S.=E0 r.l. & Cie, S.C.A.
+Soci=E9t=E9 en Commandite par Actions
+Registered Office: 5th Floor 22-24 Boulevard Royal L-2449, Luxembourg
+RCS Luxembourg B 118 349
+
+PPID PP341=20
+
+----NextPart_048F8BC8A2197DE2036A
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/html; charset=windows-1252
+
+<html><head title=3D=22PayPal=22/><body><div class=3D=22ppmail=22><style =
+type=3D=22text/css=22>
+=09=09=09=09=09=09=09=09body, td =7Bfont-size: 12px;font-family: =
+arial,helvetica,sans-serif;=7D
+                               .itemtbl =7Bmargin-top:20px;=7D
+=09=09=09=09=09=09      .itemtbl tr td =7Bpadding: 10px;color: =23333;=7D
+=09=09=09=09    =09=09=09tr.itemheading td=7Bborder:1px solid =
+=23ccc;border-right:none;border-left:none;padding:5px 10px 5px 10px =
+=21important;color: =23333333 =21important;=7D
+=09=09=09=09=09=09=09=09.padtoptwty =7Bpadding-top:20px =21important;=7D
+=09=09=09=09=09=09=09=09tr.last td =7Bborder-bottom:none;=7D
+=09=09=09=09=09=09=09=09tr.itemrepeat td =7Bborder-bottom:1px dashed =
+=23ccc;=7D
+=09=09=09=09=09=09=09=09 .itemtbl =7Bmargin-top:20px;=7D
+=09=09=09=09=09=09=09    .itemtbl tr td =7Bpadding: 10px;color: =
+=23333;=7D=09
+=09=09=09=09=09=09=09    .content =7Bmargin-top: 30px;color:=23333 =
+=21important; =7D
+=09=09=09=09=09=09=09=09.mainheading=7Bcolor:=23333333;font-weight:bold;=7D
+=09=09=09=09      =09=09=09.confirm =7Bcolor: =234c8f3a;=7D
+=09=09=09=09=09=09=09=09.greeting =7Bcolor:=23333333 =
+=21important;font-weight:bold;=7D
+=09=09=09=09=09=09=09=09.status =
+=7Bfont-size:14px;color:=23C88039;font-weight:bold;text-decoration:none;=7D=
+=09
+=09=09=09=09=09=09=09=09.strong =7Bfont-weight: bold;=7D
+=09=09=09=09=09=09=09=09.valign =7Bvertical-align: middle;=7D
+=09=09=09=09=09=09=09=09.purchasebox =7Bwidth: 598px;=7D
+=09=09=09=09=09=09=09=09.purchasetitle =7Bborder-bottom:1px solid =
+=23ccc;padding:5px 0 5px 10px;=7D
+=09=09=09=09=09=09=09=09.purchaseboxmul =7Bborder:1px solid =
+=23ccc;margin:10px 0 10px 0;padding-bottom:10px;=7D
+=09=09=09=09=09=09=09=09.purchasetotal =7Bborder-top: 1px solid =
+=23ccc;border-bottom: 1px solid =23ccc;=7D
+=09=09=09=09=09=09=09=09.purchasetotal =7Bmargin: 7px 0 20px 0;=7D
+=09=09=09=09=09=09=09=09.purchasetotal tr td=7Bpadding-bottom:20px;=7D
+=09=09=09=09=09=09=09=09.purchasetotalmul =7Bborder-top: 1px solid =
+=23ccc;width : 580px;=7D
+=09=09=09=09=09=09=09=09.purchasetotalmul img , .purchasetotal img =
+=7Bmargin-top: 20px;=7D
+=09=09=09=09=09=09=09=09.purchasedetails tr =
+td=7Bcolor:=23333;padding-top:15px;=7D
+=09=09=09=09=09=09=09=09.purchasedetailsmul tr =
+td=7Bcolor:=23333;padding:20px 0 0 10px;=7D
+=09=09=09=09=09=09=09    .headinfo =7Bcolor:=23333333;=7D
+=09=09=09=09=09=09=09     hr =7Bcolor: =23dedede =21important;height:1px;=7D
+=09=09=09=09=09=09=09     .totaltbl =7Bmargin-top: 20px; width: 100%;=7D
+=09=09=09=09=09=09=09     .totaltbl tr td =7Btext-align:right;color: =
+=23333;padding:0 5px 0 0;width: 90px;=7D
+=09=09=09=09=09=09=09    .totaltblmlt =7Bmargin: 10px 0 0 10px;=7D
+=09=09=09=09=09=09=09    .totaltblmlt tr td =7Btext-align:right;color: =
+=23333;width: 85px;=7D
+=09=09=09=09=09=09=09    .totaltblmlt tr td.subhd , .totaltbl tr td.subhd =
+=7Bwidth: 390px;padding-right: 10px;text-align:right;=7D
+=09=09=09=09=09=09=09     .clr =7Bclear:both;=7D
+=09=09=09=09=09=09=09     .airtbl =7Bmargin-top : 30px;width:320px;=7D
+=09=09=09=09=09=09=09    .emphasis =7Bcolor:=23333333 =
+=21important;font-weight:bold;=7D
+=09=09=09=09=09=09=09     .padleftten =7Bpadding-left: 10px;=7D
+=09=09=09=09=09=09=09     .option =7Bcolor: =23aaaaaa;=7D
+=09=09=09=09=09=09=09     .fmf =7Bcolor:red;=7D
+=09=09=09=09=09=09=09      .airtbl tr td=7Bpadding-right: 15px;color: =
+=23757575;padding-bottom: 5px;=7D
+=09=09=09=09=09=09=09      .tblfooter =7Bcolor: =
+=23757575;padding-left:10px;=7D
+=09=09=09=09=09=09=09      .help=7Bmargin-right: 5px;vertical-align: =
+middle;=7D
+=09=09=09=09=09=09=09      .footercontainer=7Bwidth:400px;=7D
+=09=09=09=09=09=09=09      .exchange=7Bwidth:100%;=7D
+=09=09=09=09=09=09=09     =20
+/*For 26568 spec */
+=2EheaderDetails =7Bcolor:=23000000 =21important;font-weight:bold;=7D
+=2Edescription =7Bcolor:=23333333;=7D
+=2EtopBorder=7Bborder-top:1px solid =23CCCCCC;=7D
+=2EbottomBorder=7Bborder-bottom:1px solid =23CCCCCC;=7D
+=2EbottomMargin=7Bmargin:7px 0 20px;=7D
+=2EredFmf=7Bcolor:=23ff0000;=7D
+=2EpadBottom =7Bpadding-bottom:20px =21important;=7D
+=2EcontentNew =7Bcolor:=23666666;=7D
+HR.dotted =7Bwidth: 100%; margin-top: 0px; margin-bottom: 0px; =
+border-left: =23fff; border-right: =23fff; border-top: =23fff; =
+border-bottom: 2px dotted =23ccc;=7D
+=2EuseNextBox =7B
+background:=23FFFFFF =
+url(http://www.paypal.com/en_US/i/scr/scr_table_bg_1x70.gif) repeat-x =
+scroll left bottom;
+border:1px solid =23CCCCCC;
+border-collapse:separate;
+padding:10px 10 20px 10px;
+width:530px;
+margin-left:20px;
+margin-top:20px;
+color:=23333333;
+font-family:arial,helvetica,sans-serif;
+font-size:11px;
+=7D
+=2EboxHead=7Bwidth:530px;padding-bottom:10px =
+=21important;border-bottom:1px solid =23CCCCCC;text-align:left;=7D
+=2EboxHeadingTxt=7Bfont-size:12px;font-weight:bold;=7D
+=2EpadBoxTop =7Bpadding-top:10px =21important;=7D
+=2ESignupLink=7Bcolor:=23084482 =21important;=7D
+=09=09=09=09=09=09=09     </style>
+
+<table align=3D=22center=22 border=3D=220=22 cellpadding=3D=220=22 =
+cellspacing=3D=220=22 width=3D=22100%=22><tr><td/></tr></table><table =
+align=3D=22center=22 border=3D=220=22 cellpadding=3D=220=22 =
+cellspacing=3D=220=22 width=3D=22600=22><tr valign=3D=22top=22><td =
+width=3D=22100%=22><table align=3D=22center=22 border=3D=220=22 =
+cellpadding=3D=220=22 cellspacing=3D=220=22 style=3D=22color:=23333333 =
+=21important;font-family: arial,helvetica,sans-serif;font-size:12px;=22 =
+width=3D=22600=22><tr valign=3D=22top=22><td><img =
+src=3D=22http://images.paypal.com/en_US/i/logo/paypal_logo.gif=22 =
+border=3D=220=22 alt=3D=22PayPal logo=22/></td><td valign=3D=22middle=22 =
+align=3D=22right=22>9 May 2013 21:10:34 GMT+02:00<br/>Transaction ID: <a =
+target=3D=22new=22 =
+href=3D=22https://www.paypal.com/nl/cgi-bin/webscr?cmd=3D_view-a-trans&amp;=
+id=3D6WH313479H190372D=22>6WH313479H190372D</a></td></tr></table><div =
+style=3D=22margin-top: 30px;color:=23333 =21important;font-family: =
+arial,helvetica,sans-serif;font-size:12px;=22><span =
+style=3D=22color:=23333333 =21important;font-weight:bold;font-family: =
+arial,helvetica,sans-serif;=22>Dear ARRR.tv =
+webservice,</span><br/><br/><span =
+style=3D=22font-size:14px;color:=23C88039;font-weight:bold;text-decoration:=
+none;=22>You received a payment of =249,00 USD from Oleg =
+Ryazhenov-Siems</span><span =
+style=3D=22font-size:14px;color:=23C88039;font-weight:bold;text-decoration:=
+none;=22> (oryazhenov=40yahoo.com)</span><br/>You can now ship the items. =
+To see all the transaction details, log in to your PayPal =
+account.<br/><br/>It may take a few moments for this transaction to appear =
+in your account.<br/><br/><span =
+style=3D=22font-weight:bold;color:=23333333;=22>Seller Protection - =
+</span><span style=3D=22color: =234c8f3a;=22>Not Eligible</span><br/><div =
+style=3D=22margin-top:5px;=22><hr size=3D=221=22/></div><table =
+border=3D=220=22 cellpadding=3D=220=22 cellspacing=3D=220=22 =
+style=3D=22color:=23333 =21important;font-family: =
+arial,helvetica,sans-serif;font-size:12px; margin-bottom:20px;=22 =
+width=3D=2298%=22 align=3D=22left=22><tr><td =
+style=3D=22padding-top:5px;=22 valign=3D=22top=22 width=3D=2250%=22 =
+align=3D=22left=22><span =
+style=3D=22color:=23333333;font-weight:bold;=22>Buyer</span><br/>Oleg =
+Ryazhenov-Siems<br/>oryazhenov=40yahoo.com<br/></td><td =
+style=3D=22padding-top:5px;=22 valign=3D=22top=22><span =
+style=3D=22color:=23333333;font-weight:bold;=22>Instructions to =
+merchant</span><br/>The buyer hasn't entered any =
+instructions.</td></tr><tr><td style=3D=22padding-top:10px;=22 =
+valign=3D=22top=22 width=3D=2240%=22 align=3D=22left=22/><td =
+style=3D=22padding-top:10px;=22 valign=3D=22top=22/></tr></table><table =
+align=3D=22center=22 border=3D=220=22 cellpadding=3D=220=22 =
+cellspacing=3D=220=22 style=3D=22clear:both;color:=23333 =
+=21important;font-family: =
+arial,helvetica,sans-serif;font-size:12px;margin-top:20px;=22 =
+width=3D=22598=22><tr><td style=3D=22border:1px solid =
+=23ccc;border-right:none;border-left:none;padding:5px 10px 5px 10px =
+=21important;color: =23333333 =21important;=22 width=3D=22330=22 =
+align=3D=22left=22>Description</td><td style=3D=22border:1px solid =
+=23ccc;border-right:none;border-left:none;padding:5px 10px 5px 10px =
+=21important;color: =23333333 =21important;=22 width=3D=2275=22 =
+align=3D=22right=22>Unit price</td><td style=3D=22border:1px solid =
+=23ccc;border-right:none;border-left:none;padding:5px 10px 5px 10px =
+=21important;color: =23333333 =21important;=22 width=3D=2275=22 =
+align=3D=22right=22>Qty</td><td style=3D=22border:1px solid =
+=23ccc;border-right:none;border-left:none;padding:5px 10px 5px 10px =
+=21important;color: =23333333 =21important;=22 width=3D=2280=22 =
+align=3D=22right=22>Amount</td></tr><tr><td style=3D=22padding:10px;=22 =
+width=3D=22330=22 align=3D=22left=22><br/> , Abonnement: 6 =
+months<br/></td><td style=3D=22padding:10px;=22 width=3D=2275=22 =
+align=3D=22right=22>=249,00 USD</td><td style=3D=22padding:10px;=22 =
+width=3D=2275=22 align=3D=22right=22>1</td><td style=3D=22padding:10px;=22 =
+width=3D=2280=22 align=3D=22right=22>=249,00 USD</td></tr></table><table =
+align=3D=22center=22 border=3D=220=22 cellpadding=3D=220=22 =
+cellspacing=3D=220=22 style=3D=22border-top: 1px solid =
+=23ccc;border-bottom: 1px solid =23ccc;color:=23333 =
+=21important;font-family: =
+arial,helvetica,sans-serif;font-size:12px;margin-bottom:10px;=22 =
+width=3D=22595=22><tr><td><table border=3D=220=22 cellpadding=3D=220=22 =
+cellspacing=3D=220=22 style=3D=22color:=23333 =21important;font-family: =
+arial,helvetica,sans-serif;font-size:12px;margin-top: 10px;=22 =
+align=3D=22right=22><tr><td style=3D=22width:390px;text-align:right; =
+padding:0 10px 0 0;=22>Subtotal</td><td =
+style=3D=22width:90px;text-align:right; padding:0 5px 0 0;=22>=249,00 =
+USD</td></tr><tr><td style=3D=22width:390px;text-align:right; padding:0 =
+10px 0 0;=22><span style=3D=22color:=23333333 =
+=21important;font-weight:bold;=22>Total</span></td><td =
+style=3D=22width:90px;text-align:right; padding:0 5px 0 0;=22>=249,00 =
+USD</td></tr><tr><td style=3D=22width:390px;text-align:right; padding:20px =
+10px 0 0;=22><span style=3D=22color:=23333333 =
+=21important;font-weight:bold;=22>Payment</span></td><td =
+style=3D=22width:90px;text-align:right; padding:20px 5px 0 0;=22>=249,00 =
+USD</td></tr><tr><td style=3D=22width:390px;text-align:right; padding:0 =
+10px 10px 0;=22>Payment sent to webmaster=40arrr.tv</td><td =
+style=3D=22width:90px;text-align:right; padding:20px 5px 0 =
+0;=22/></tr></table></td></tr></table><br/><br/><img =
+src=3D=22http://images.paypal.com/en_US/i/icon/icon_help_16x16.gif=22 =
+border=3D=220=22 style=3D=22margin-right: 5px;vertical-align: middle;=22 =
+alt=3D=22=22/>Questions? Go to the Help Center at: =
+www.paypal.com/nl/help.<br/><br/>Lift your withdrawal and receiving =
+limits. Log in to your PayPal account and click <span =
+class=3D=22strong=22>View limits</span> on your Account Overview =
+page.<br/><br/><span style=3D=22font-size:11px;color:=23333;=22>Please do =
+not reply to this email. This mailbox is not monitored and you will not =
+receive a response. For assistance, log in to your PayPal account and =
+click <strong>Help</strong> in the top right corner of any PayPal =
+page.</span><br/><br/><span style=3D=22font-size:11px;color:=23333;=22>You =
+can receive plain text emails instead of HTML emails. To change your =
+Notifications preferences, log in to your  account, go to your Profile, =
+and click <strong>Account settings</strong>.</span></div><br/><br/><span =
+class=3D=22xptFooter=22>Copyright =A9 1999-2013 PayPal. All rights =
+reserved.<br/><br/>PayPal (Europe) S.=E0 r.l. &amp; Cie, =
+S.C.A.<br/>Soci=E9t=E9 en Commandite par Actions<br/>Registered Office: =
+5th Floor 22-24 Boulevard Royal L-2449, Luxembourg<br/>RCS Luxembourg B =
+118 349</span><br/><br/><span style=3D=22color: =23333333;font-family: =
+arial,helvetica,sans-serif;font-size:11px;=22><span class=3D=22xptFooter =
+ppid=22>PayPal Email ID PP341</span></span><img height=3D=221=22 =
+width=3D=221=22 =
+src=3D=22https://paypal.112.2o7.net/b/ss/paypalglobal/1/H.22--NS/1629484171=
+?c6=3D6U122708CG939542L&amp;v0=3DPP341_0_&amp;pe=3Dlnk_o&amp;pev1=3Demail&a=
+mp;pev2=3DD=3Dv0&amp;events=3DscOpen=22 border=3D=220=22 =
+alt=3D=22=22/></td></tr></table></div></body></html>=
+
+----NextPart_048F8BC8A2197DE2036A--
+
