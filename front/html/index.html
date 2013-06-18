@@ -67,13 +67,13 @@
 
 
     <div class="container-fluid app">
-        <div class="row-fluid">
+        <div class="row-fluid mainBlock hide">
             <div class="span3">
                 <div class="sidebar-nav sidebar-nav-fixed sidebarNav">
                     <div id="packBlocks">
                     </div>
                     <div class="packs" style="padding:10px 0px;">
-                        <label class="nav-header">predefined searches</label>
+                        <label class="nav-header">predefined</label>
                         <ul class="nav nav-list">
                             <li><a href="#search/K3JlY2VpdmVkOltOT1cvREFZIFRPIE5PVy9EQVkrMURBWV0%3D">today</a></li>
                             <li><a href="#search/K3JlY2VpdmVkOltOT1cvREFZLTFEQVkgVE8gTk9XL0RBWV0%3D">yesterday</a></li>
@@ -104,42 +104,42 @@
 
                 var PERIODIC_FETCH = 0;//20 * 1000;
                 var RECONNECT_TIMEOUT_START = 100;
+                var reconnectInterval = RECONNECT_TIMEOUT_START;
 
                 function dummy() {};
 
-                function showAlert(msg) {
+                function showAlert(msg, reason) {
                     $("#errorAlert").html(msg).show();
+                    console.error(reason);
                 }
 
                 function hideAlert() {
                     $("#errorAlert").html("").hide();
                 }
 
-                var reconnectInterval = RECONNECT_TIMEOUT_START;
+                function createDataConnection() {
 
-                function createConnection(options) {
+                    stateModel.trigger("login-success");
 
-                    var email = options.email || null,
-                        password = options.password || null,
-                        channel = options.channel || new jsSHA(email, "TEXT").getHash("SHA-512", "HEX");
+                    var channel = window.readCookie("curie.channel");
+                    if (!channel) {
+                        console.error("No channel specified");
+                        return;
+                    }
+
+                    console.info("Creating data connection to channel=" + channel);
 
                     var initialData = {
                         secure: true,
                         port: 443,
                         'force new connection': true
                     }
-                    if (email && password) {
-                        initialData.query = "email=" + email + "&password=" + password;
-                    }
 
                     var socket = window.curie.socket = io.connect('/stream/' + channel, initialData);
 
-                    socket.on('error', function() {
-                        showAlert("Socket error");
-                        stateModel.trigger("logout");
-                    });
-                    socket.on('session-id', function(sessionId) {
-                        setCookie("curie.session", sessionId);
+                    socket.on('error', function(reason) {
+                        //showAlert("Socket error", reason);
+                        stateModel.trigger("login-fail");
                     });
                     socket.on('connect', function() {
                         reconnectInterval = RECONNECT_TIMEOUT_START;
@@ -147,14 +147,15 @@
 
                         console.info("Connection to " + channel + " created");
 
-                        stateModel.trigger("login", email, channel);
-
                         //FIXME: move to controller
                         initDataLoad();
                     });
-                    socket.on("disconnect", function() {
-                        showAlert("Disconnected");
-                        stateModel.trigger("disconnected");
+                    socket.on("disconnect", function(reason) {
+                        showAlert("Disconnected", reason);
+                        setTimeout(function() {
+                            console.info("reconnecting");
+                            socket.socket.connect();
+                        }, (reconnectInterval *= 2)); 
                     });
                 }
 
@@ -195,14 +196,12 @@
         <script>
 
             function reconnect() {
-                if (window.readCookie("curie.stream")) {
-                    console.info("Stream exists! " + window.readCookie("curie.stream"));
-                    createConnection({
-                        channel : window.readCookie("curie.stream"),
-                        email : window.readCookie("curie.account"),
-                    });
+                var channel = window.readCookie("curie.channel");
+                if (channel) {
+                    console.info("Stream exists! " + channel);
+                    createDataConnection();
                 } else {
-                    stateModel.trigger("logout");
+                    stateModel.trigger("login-show-popup");
                 }
             }
 

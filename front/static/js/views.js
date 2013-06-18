@@ -83,7 +83,7 @@ var AppView = Backbone.View.extend({
     },
     initialize : function() {
         stateModel.on("fetchFinished", this.updateLastFetchTime, this);
-        stateModel.on("login", this.updateAccountInfo, this);
+        stateModel.on("login-success", this.updateAccountInfo, this);
 
         stateModel.on("showSearch", this.showSearch, this);
         stateModel.on("hideSearch", this.hideSearch, this);

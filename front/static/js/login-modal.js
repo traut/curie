@@ -1,3 +1,19 @@
+
+function auth(email, password) {
+    $.post("/auth", {
+        login : email,
+        password : password
+    }, function(response) {
+        console.info(response);
+        if (response.status == 'error') {
+            console.error("Can't authenthicate: " + response.message);
+            stateModel.trigger("login-fail");
+            return;
+        }
+        createDataConnection();
+    });
+}
+
 LoginModal = function() {
 
     var modalObj = $("#loginModal");
@@ -8,7 +24,25 @@ LoginModal = function() {
 
     var modalLoader = "#modalLoader";
 
-    var modal = {
+
+    var controller = {};
+
+    stateModel.on("login-fail", function() {
+        controller.shake();
+    });
+
+    stateModel.on("login-success", function() {
+        console.info("LOGIN SUCCESS");
+        $(".mainBlock", ".app").show();
+        controller.hide();
+    });
+
+    stateModel.on("login-show-popup", function() {
+        controller.show();
+    });
+
+
+    $.extend(controller, {
         create : function () {
             modalObj.html(Handlebars.templates.loginModal());
 
@@ -27,18 +61,12 @@ LoginModal = function() {
                     return false;
                 }
 
-                stateModel.once("disconnected", function() {
-                    modal.shake();
-                });
+                auth(email, password);
 
-                createConnection({
-                    email : email,
-                    password : password
-                });
                 return false;
             });
             modalObj.modal({show : false});
-            return modal;
+            return controller;
         },
         show : function () {
 
@@ -54,11 +82,12 @@ LoginModal = function() {
             modalObj.modal('hide');
             $(":input", modalObj).removeAttr("disabled");
             $(modalLoader, modalObj).hide();
+            console.error("should be hided");
         },
         shake : function () {
-            modal.show();
+            controller.show();
             modalObj.shake();
         }
-    }
-    return modal;
+    });
+    return controller;
 }

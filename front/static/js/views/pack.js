@@ -4,6 +4,8 @@ var PACK_STYLES = {
     TILES : "tiles"
 };
 
+var groups = [];
+
 var PackView = Backbone.View.extend({
     initialize : function() {
 
@@ -88,6 +90,9 @@ var PackView = Backbone.View.extend({
 
     changePackStyle : function(newStyle) {
         if (newStyle != this.activeStyle && stateModel.get("activePackName") == this.model.get("name")) {
+
+            this.model.groups.sort();
+
             this.activeStyle = newStyle;
             this.insertElement();
             this.render();

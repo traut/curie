@@ -1,16 +1,21 @@
 var Draft = Backbone.Model.extend({
     defaults: {
         id : null,
-        to_name : null,
-        to_email : null,
-        from_name : null,
-        from_email : null,
+
+        from : [],
+        to : [],
+        cc : [],
+        bcc : [],
+
         subject : null,
         body : null,
+        in_reply_to : null,
 
         // dates
         created : null,
         saved : null,
+
+        attachment : []
     },
     urlRoot : "/draft",
 
@@ -123,7 +128,7 @@ var Groups = Backbone.Collection.extend({
     initialize: function() {
     },
     comparator : function(group) {
-        return - group.get("size"); // biggest goes first
+        return - group.get("messages").at(0).get("received"); // newest goes first
     }
 });
 

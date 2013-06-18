@@ -5,39 +5,9 @@
 
    <field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
 
-   <field name="received" type="date" indexed="true" stored="true" required="true"/>
-   <field name="indexed" type="date" indexed="true" stored="true" default="NOW" multiValued="false"/>
+   <field name="updated" type="date" indexed="true" stored="true" default="NOW" required="true"/>
 
-   <field name="header_message_id" type="string" indexed="true" stored="true"/>
-   <field name="header_in_reply_to" type="string" indexed="true" stored="true"/>
-   <field name="header_references" type="string" indexed="true" stored="true"/>
-
-   <field name="header_keywords" type="text_general" indexed="true" stored="true"/>
-
-   <field name="header_sender" type="string_email" indexed="true" stored="true"/>
-
-   <field name="header_from_name" type="text_ws_lower" indexed="true" stored="true" multiValued="true" />
-   <field name="header_from_email" type="string_email" indexed="true" stored="true" />
-   <field name="header_from_email_raw" type="text_ws_lower" indexed="true"/>
-
-   <field name="header_to_name" type="text_ws_lower" indexed="true" stored="true" multiValued="true" />
-   <field name="header_to_email" type="string_email" indexed="true" stored="true" multiValued="true" />
-
-   <field name="header_cc_name" type="text_ws_lower" indexed="true" stored="false" multiValued="true" />
-   <field name="header_cc_email" type="string_email" indexed="true" stored="false" multiValued="true" />
-
-   <field name="header_bcc_name" type="text_ws_lower" indexed="true" stored="false" multiValued="true" />
-   <field name="header_bcc_email" type="string_email" indexed="true" stored="false" multiValued="true" />
-
-   <field name="header_orig_date" type="date" indexed="true" stored="true" />
-
-   <field name="header_subject" type="text_general" indexed="true" stored="true" />
-
-   <field name="body" type="html_text" indexed="true" stored="false" multiValued="true"/>
-
-   <field name="labels" type="string" indexed="true" stored="true" multiValued="true"/>
-
-   <field name="unread" type="boolean" indexed="true" stored="true" default="true"/>
+   <field name="child" type="string" indexed="true" stored="true" multiValued="true"/>
 
    <field name="_version_" type="long" indexed="true" stored="true"/>
    
@@ -48,8 +18,7 @@
   <!-- copyField commands copy one field to another at the time a document
         is added to the index.  It's used either to index the same field differently,
         or to add multiple fields to the same field for easier/faster searching.  -->
-   <copyField source="header_from_email" dest="header_from_email_raw"/>
- 
+
   <types>
 
     <fieldType name="boolean" class="solr.BoolField" sortMissingLast="true"/>
@@ -86,6 +55,20 @@
       </analyzer>
     </fieldType>
 
+    <fieldType name="text_ws" class="solr.TextField" positionIncrementGap="100">
+        <analyzer>
+            <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        </analyzer>
+    </fieldType>
+
+    <fieldType name="text_commaDelimited_lower" class="solr.TextField" positionIncrementGap="100">
+        <analyzer>
+            <filter class="solr.LowerCaseFilterFactory"/>
+            <tokenizer class="solr.PatternTokenizerFactory" pattern=",\s*" />
+        </analyzer>
+    </fieldType>
+
+
     <fieldType name="string" class="solr.StrField" sortMissingLast="true" />
 
 
@@ -114,13 +97,6 @@
     <fieldType name="date" class="solr.TrieDateField" precisionStep="0" positionIncrementGap="0"/>
 
     <fieldType name="long" class="solr.TrieLongField" precisionStep="0" positionIncrementGap="0"/>
-
-    <!-- A text field that only splits on whitespace for exact matching of words -->
-    <fieldType name="text_ws" class="solr.TextField" positionIncrementGap="100">
-      <analyzer>
-        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-      </analyzer>
-    </fieldType>
 
     <!-- A general text field that has reasonable, generic cross-language defaults: it tokenizes with StandardTokenizer,
 	 removes stop words from case-insensitive "stopwords.txt" (empty by default), and down cases.  At query time only, it

@@ -11,6 +11,7 @@ fi
 
 FILEPATH=~/storage/${ID:0:2}/${ID:2:2}/${ID:4:2}/$ID
 
+echo $FILEPATH
 
 if [ "$FORMAT" = "json" ]
 then

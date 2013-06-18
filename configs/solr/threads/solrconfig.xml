@@ -770,7 +770,7 @@
      <lst name="defaults">
        <str name="echoParams">explicit</str>
        <int name="rows">10</int>
-       <str name="df">body</str>
+       <str name="df">child</str>
      </lst>
     <!--
        <lst name="appends">

@@ -59,7 +59,7 @@ function Controller() {
 
         var nextIndex = null;
         if (movement == "below") {
-            nextIndex = (currentIndex == null) ? 1 : ((currentIndex + 1) % flatPacks.length); // change to 0 (if null) if "change active on move" is disabled
+            nextIndex = (currentIndex == null) ? 0 : ((currentIndex + 1) % flatPacks.length); // change to 0 (if null) if "change active on move" is disabled
         } else if (movement == "above") {
             nextIndex = ((currentIndex) ? currentIndex : flatPacks.length) - 1;
         }
@@ -111,30 +111,9 @@ function Controller() {
 
     }, this);
 
-    stateModel.on("login", function(email, channel) {
-        loginPopup.hide();
-
-        setCookie("curie.stream", channel);
-        setCookie("curie.account", email);
-    });
-
     stateModel.on("logout", function() {
-
-        delCookie("curie.session");
-        delCookie("curie.stream");
-        delCookie("curie.account");
-
-        window.curie.socket && window.curie.socket.disconnect();
-        window.curie.router.navigate("#");
-
-        //FIXME: add all entities to entityMap and delete them there
-        serverPacks.models.map(function(pack) {
-            pack.messages.remove(pack.messages.models)
-            pack.groups.remove(pack.groups.models)
-        });
-        serverPacks.remove(serverPacks.models);
-
-        loginPopup.show();
+        //delCookie("curie.channel");
+        window.location = "/logout";
     });
 
     new AppView();

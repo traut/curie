@@ -2,118 +2,165 @@ var http = require('http'),
     socketio = require('socket.io'),
     fs = require('fs'),
     crypto = require('crypto'),
-    redis = require('redis'),
-    winston = require('winston'),
-    cookie = require('cookie');
+    cookie = require('cookie'),
+    express = require('express'),
+    RedisStore = require('connect-redis')(express),
+    parseSignedCookie = require('express/node_modules/connect').utils.parseSignedCookie,
 
-var store = require("./store.js");
-var feed = require("./feed.js");
+    settings = require('./settings'),
+    utils = require('./utils'),
+    store = require("./store.js"),
+    feed = require("./feed.js");
 
-var server = http.createServer(function(req, res) {
-    res.writeHead(200, { 'Content-type': 'text/html'});
-    res.end(fs.readFileSync(__dirname + '/html/index.html'));
-}).listen(8080, function() {
-    winston.info('Listening at: http://localhost:8080');
+var log = utils.getLogger("runner");
+
+
+var sessionStore = new RedisStore({
+    host : '127.0.0.1',
+    port : 6379,
+    db : 'curie.session'
 });
 
+var app = express();
+
+app.configure(function () {
+    app.use(express.cookieParser(settings.SECRET));
+    app.use(express.session({
+        secret : settings.SECRET,
+        key : settings.COOKIE_NAME_SESSION,
+        store : sessionStore,
+        cookie : {
+            maxAge: settings.COOKIE_EXIPE_IN,
+            httpOnly : true,
+        }
+    }));
+    app.use(express.bodyParser());
+    //app.use(express.logger());
+});
+
+app.get('/', function (req, res) {
+    res.writeHead(200, { 'Content-type': 'text/html'});
+    res.end(fs.readFileSync(__dirname + '/html/index.html'));
+});
+
+app.post('/auth', function (req, res) {
+    if (!req.body) {
+        res.send({status : 'error', message : "No login/password"});
+        return;
+    }
+    var login = req.body.login;
+    var password = req.body.password;
+
+    log.info("Login for user=" + login + ", pass=" + password);
+    if (settings.ACCOUNTS[login] == password) {
+
+        var channel = crypto.createHash('sha512').update(login).digest('hex');
+
+        req.session.user = {
+            email : login,
+            channel : channel
+        };
+        req.session.save();
+        res.cookie("curie.channel", channel, {httpOnly: false});
+        res.send({status : 'ok'});
+    } else {
+        res.send({status : 'error', message : "Not valid"});
+    }
+});
+
+app.get('/logout', function (req, res) {
+    log.info("Calling logout for " + req.sessionID);
+    req.session.destroy();
+    res.redirect('/');
+});
+ 
+var server = http.createServer(app);
 var io = socketio.listen(server);
 io.set('log level', 1); // info
 
-var newMessagesSocketName = "new-messages";
-
-var expectedEmails = [
-    "some@curie.heyheylabs.com",
-    "t@curie.heyheylabs.com"
-];
-
-var expectedPassword = "p";
-
-var sessions = {};
-
+server.listen(8080, function() {
+    log.info('Listening at: http://localhost:8080');
+});
 
 io.configure(function (){
     io.set('authorization', function (handshakeData, callback) {
 
-        var cookies = cookie.parse(handshakeData.headers.cookie || "");
-        if (cookies['curie.stream'] && cookies['curie.session']) {
-            if (sessions[cookies['curie.session']]) {
-                var sessionId = cookies['curie.session'];
-                winston.info("Session " + sessionId + " authorized");
+        log.info("Authorization request", handshakeData, {});
 
-                handshakeData.session = sessions[sessionId];
-                callback(null, true);
+        handshakeData.cookies = cookie.parse(handshakeData.headers.cookie || "");
+
+        var sessionID = handshakeData.cookies['curie.sid'];
+        console.info(handshakeData.cookies);
+        if (!sessionID) {
+            callback("No session configured", false);
+            return
+        }
+        var sessionIDRaw = parseSignedCookie(sessionID, settings.SECRET);
+        log.info("Auth request with session=" + sessionIDRaw);
+
+        sessionStore.load(sessionIDRaw, function(err, session) {
+
+            if (err || !session) {
+                log.warn("No session found for sessionIDRaw=" + sessionIDRaw);
+                callback(null, false);
                 return;
             }
-        }
 
-        var email = handshakeData.query.email;
-        var pass = handshakeData.query.password;
+            if (!session.user) {
+                log.warn("No user for sessionIDRaw=" + sessionIDRaw);
+                session.destroy();
+                callback(null, false);
+                return;
+            }
 
-        console.info(email + " " + pass);
+            handshakeData.session = session;
 
-        if (expectedEmails.indexOf(email) == -1 && pass != expectedPassword) {
-            callback(null, false);
-            return;
-        }
+            log.info("User " + session.user.email + " authorized");
 
-        var sessionId = "session" + (Math.random() * 10000);
-        sessions[sessionId] = handshakeData.session = {
-            email : email,
-            id : sessionId
-        };
+            var channel = session.user.channel;
+            var channelKey = "channel-" + channel;
+            var channelNamespace = "/stream/" + channel;
 
-        var channel = crypto.createHash('sha512').update(email).digest('hex');
-        var channelKey = "channel-" + channel;
-        var channelNamespace = "/stream/" + channel;
+            if (!io.namespaces[channelNamespace]) {
+                log.info("Creating channel '" + channel + "'");
 
-        winston.info("User " + email + " authorized");
+                io.of("/stream/" + channel).on('connection', function(socket) {
+                    log.info("Connection created " + socket.id);
 
-        if (!io.namespaces[channelNamespace]) {
-            winston.info("Creating channel '" + channel + "'");
-
-            io.of("/stream/" + channel).on('connection', function(socket) {
-                winston.info("Connection created " + socket.id);
-
-                socket.emit("session-id", socket.handshake.session.id);
-
-                socket.redis = redis.createClient();
-                socket.redis.incr(channelKey);
-
-                socket.on('create', function(data) {
-                    winston.info("create", data);
-                    store.create(socket, data.cast, data.item);
-                });
-                socket.on('read', function(data) {
-                    winston.info("read", data);
-                    store.read(socket, data.cast, data.ctx);
-                });  
-                socket.on('update', function(data) {
-                    winston.info("update", data);
-                    store.update(socket, data.cast, data.item);
-                }); 
-                socket.on('patch', function(data) {
-                    store.patch(socket, data.cast, data.changed);
-                }); 
-                socket.on('delete', function(data) {
-                    winston.info("delete", data);
-                    store.destroy(socket, data.cast);       
-                });
-                socket.on("disconnect", function() {
-                    winston.info("Disconnect received for " + channel);
-                    socket.redis.decr(channelKey, function(err, left) {
-                        winston.info(left + " listeners on " + channel);
-                        if (left == 0) {
-                            socket.redis.del(channelKey);
-                            delete io.namespaces[channelNamespace];
-                            winston.info("Channel destroyed");
-                        } 
+                    socket.on('create', function(data) {
+                        log.log("info", "create %j", data, {});
+                        store.create(socket, data.cast, data.item);
                     });
-                });
+                    socket.on('read', function(data) {
+                        session.touch();
+                        log.log("info", "read %j", data, {});
+                        store.read(socket, data.cast, data.ctx);
+                    });  
+                    socket.on('update', function(data) {
+                        log.log("info", "update %j", data, {});
+                        store.update(socket, data.cast, data.item);
+                    }); 
+                    socket.on('patch', function(data) {
+                        log.log("info", "patch %j", data, {});
+                        store.patch(socket, data.cast, data.changed);
+                    }); 
+                    socket.on('delete', function(data) {
+                        log.log("info", "delete %j", data, {});
+                        store.destroy(socket, data.cast);       
+                    });
+                    socket.on("disconnect", function() {
+                        log.info("Disconnect received for " + channel);
+                    });
 
-                //feed.subscribe(channel, newMessagesSocketName, socket);
-            });
-        }
-        callback(null, true);
+                    //var newMessagesSocketName = "new-messages";
+                    //feed.subscribe(channel, newMessagesSocketName, socket);
+                });
+            }
+            callback(null, true);
+
+        });
+        
+
     });
 });
 
