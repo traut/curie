@@ -33,8 +33,12 @@ SearchStore = function() {
                     return;
                 }
                 var responseObj = JSON.parse(response);
-                var messages = responseObj.response.docs.map(utils.emailFromDoc);
-                var unreadCounts = utils.flatToDict(responseObj.facet_counts.facet_fields.unread);
+                var messages = [];
+                var unreadCounts = {};
+                if (responseObj.response.docs && responseObj.response.docs.length > 0) {
+                    messages = responseObj.response.docs.map(utils.emailFromDoc);
+                    unreadCounts = utils.flatToDict(responseObj.facet_counts.facet_fields.unread);
+                }
 
                 var response = {
                     id : crypto.createHash('md5').update(query).digest("hex"),

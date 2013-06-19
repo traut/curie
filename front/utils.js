@@ -17,7 +17,7 @@ var solrEscape = solrLib.valueEscape
 function accessControlQueryPart(email) {
     var query = " +(";
     for(i in settings.MAIL_ACCESS_MAP[email]) {
-        query += ' header_to_email:"' + solrEscape(settings.MAIL_ACCESS_MAP[email][i]) + '"';
+        query += ' to.email:"' + solrEscape(settings.MAIL_ACCESS_MAP[email][i]) + '"';
     }
     query += ") ";
     return query;
@@ -129,7 +129,6 @@ module.exports = {
 
     accessControl : accessControlQueryPart,
     flatToDict : flatToDict,
-    emailFromDoc : emailFromDoc,
 
     getLogger : getLogger,
 

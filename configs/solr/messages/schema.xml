@@ -18,8 +18,9 @@
 
        <field name="sender" type="string_email" indexed="true" stored="true"/>
 
-       <field name="from.name" type="text_ws_lower" indexed="true" stored="true" multiValued="true" />
-       <field name="from.email" type="text_ws_lower" indexed="true" stored="true" multiValued="true"/>
+       <!-- it's allowed by http://tools.ietf.org/html/rfc2822 to have multiple addresses in From: header but we will index only the first one -->
+       <field name="from.name" type="text_ws_lower" indexed="true" stored="true" multiValued="false" /> 
+       <field name="from.email" type="text_ws_lower" indexed="true" stored="true" multiValued="false" />
        <field name="from.json" type="string" indexed="false" stored="true" multiValued="false"/>
 
        <!-- <field name="from.email" type="string.email" indexed="true" stored="true" multiValued="true"/> -->

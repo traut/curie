@@ -143,7 +143,7 @@ var Pack = Backbone.Model.extend({
         var packName = this.get('name');
 
         this.groups = new Groups();
-        this.groups.url = '/packs/' + packName  + '/groups/from';
+        //this.groups.url = '/packs/' + packName  + '/groups/from';
 
         this.messages = new Messages();
         this.messages.url = '/packs/' + packName + '/messages';

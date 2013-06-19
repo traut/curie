@@ -82,7 +82,6 @@ LoginModal = function() {
             modalObj.modal('hide');
             $(":input", modalObj).removeAttr("disabled");
             $(modalLoader, modalObj).hide();
-            console.error("should be hided");
         },
         shake : function () {
             controller.show();

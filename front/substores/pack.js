@@ -21,7 +21,11 @@ PackStore = function() {
                     callback(err, []);
                     return;
                 }
-                var msgs = docs.map(utils.emailFromDoc);
+                var msgs = [];
+                if (docs && docs.length > 0) {
+                    console.info(docs);
+                    msgs = docs.map(utils.emailFromDoc);
+                }
                 callback(null, msgs);
             });
         },
@@ -45,6 +49,7 @@ PackStore = function() {
                     }, callback);
                 }
             }, function(err, results) {
+                log.info("results", results, {});
                 if (err) {
                     log.error("Error " + err);
                     callback(err, null);
@@ -76,7 +81,7 @@ PackStore = function() {
             log.info("Getting groups for pack=" + packName + ", groupField=" + groupField + ", user=" + handshake.session.user.email);
 
             var groupFieldMapping = {
-                from : 'header_from_email_raw',
+                from : 'from.email',
             };
 
             var groupByFieldRealName = groupFieldMapping[groupField];
