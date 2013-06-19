@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -17,7 +18,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
 import java.util.UUID;
-import java.util.logging.SimpleFormatter;
 
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -31,9 +31,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonFactory.Feature;
-import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jackson.JsonLoader;
@@ -42,7 +39,6 @@ import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import com.github.fge.jsonschema.main.JsonValidator;
 import com.github.fge.jsonschema.report.ProcessingReport;
 import com.google.common.base.Joiner;
-import com.google.gson.JsonNull;
 
 
 /*
@@ -50,15 +46,13 @@ import com.google.gson.JsonNull;
  */
 public class Parser {
 
-    
-
     private static final Log log = LogFactory.getLog(Parser.class);
 
     private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
     private static final String ATTACHMENT_STORAGE = "/tmp";//"/home/curie/storage/attachments";
     
-    private static final String MESSAGE_SCHEMA_FILE = "/Users/traut/Work/curiemail/back/schemas/message.json";
+    private static final URL MESSAGE_SCHEMA = ClassLoader.getSystemResource("message.json");
 
 
     private Properties props;
@@ -74,7 +68,7 @@ public class Parser {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));   
         
         validator = JsonSchemaFactory.byDefault().getValidator();
-        schema = JsonLoader.fromFile(new File(MESSAGE_SCHEMA_FILE));
+        schema = JsonLoader.fromURL(MESSAGE_SCHEMA);
 
     }
 
@@ -91,7 +85,7 @@ public class Parser {
         Document doc = parser.parseMessage(new File(filename));
         
         if (!parser.validate(doc)) {
-            log.error("Created doc is not valid (schema=" + MESSAGE_SCHEMA_FILE +") : " + doc.toJson());
+            log.error("Created doc is not valid (schema=" + MESSAGE_SCHEMA.getFile() +") : " + doc.toJson());
             System.exit(1);
         }
 
@@ -113,15 +107,8 @@ public class Parser {
     public boolean validate(Document doc) throws IOException {
         
         ObjectMapper om = new ObjectMapper();
-        om.setDateFormat(new SimpleDateFormat(Document.DEFAULT_DATE_FORMAT));
-        
-        JsonNode instance = om.readTree(doc.toJson());
-        
-        //JsonNode instance = om.getFactory().createParser(doc.toJson()).readValueAs(JsonNode.class);
-        
-        //JsonNode instance = om.valueToTree(doc.toJson());
-        
-        //JsonNode docJson = JsonLoader.fromString(doc.toJson());
+        String docAsJson = doc.toJson();
+        JsonNode instance = om.readTree(docAsJson);
         
         ProcessingReport report;
         try {

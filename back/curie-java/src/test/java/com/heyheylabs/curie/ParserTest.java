@@ -39,7 +39,7 @@ public class ParserTest {
     
     @Test
     public void testPlainEmail() throws MessagingException, IOException {
-        InputStream is = ParserTest.class.getResourceAsStream("plain-email.txt");
+        InputStream is = ClassLoader.getSystemResourceAsStream("plain-email.txt");
         Document doc = parser.parseMessage("plain-email", is);
         log.info(doc.toPrettyJson());
         
@@ -50,7 +50,7 @@ public class ParserTest {
     
     @Test
     public void testHtmlAndTextEmail() throws MessagingException, IOException {
-        InputStream is = ParserTest.class.getResourceAsStream("html-and-text-email.txt");
+        InputStream is = ClassLoader.getSystemResourceAsStream("html-and-text-email.txt");
         Document doc = parser.parseMessage("html-and-text-email", is);
         
         log.info(doc.toPrettyJson());
@@ -63,7 +63,7 @@ public class ParserTest {
 
     @Test
     public void testEmailWithAttachment() throws MessagingException, IOException {
-        InputStream is = ParserTest.class.getResourceAsStream("with-attachment.txt");
+        InputStream is = ClassLoader.getSystemResourceAsStream("with-attachment.txt");
         Document doc = parser.parseMessage("with-attachment", is);
         
         log.info(doc.toPrettyJson());
@@ -82,7 +82,7 @@ public class ParserTest {
     
     @Test
     public void testEmailWithReply() throws MessagingException, IOException {
-        InputStream is = ParserTest.class.getResourceAsStream("with-reply.txt");
+        InputStream is = ClassLoader.getSystemResourceAsStream("with-reply.txt");
         Document doc = parser.parseMessage("with-reply", is);
         
         log.info(doc.toPrettyJson());
@@ -95,7 +95,7 @@ public class ParserTest {
     
     @Test
     public void testEmailWithForward() throws MessagingException, IOException {
-        InputStream is = ParserTest.class.getResourceAsStream("with-forward.txt");
+        InputStream is = ClassLoader.getSystemResourceAsStream("with-forward.txt");
         Document doc = parser.parseMessage("with-forward", is);
         
         log.info(doc.toPrettyJson());
@@ -108,9 +108,8 @@ public class ParserTest {
     
     @Test
     public void testValidation() throws MessagingException, IOException, ProcessingException {
-        InputStream is = ParserTest.class.getResourceAsStream("with-forward.txt");
+        InputStream is = ClassLoader.getSystemResourceAsStream("with-forward.txt");
         Document doc = parser.parseMessage("with-forward-and-validation", is);
-        
         log.info(doc.toPrettyJson());
         
         assertEquals(true, parser.validate(doc));

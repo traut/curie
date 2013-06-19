@@ -6,7 +6,7 @@
     "definitions": {
         "email": {
             "type": "string",
-            "pattern": "^.+@.+\\..+$"
+            "format" : "email"
         },
         "emailAddress": {
             "type": "object",
@@ -24,7 +24,7 @@
                 "$ref": "#/definitions/emailAddress"
             },
             "uniqueItems": true
-        }
+        },
         "attachment": {
             "type": "object",
             "properties": {
@@ -40,10 +40,10 @@
         "received": {
             "type": "string",
             "format": "date-time"
-        }
+        },
         "labels": {
             "type": "array",
-            "minItems": 1
+            "minItems": 1,
             "items": {
                 "type": "string"
             },
@@ -106,5 +106,6 @@
             "additionalProperties": true
         }
     },
-    "required": ["id", "received", "raw"]
+    "additionalProperties": false,
+    "required": ["id", "received", "raw", "fields"]
 }

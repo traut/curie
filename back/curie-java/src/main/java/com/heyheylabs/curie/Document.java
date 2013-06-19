@@ -70,7 +70,11 @@ public class Document {
     }
 
     public String toJson() {
-        return new Gson().toJson(data);
+        Gson gson = new GsonBuilder()
+            .disableHtmlEscaping()
+            .setDateFormat(DEFAULT_DATE_FORMAT)
+            .create();
+    return gson.toJson(data);
     }
     
     public String toPrettyJson() {
