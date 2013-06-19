@@ -138,14 +138,21 @@ function Controller() {
 
     this.firstFetch = function(callback) {
         var packsFetched = _.after(packBlocks.length, function() {
+            console.info("Fetch for all packs is finished!");
             stateModel.trigger("fetchFinished");
             (callback || dummy)();
         });
 
+        console.info(packBlocks.length);
+
         packBlocks.map(function(packs) {
             packs.trigger("reset");
             packs.fetch({
+                error : function() {
+                    console.info("Can't fetch packs for:", packs);
+                },
                 success : function() {
+                    console.info("Packs list fetched!");
                     packs.each(function(model) {
                         new PackView({ model : model });
                         model.fetchAll({ update: true });
@@ -154,6 +161,7 @@ function Controller() {
                 }
             });
         });
+
     }
 
 }
