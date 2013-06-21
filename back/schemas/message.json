@@ -29,7 +29,7 @@
             "type": "object",
             "properties": {
                 "filename": { "type": "string" },
-                "path": { "type": "string" }
+                "file": { "type": "string" }
             }
         }
     },
@@ -81,6 +81,7 @@
                 "Message-ID": { "type": "string" },
                 "From": { "type": "string" },
                 "To": { "type": "string" },
+                "Date": { "type": "string" },
 
                 "In-Reply-To": { "type": "string" },
 
