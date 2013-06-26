@@ -23,7 +23,7 @@ public class ParserTest {
     private Store store;
 
     public ParserTest() throws IOException {
-        store = new Store();
+        store = new Store("/tmp");
         parser = new Parser(store);
         log.info("Привет, эклипс-консоль!");
     }
@@ -81,9 +81,9 @@ public class ParserTest {
         
         assertEquals(1, attachments.size());
         
-        for(HashMap<String, String> attachment : attachments) {
-            Store.getAttachment(attachment.get("file")).delete();
-        }
+        //for(HashMap<String, String> attachment : attachments) {
+        //    store.getAttachment(attachment.get("file")).delete();
+        //}
     }
 
 }

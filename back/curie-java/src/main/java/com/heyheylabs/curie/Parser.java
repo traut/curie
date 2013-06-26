@@ -37,22 +37,10 @@ public class Parser {
 
     private static final Log log = LogFactory.getLog(Parser.class);
 
-    private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
-
     private Properties props;
     private Session session;
 
     private Store store;
-
-    public Parser(Store store) throws IOException {
-        props = new Properties();
-        session = Session.getInstance(props);
-
-        this.store = store;
-
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));   
-
-    }
 
     public static void main(String[] args) throws IOException, MessagingException, ProcessingException {
 
@@ -75,6 +63,16 @@ public class Parser {
         }
 
         store.saveMessage(filename, doc);
+    }
+    
+    public Parser(Store store) throws IOException {
+        props = new Properties();
+        session = Session.getInstance(props);
+
+        this.store = store;
+
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));   
+
     }
 
 
@@ -157,7 +155,7 @@ public class Parser {
 
                 bodyParts.add(dict);
             } else {
-                log.error("Unknown mime type");
+                log.error("Unknown mime type. Part: " + part.toString());
             }
         } else if (disposition.equalsIgnoreCase(Part.ATTACHMENT)) {
             saveAttachment(part, attachments);

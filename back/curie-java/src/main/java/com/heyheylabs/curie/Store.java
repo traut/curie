@@ -30,16 +30,22 @@ public class Store {
     
     private static final Log log = LogFactory.getLog(Store.class);
     
-    private static final String ATTACHMENT_STORAGE = "/tmp";//"/home/curie/storage/attachments";    
+    private static final String DEFAULT_ATTACHMENT_STORAGE = "/home/curie/storage/attachments";    
     private static final URL MESSAGE_SCHEMA = ClassLoader.getSystemResource("message.json");
 
     private JsonValidator validator;
     private JsonNode schema;
 
+    private String attachmentStorage = DEFAULT_ATTACHMENT_STORAGE;
 
     public Store() throws IOException {
         validator = JsonSchemaFactory.byDefault().getValidator();
         schema = JsonLoader.fromURL(MESSAGE_SCHEMA);
+    }
+    
+    public Store(String attachmentStorageDir) throws IOException {
+        this();
+        this.attachmentStorage = attachmentStorageDir;
     }
 
 
@@ -83,8 +89,20 @@ public class Store {
         }
     }
     
-    public static File getAttachment(String attachmentSavedAs) {
-        return new File(ATTACHMENT_STORAGE, attachmentSavedAs);
+    public File getAttachment(String attachmentSavedAs) {
+        
+        String relativePath = attachmentSavedAs.substring(0, 2) + "/"
+                + attachmentSavedAs.substring(2, 4) + "/"
+                + attachmentSavedAs.substring(4, 6) + "/"
+                + attachmentSavedAs;
+        
+        File file = new File(this.attachmentStorage, relativePath);
+        
+        File parent = file.getParentFile();
+        if (!parent.exists()) {
+            parent.mkdirs();
+        }
+        return file;
     }
     
     public String saveAttachment(String originalFilename, InputStream in) throws IOException, MessagingException, FileNotFoundException {
