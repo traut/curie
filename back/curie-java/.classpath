@@ -28,6 +28,9 @@
   <classpathentry kind="var" path="M2_REPO/com/github/fge/json-schema-validator/2.1.2/json-schema-validator-2.1.2.jar" sourcepath="M2_REPO/com/github/fge/json-schema-validator/2.1.2/json-schema-validator-2.1.2-sources.jar"/>
   <classpathentry kind="var" path="M2_REPO/junit/junit/4.11/junit-4.11.jar" sourcepath="M2_REPO/junit/junit/4.11/junit-4.11-sources.jar"/>
   <classpathentry kind="var" path="M2_REPO/com/googlecode/libphonenumber/libphonenumber/5.4/libphonenumber-5.4.jar" sourcepath="M2_REPO/com/googlecode/libphonenumber/libphonenumber/5.4/libphonenumber-5.4-sources.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/apache/logging/log4j/log4j-1.2-api/2.0-beta7/log4j-1.2-api-2.0-beta7.jar" sourcepath="M2_REPO/org/apache/logging/log4j/log4j-1.2-api/2.0-beta7/log4j-1.2-api-2.0-beta7-sources.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/apache/logging/log4j/log4j-api/2.0-beta7/log4j-api-2.0-beta7.jar" sourcepath="M2_REPO/org/apache/logging/log4j/log4j-api/2.0-beta7/log4j-api-2.0-beta7-sources.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/apache/logging/log4j/log4j-core/2.0-beta7/log4j-core-2.0-beta7.jar" sourcepath="M2_REPO/org/apache/logging/log4j/log4j-core/2.0-beta7/log4j-core-2.0-beta7-sources.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/mozilla/rhino/1.7R4/rhino-1.7R4.jar" sourcepath="M2_REPO/org/mozilla/rhino/1.7R4/rhino-1.7R4-sources.jar"/>
   <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 </classpath>

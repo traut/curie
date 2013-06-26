@@ -91,18 +91,7 @@
                 "References": { "type": "string" },
                 "Subject": { "type": "string" },
 
-                "Body": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "text": { "type": "string" },
-                            "html": { "type": "string" },
-                            "attachment": { "type": "string" },
-                            "filename": { "type": "string" }
-                        }
-                    }
-                }
+                "Body": { "type": "string" }
             },
             "additionalProperties": true
         }

@@ -1,24 +1,20 @@
 package com.heyheylabs.curie;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.nio.charset.Charset;
-import java.text.SimpleDateFormat;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
-import java.util.UUID;
 
+import javax.mail.BodyPart;
+import javax.mail.Header;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
@@ -31,14 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.fge.jackson.JsonLoader;
 import com.github.fge.jsonschema.exceptions.ProcessingException;
-import com.github.fge.jsonschema.main.JsonSchemaFactory;
-import com.github.fge.jsonschema.main.JsonValidator;
-import com.github.fge.jsonschema.report.ProcessingReport;
-import com.google.common.base.Joiner;
 
 
 /*
@@ -50,214 +39,151 @@ public class Parser {
 
     private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
-    private static final String ATTACHMENT_STORAGE = "/tmp";//"/home/curie/storage/attachments";
-    
-    private static final URL MESSAGE_SCHEMA = ClassLoader.getSystemResource("message.json");
-
-
     private Properties props;
     private Session session;
 
-    private JsonValidator validator;
-    private JsonNode schema;
+    private Store store;
 
-
-    public Parser() throws IOException {
+    public Parser(Store store) throws IOException {
         props = new Properties();
         session = Session.getInstance(props);
+
+        this.store = store;
+
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));   
-        
-        validator = JsonSchemaFactory.byDefault().getValidator();
-        schema = JsonLoader.fromURL(MESSAGE_SCHEMA);
 
     }
 
     public static void main(String[] args) throws IOException, MessagingException, ProcessingException {
 
         if (args.length != 1) {
-            System.err.println("Usage: Parser <filename>");
+            System.err.println("Usage: java com.heyheylabs.curie.Parser <filename>");
             System.exit(1);
         }
 
         String filename = args[0];
 
-        Parser parser = new Parser();
-        Document doc = parser.parseMessage(new File(filename));
+        Store store = new Store();
+
+        Parser parser = new Parser(store);
         
-        if (!parser.validate(doc)) {
-            log.error("Created doc is not valid (schema=" + MESSAGE_SCHEMA.getFile() +") : " + doc.toJson());
+        Document doc = parser.parseMessage(filename);
+        
+        if (!store.isValid(doc)) {
+            log.error("Created doc is not valid: " + doc.asJson());
             System.exit(1);
         }
 
-        log.info("JSON blob: " + doc.toJson());
-
-        String jsonFilename = filename + ".json";
-        File file = new File(jsonFilename);
-        if (file.exists()) {
-            file.delete();
-        }
-        BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-        writer.write(doc.toJson());
-        writer.flush();
-        writer.close();
-
-        log.info("JSON blob in " + jsonFilename);
+        store.saveMessage(filename, doc);
     }
 
-    public boolean validate(Document doc) throws IOException {
-        
-        ObjectMapper om = new ObjectMapper();
-        String docAsJson = doc.toJson();
-        JsonNode instance = om.readTree(docAsJson);
-        
-        ProcessingReport report;
-        try {
-            report = validator.validate(schema, instance);
-        } catch (ProcessingException e) {
-            log.error("Exception while validating the doc:" + e.getProcessingMessage().getMessage(), e);
-            return false;
-        }
-        
-        if (!report.isSuccess()) {
-            log.error(Joiner.on(";").join(report.iterator()));
-            return false;
-        }
-        return true;
+
+    public Document parseMessage(String fileName) throws MessagingException, IOException {
+        return parseMessage(new File(fileName));
     }
 
-    public Document parseMessage(File file) throws MessagingException, IOException {
-
-        long start = System.currentTimeMillis();
-        String id = file.getName();
-        Document result = parseMessage(id, file);
-
-        log.info(file.getAbsolutePath() + " parsed in " + (System.currentTimeMillis() - start) / (float) 1000 + " secs");
-
-        return result;
-    }
-
-    public Document parseMessage(String id, File f) throws MessagingException, IOException {
+    public Document parseMessage(File f) throws MessagingException, IOException {
         FileInputStream fis = new FileInputStream(f);
         try {
-            return parseMessage(id, fis);
+            return parseMessage(f.getName(), fis);
         } finally {
             fis.close();
         }
     }
 
     public Document parseMessage(String id, InputStream is) throws MessagingException, IOException {
+        
+        log.info("id=" + id + " starting parse process");
+        long start = System.currentTimeMillis();
 
         MimeMessage email = new MimeMessage(session, is);
 
-        Document doc = new Document();
-        
-        doc.addAsOne("id", id);
+        Document doc = new Document(id);
 
-        doc.addRaw("Subject", email.getSubject());
-        doc.addRaw("Message-ID", email.getMessageID());
-        doc.addRaw("Date", email.getSentDate());
-
-        doc.addAddresses("from", email.getFrom());
-        doc.addAddresses("to", email.getRecipients(RecipientType.TO));
-        doc.addAddresses("cc", email.getRecipients(RecipientType.CC));
-        doc.addAddresses("bcc", email.getRecipients(RecipientType.BCC));
-
-        doc.addRaw("References", email.getHeader("References", ","));
-
-        String[] inReplyTo = email.getHeader("In-Reply-To");
-        if (inReplyTo != null && inReplyTo.length == 1) {
-            doc.addRaw("In-Reply-To", inReplyTo[0]);
+        Enumeration<Header> headers = email.getAllHeaders();
+        while (headers.hasMoreElements()) {
+            Header h = (Header) headers.nextElement();
+            
+            String value = h.getValue().trim();
+            if (!StringUtils.isEmpty(value)) {
+                doc.addRaw(h.getName(), value);
+            }
         }
+        doc.addRaw("Body", IOUtils.toString(email.getInputStream(), "UTF-8"));
 
-        doc.addRaw("Body", handlePart(email));
-
+        doc.addField("from", email.getFrom());
+        doc.addField("to", email.getRecipients(RecipientType.TO));
+        doc.addField("cc", email.getRecipients(RecipientType.CC));
+        doc.addField("bcc", email.getRecipients(RecipientType.BCC));
+        doc.addField("subject", email.getSubject());
+        
+        doc.addLabel("inbox");
+        
+        List<HashMap<String, String>> attachments = new LinkedList<HashMap<String, String>>();
+        List<HashMap<String, String>> bodyParts = new LinkedList<HashMap<String, String>>();
+        handlePart(email, bodyParts, attachments);
+        
+        doc.addField("body", bodyParts);
+        doc.addField("attachments", attachments);
+        
+        log.info("id=" + id + " parsed in " + (System.currentTimeMillis() - start) / (float) 1000 + " secs");
+        
         return doc;
     }
 
 
-    public List<HashMap<String, String>> handlePart(Part part) throws IOException, MessagingException {
+    public void handlePart(Part part, List<HashMap<String, String>> bodyParts,
+            List<HashMap<String, String>> attachments) throws IOException, MessagingException {
 
-        /*
-        if (p.isMimeType("text/plain") || p.isMimeType("text/html")) {
-            add(parsed, "body", p.getContent().toString());
-        } else if (p.isMimeType("multipart/*")) {
-            Multipart mp = (Multipart) p.getContent();
-            for (int i = 0; i < mp.getCount(); i++) {
-                handlePart(mp.getBodyPart(i), parsed);
-            }
-        } else if (p.isMimeType("message/rfc822")) {
-            handlePart((Part) p.getContent(), parsed);
-        }
-         */
         String disposition = part.getDisposition();
-        String contentType = part.getContentType();
-
-        List<HashMap<String, String>> result = new LinkedList<HashMap<String, String>>();
 
         if (disposition == null) {
             if (part.isMimeType("multipart/*")) {
                 Multipart multipart = (Multipart) part.getContent();
 
-                Map<String, Object> partData = new HashMap<String, Object>();
                 for (int i = 0; i < multipart.getCount(); i++) {
-                    for(HashMap<String, String> r : handlePart(multipart.getBodyPart(i))) {
-                        result.add(r);
-                    }
+                    BodyPart subpart = multipart.getBodyPart(i);
+                    handlePart(subpart, bodyParts, attachments);
                 }
 
             } else if (part.isMimeType("text/*")) {
 
-                String key = part.isMimeType("text/html") ? "html" : "text";
+                String type = part.isMimeType("text/html") ? "html" : "text";
                 String value = (String) part.getContent();
-
+                
                 HashMap<String, String> dict = new HashMap<String, String>();
-                dict.put(key, value);
+                dict.put("type", type);
+                dict.put("value", value);
 
-                result.add(dict);
+                bodyParts.add(dict);
             } else {
                 log.error("Unknown mime type");
             }
         } else if (disposition.equalsIgnoreCase(Part.ATTACHMENT)) {
-            HashMap<String, String> dict = new HashMap<String, String>();
-            dict.put("attachment", part.getFileName());
-
-            String filename;
-            if ((filename = saveAsAttachment(part)) != null) {
-                dict.put("filename", filename);
-                result.add(dict);
-            }
-
+            saveAttachment(part, attachments);
         } else if (disposition.equalsIgnoreCase(Part.INLINE)) {
             HashMap<String, String> dict = new HashMap<String, String>();
-            dict.put("inline", part.getFileName());
+            dict.put("type", "inline");
+            dict.put("value", part.getFileName());
 
-            String filename;
-            if ((filename = saveAsAttachment(part)) != null) {
-                dict.put("filename", filename);
-                result.add(dict);
-            }
+            saveAttachment(part, attachments);
         }
-
-        return result;
     }
 
-    private String saveAsAttachment(Part part) throws IOException, MessagingException, FileNotFoundException {
+    private void saveAttachment(Part part, List<HashMap<String, String>> attachments)
+            throws MessagingException, IOException, FileNotFoundException {
         
-        String filename = UUID.randomUUID().toString();
-
-        InputStream in = part.getInputStream();
-        FileOutputStream out = new FileOutputStream(new File(ATTACHMENT_STORAGE, filename));
-
-        try {
-            IOUtils.copy(in, out);
-            return filename;
-        } catch (IOException e) {
-            log.error("Cannot save attachment " + part.getFileName() + " to " + filename + ". Skipping");
-            return null;
-        } finally {
-            IOUtils.closeQuietly(in);
-            IOUtils.closeQuietly(out);
-        }
+        HashMap<String, String> attachment = new HashMap<String, String>();
+        
+        String attachmentName = part.getFileName();
+        String savedAs = store.saveAttachment(attachmentName, part.getInputStream());
+        
+        attachment.put("filename", attachmentName);
+        attachment.put("file", savedAs);
+        
+        attachments.add(attachment);
+        
+        log.debug("attachment \"" + attachmentName + "\" saved to with name \"" + savedAs + "\"");
     }
 
 

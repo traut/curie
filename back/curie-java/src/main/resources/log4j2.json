@@ -1,0 +1,32 @@
+{
+    "configuration": {
+        "status": "debug"
+    },
+    "appenders": {
+      "appender": [
+        {
+            "type": "Console",
+            "name": "Console",
+            "PatternLayout": {
+                "pattern": "%d %p %c{1.} [%t] %m%n"
+            }
+        }
+    ]},
+    "loggers": {
+        "logger": [
+            {
+                "name": "Sub",
+                "level": "DEBUG",
+                "appender-ref": {
+                    "ref": "Console"
+                }
+            }
+        ],
+        "root": {
+            "level": "DEBUG",
+            "appender-ref": {
+                "ref": "Console"
+            }
+        }
+    }
+}

@@ -1,11 +1,8 @@
 package com.heyheylabs.curie;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
-import java.util.TimeZone;
 
 import javax.mail.Address;
 import javax.mail.internet.InternetAddress;
@@ -17,35 +14,29 @@ public class Document {
 
     public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
-    private final HashMap<String, Object> data = new HashMap<String, Object>();
+    private HashMap<String, Object> fields;
+    private HashMap<String, Object> raw;
+    private LinkedList<String> labels;
+    private String id;
 
-    public Document() {
-        data.put("raw", new HashMap<String, Object>());
-        data.put("received", new Date());
+    public Document(String id) {
+        fields = new HashMap<String, Object>();
+        raw = new HashMap<String, Object>();
+        labels = new LinkedList<String>();
+
+        this.id = id;
     }
 
-    public void addAsOne(String field, Object value) {
-        data.put(field, value);
-    }
-    
-    public void addAsList(String field, Object... values) {
-        if (values != null) {
-            LinkedList selected = new LinkedList();
-            for (Object v : values) {
-                if (v != null) {
-                    selected.add(v);
-                }
-            }
-            data.put(field, selected);
-        }
+    public void addLabel(String label) {
+        labels.add(label);
     }
 
     @SuppressWarnings("unchecked")
     public void addRaw(String field, Object value) {
-        ((HashMap<String, Object>) data.get("raw")).put(field, value);
+        raw.put(field, value);
     }
 
-    public void addAddresses(String field, Address[] recipients) {
+    public void addField(String field, Address[] recipients) {
         LinkedList<HashMap<String, String>> pairs = new LinkedList<HashMap<String,String>>();
         if (recipients != null) {
             for (Address a : recipients) {
@@ -66,28 +57,39 @@ public class Document {
             }
         }
 
-        data.put(field, pairs);
+        fields.put(field, pairs);
     }
 
-    public String toJson() {
+    public void addField(String field, Object value) {
+        fields.put(field, value);
+    }
+
+    public HashMap<String, Object> asDataMap() {
+        HashMap<String, Object> data = new HashMap<String, Object>();
+        data.put("id", this.id);
+        data.put("received", new Date());
+        data.put("labels", labels);
+        
+        data.put("raw", raw);
+        data.put("fields", fields);
+        return data;
+    }
+
+    public String asJson() {
         Gson gson = new GsonBuilder()
             .disableHtmlEscaping()
             .setDateFormat(DEFAULT_DATE_FORMAT)
             .create();
-    return gson.toJson(data);
+        return gson.toJson(asDataMap());
     }
-    
-    public String toPrettyJson() {
+
+    public String asPrettyJson() {
         Gson gson = new GsonBuilder()
             .setPrettyPrinting()
             .disableHtmlEscaping()
             .setDateFormat(DEFAULT_DATE_FORMAT)
             .create();
-        return gson.toJson(data);
-    }
-    
-    public Map<String, Object> getData() {
-        return data;
+        return gson.toJson(asDataMap());
     }
 
 }
