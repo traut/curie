@@ -16,11 +16,12 @@ def read_blob(filename):
     if not os.path.exists(json_filename):
         raise Exception("File %s does not exists!" % json_filename)
 
-    f = open(json_filename, "r")
-    return json.loads(f.read())
+    with open(json_filename, "r") as f:
+        blob_str = f.read()
+        return json.loads(blob_str)
 
 
-def process(message):
+def process(message_blob):
 
     # mandatory fields
     filename = message.get("original")[0]
@@ -75,5 +76,7 @@ if __name__ == '__main__':
         print "Usage: %s <filepath>" % __file__
         sys.exit(1)
 
-    message = read_blob(sys.argv[1])
-    process(message)
+    message_blob = read_blob(sys.argv[1])
+    process(message_blob)
+
+
