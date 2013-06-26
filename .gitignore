@@ -10,3 +10,7 @@ local_settings.py
 var
 snapshot.db
 
+.settings
+target
+
+
