@@ -5,10 +5,19 @@ import iso8601
 import json
 import solr
 
-from os.path import basename
+from jsonschema import validate
 
 
 solrClient = solr.SolrConnection('http://localhost:8983/solr')
+
+
+def get_schema():
+    SCHEMA_PATH = "schemas/message-parsed.json"
+    with open(SHEMA_PATH, "r") as f:
+        return json.loads(f.read())
+
+SCHEMA = get_schema()
+
 
 
 def read_blob(filename):
@@ -18,16 +27,16 @@ def read_blob(filename):
 
     with open(json_filename, "r") as f:
         blob_str = f.read()
+
+        validate(blob_str, SCHEMA)
+
         return json.loads(blob_str)
 
 
 def process(message_blob):
 
-    # mandatory fields
-    filename = message.get("original")[0]
-    mid = basename(filename)
-
-    received = iso8601.parse_date(message.get("received")[0])
+    mid = message_blob["id"]
+    received = iso8601.parse_date(message.get("received"))
 
     orig_date_str = message.get("header_orig_date", None)
     orig_date = iso8601.parse_date(orig_date_str[0]) if orig_date_str else None
@@ -66,7 +75,7 @@ def process(message_blob):
     print "Pushing to index: %s" % document
 
     solrClient.add(**document)
-    solrClient.commit()
+    #solrClient.commit()
 
 
 

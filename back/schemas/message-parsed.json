@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema",
-    "id": "curie.message",
-    "title": "Schema for an email message",
+    "id": "curie.message.parsed",
+    "title": "Schema for a parsed email message",
     "type": "object",
     "definitions": {
         "email": {
@@ -73,29 +73,9 @@
                     "$ref": "#/definitions/attachment"
                 }
             }
-        },
-        "raw": {
-            "type": "object",
-            "properties": {
-
-                "Message-ID": { "type": "string" },
-                "From": { "type": "string" },
-                "To": { "type": "string" },
-                "Date": { "type": "string" },
-
-                "In-Reply-To": { "type": "string" },
-
-                "Cc": { "type": "string" },
-                "Bcc": { "type": "string" },
-
-                "References": { "type": "string" },
-                "Subject": { "type": "string" },
-
-                "Body": { "type": "string" }
-            },
-            "additionalProperties": true
         }
     },
     "additionalProperties": false,
-    "required": ["id", "received", "raw", "fields"]
+    "required": ["id", "received", "fields"]
 }
+
