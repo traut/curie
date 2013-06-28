@@ -3,12 +3,15 @@
     "id": "curie.message.raw",
     "title": "Schema for a raw email message",
     "type": "object",
+    "additionalProperties": false,
+    "required": ["id", "raw"],
     "properties": {
         "id": {
             "type": "string"
         },
         "raw": {
             "type": "object",
+            "additionalProperties": true,
             "properties": {
 
                 "Message-ID": { "type": "string" },
@@ -25,10 +28,7 @@
                 "Subject": { "type": "string" },
 
                 "Body": { "type": "string" }
-            },
-            "additionalProperties": true
+            }
         }
     }
-    "additionalProperties": false,
-    "required": ["id", "raw"]
 }

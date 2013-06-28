@@ -25,14 +25,25 @@
             },
             "uniqueItems": true
         },
+        "emailAddressesAtLeastOne": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "$ref": "#/definitions/emailAddress"
+            },
+            "uniqueItems": true
+        },
         "attachment": {
             "type": "object",
             "properties": {
                 "filename": { "type": "string" },
                 "file": { "type": "string" }
-            }
+            },
+            "required": ["filename", "file"]
         }
     },
+    "additionalProperties": false,
+    "required": ["id", "received", "fields"],
     "properties": {
         "id": {
             "type": "string"
@@ -51,31 +62,34 @@
         },
         "fields": {
             "type": "object",
-            "from": { "$ref": "#/definitions/emailAddresses" },
-            "to": { "$ref": "#/definitions/emailAddresses" },
-            "cc": { "$ref": "#/definitions/emailAddresses" },
-            "bcc": { "$ref": "#/definitions/emailAddresses" },
-            "subject": { "type": "string" },
-            "body": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "description": "body part (html block, text block)",
-                    "properties": {
-                        "type": { "type": "string" },
-                        "value": { "type": "string" }
+            "additionalProperties": false,
+            "required": ["message_id", "from"],
+            "properties" : {
+                "message_id" : { "type": "string" },
+                "from": { "$ref": "#/definitions/emailAddressesAtLeastOne" },
+                "to": { "$ref": "#/definitions/emailAddresses" },
+                "cc": { "$ref": "#/definitions/emailAddresses" },
+                "bcc": { "$ref": "#/definitions/emailAddresses" },
+                "subject": { "type": "string" },
+                "body": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "description": "body part (html block, text block)",
+                        "properties": {
+                            "type": { "type": "string" },
+                            "value": { "type": "string" }
+                        }
                     }
-                }
-            },
-            "attachments": {
-                "type": "array",
-                "items": {
-                    "$ref": "#/definitions/attachment"
+                },
+                "attachments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/attachment"
+                    }
                 }
             }
         }
-    },
-    "additionalProperties": false,
-    "required": ["id", "received", "fields"]
+    }
 }
 

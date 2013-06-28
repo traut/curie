@@ -13,7 +13,7 @@ solrClient = solr.SolrConnection('http://localhost:8983/solr')
 
 def get_schema():
     SCHEMA_PATH = "schemas/message-parsed.json"
-    with open(SHEMA_PATH, "r") as f:
+    with open(SCHEMA_PATH, "r") as f:
         return json.loads(f.read())
 
 SCHEMA = get_schema()
@@ -33,44 +33,37 @@ def read_blob(filename):
         return json.loads(blob_str)
 
 
-def process(message_blob):
+def process(blob):
 
-    mid = message_blob["id"]
-    received = iso8601.parse_date(message.get("received"))
+    mid = blob["id"]
+    received = iso8601.parse_date(blob.get("received"))
 
-    orig_date_str = message.get("header_orig_date", None)
-    orig_date = iso8601.parse_date(orig_date_str[0]) if orig_date_str else None
+    _from = blob["fields"]["from"][0]
 
+    document = {
+        "id" : mid,
+        "received" : received,
+        "labels" : blob["labels"],
 
-    def get_or_none(key):
-        return message.get(key, None)
+        "message_id" : blob["fields"]["message_id"],
 
-    document = dict(
-        id = mid,
+        "from.name" : _from.get("name"),
+        "from.email" : _from["email"],
+        "from.json" : json.dumps(_from),
 
-        received = received,
-        labels = ["inbox"],
-        header_orig_date = orig_date,
+        "cc.name" : filter(None, [a.get("name") for a in blob["fields"]["cc"]]),
+        "cc.email" : [a["email"] for a in blob["fields"]["cc"]],
+        "cc.json" : json.dumps(blob["fields"]["cc"]),
 
-        header_message_id = get_or_none("header_message_id"),
-        header_in_reply_to = get_or_none("header_in_reply_to"),
+        "bcc.name" : filter(None, [a.get("name") for a in blob["fields"]["bcc"]]),
+        "bcc.email" : [a["email"] for a in blob["fields"]["bcc"]],
+        "bcc.json" : json.dumps(blob["fields"]["bcc"]),
 
-        header_from_email = get_or_none("header_from_email"),
-        header_from_name = get_or_none("header_from_name"),
+        "attachment" : [a["filename"] for a in blob["fields"]["attachments"]],
 
-        header_to_email = get_or_none("header_to_email"),
-        header_to_name = get_or_none("header_to_name"),
-
-        header_bcc_email = get_or_none("header_bcc_email"),
-        header_bcc_name = get_or_none("header_bcc_name"),
-
-        header_cc_email = get_or_none("header_cc_email"),
-        header_cc_name = get_or_none("header_cc_name"),
-
-        header_subject = get_or_none("header_subject"),
-
-        body = get_or_none("body"),
-    )
+        "subject" : blob["fields"].get("subject"),
+        "body" : [b.get("value") for b in blob["fields"].get("body")]
+    }
 
     print "Pushing to index: %s" % document
 
