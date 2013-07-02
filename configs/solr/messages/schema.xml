@@ -4,19 +4,20 @@
  <fields>
 
    <field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
+   <field name="_version_" type="long" indexed="true" stored="true"/>
 
    <field name="received" type="date" indexed="true" stored="true" required="true"/>
    <field name="indexed" type="date" indexed="true" stored="true" default="NOW" multiValued="false"/>
 
+   <field name="labels" type="string" indexed="true" stored="true" multiValued="true"/>
+   <field name="unread" type="boolean" indexed="true" stored="true" default="true" multiValued="false"/>
+
+
+   <field name="thread_count" type="int" indexed="true" stored="true" multiValued="false"/>
+
+
    <!-- Fields from the email -->
        <field name="message_id" type="string" indexed="true" stored="true"/>
-
-       <field name="in_reply_to" type="string" indexed="true" stored="true"/>
-
-       <field name="reference" type="text_ws" indexed="true" stored="true" multiValued="true"/>
-       <field name="keyword" type="text_commaDelimited_lower" indexed="true" stored="true" multiValued="true"/>
-
-       <field name="sender" type="string_email" indexed="true" stored="true"/>
 
        <!-- it's allowed by http://tools.ietf.org/html/rfc2822 to have multiple addresses in From: header but we will index only the first one -->
        <field name="from.name" type="text_ws_lower" indexed="true" stored="true" multiValued="false" /> 
@@ -37,22 +38,24 @@
        <field name="bcc.email" type="text_ws_lower" indexed="true" stored="false" multiValued="true" />
        <field name="bcc.json" type="string" indexed="false" stored="true" multiValued="false"/>
 
-       <field name="orig_date" type="date" indexed="true" stored="true" />
        <field name="attachment" type="string" indexed="true" stored="true" multiValued="true"/>
 
        <field name="subject" type="text_general" indexed="true" stored="true" />
 
        <field name="body" type="html_text" indexed="true" stored="false" multiValued="true"/>
 
+
+       <!-- not supported for now 
+       <field name="orig_date" type="date" indexed="true" stored="true" />
+       <field name="in_reply_to" type="string" indexed="true" stored="true"/>
+       <field name="reference" type="text_ws" indexed="true" stored="true" multiValued="true"/>
+       <field name="keyword" type="text_commaDelimited_lower" indexed="true" stored="true" multiValued="true"/>
+       <field name="sender" type="string_email" indexed="true" stored="true"/>
+        -->
+
+
    <!-- / Fields from the email -->
 
-   <field name="labels" type="string" indexed="true" stored="true" multiValued="true"/>
-   <field name="unread" type="boolean" indexed="true" stored="true" default="true" multiValued="false"/>
-
-   <field name="thread_count" type="int" indexed="true" stored="true" multiValued="false"/>
-
-   <field name="_version_" type="long" indexed="true" stored="true"/>
-   
  </fields>
 
  <uniqueKey>id</uniqueKey>
