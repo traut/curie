@@ -1,15 +1,14 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema",
-    "id": "curie.message.raw",
     "title": "Schema for a raw email message",
     "type": "object",
     "additionalProperties": false,
-    "required": ["id", "raw"],
+    "required": ["id", "values"],
     "properties": {
         "id": {
             "type": "string"
         },
-        "raw": {
+        "values": {
             "type": "object",
             "additionalProperties": true,
             "properties": {

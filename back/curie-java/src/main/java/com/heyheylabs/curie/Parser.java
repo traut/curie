@@ -35,6 +35,10 @@ import com.github.fge.jsonschema.exceptions.ProcessingException;
  * CurieMail parser
  */
 public class Parser {
+    
+    static {
+        System.setProperty("java.awt.headless", "true");
+    }
 
     private static final Log log = LogFactory.getLog(Parser.class);
 

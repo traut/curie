@@ -22,10 +22,7 @@ public class ParserTest {
     private static final Log log = LogFactory.getLog(ParserTest.class);
     private Parser parser;
     private Store store;
-    
-    static {
-        System.setProperty("java.awt.headless", "true");
-    }
+
 
     public ParserTest() throws IOException {
         store = new Store("/Users/traut/Work/curiemail/back/schemas", "/tmp/attachments");

@@ -1,6 +1,5 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema",
-    "id": "curie.message.parsed",
     "title": "Schema for a parsed email message",
     "type": "object",
     "definitions": {
