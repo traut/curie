@@ -24,6 +24,7 @@ import javax.mail.internet.MimeMessage.RecipientType;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -55,32 +56,39 @@ public class Parser {
 
         Parser parser = new Parser(store);
         
-        Document doc = parser.parseMessage(filename);
+        Pair<ParsedMessage, RawMessage> parsedPair = parser.parseMessage(filename);
         
-        if (!store.isValid(doc)) {
-            log.error("Created doc is not valid: " + doc.asJson());
+        ParsedMessage parsed = parsedPair.getLeft();
+        RawMessage raw = parsedPair.getRight();
+        
+        if (!store.isValid(parsed)) {
+            log.error("Created ParsedMessage is not valid: " + parsed.asJson());
+            System.exit(1);
+        }
+        
+        if (!store.isValid(raw)) {
+            log.error("Created RawMessage is not valid: " + raw.asJson());
             System.exit(1);
         }
 
-        store.saveMessage(filename, doc);
+        store.saveParsedMessage(filename, parsed);
+        store.saveRawMessage(filename, raw);
     }
+    
     
     public Parser(Store store) throws IOException {
         props = new Properties();
         session = Session.getInstance(props);
-
         this.store = store;
-
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));   
-
     }
 
 
-    public Document parseMessage(String fileName) throws MessagingException, IOException {
+    public Pair<ParsedMessage, RawMessage> parseMessage(String fileName) throws MessagingException, IOException {
         return parseMessage(new File(fileName));
     }
 
-    public Document parseMessage(File f) throws MessagingException, IOException {
+    public Pair<ParsedMessage, RawMessage> parseMessage(File f) throws MessagingException, IOException {
         FileInputStream fis = new FileInputStream(f);
         try {
             return parseMessage(f.getName(), fis);
@@ -89,14 +97,15 @@ public class Parser {
         }
     }
 
-    public Document parseMessage(String id, InputStream is) throws MessagingException, IOException {
+    public Pair<ParsedMessage, RawMessage> parseMessage(String id, InputStream is) throws MessagingException, IOException {
         
-        log.info("id=" + id + " starting parse process");
+        log.info("parsing " + id);
         long start = System.currentTimeMillis();
 
         MimeMessage email = new MimeMessage(session, is);
 
-        Document doc = new Document(id);
+        ParsedMessage doc = new ParsedMessage(id);
+        RawMessage raw = new RawMessage(id);
 
         Enumeration<Header> headers = email.getAllHeaders();
         while (headers.hasMoreElements()) {
@@ -104,11 +113,12 @@ public class Parser {
             
             String value = h.getValue().trim();
             if (!StringUtils.isEmpty(value)) {
-                doc.addRaw(h.getName(), value);
+                raw.addKeyValue(h.getName(), value);
             }
         }
-        doc.addRaw("Body", IOUtils.toString(email.getInputStream(), "UTF-8"));
+        raw.addKeyValue("Body", IOUtils.toString(email.getInputStream(), "UTF-8"));
 
+        doc.addField("message_id", email.getMessageID());
         doc.addField("from", email.getFrom());
         doc.addField("to", email.getRecipients(RecipientType.TO));
         doc.addField("cc", email.getRecipients(RecipientType.CC));
@@ -124,9 +134,9 @@ public class Parser {
         doc.addField("body", bodyParts);
         doc.addField("attachments", attachments);
         
-        log.info("id=" + id + " parsed in " + (System.currentTimeMillis() - start) / (float) 1000 + " secs");
+        log.info(id + " parsed in " + (System.currentTimeMillis() - start) / (float) 1000 + " secs");
         
-        return doc;
+        return Pair.of(doc, raw);
     }
 
 
