@@ -132,7 +132,7 @@ public class Parser {
         doc.addField("in-reply-to", email.getHeader("In-Reply-To", null)); 
         
         String referencesStr = email.getHeader("References", null);
-        String[] references = (referencesStr == null) ? new String[] {""} : referencesStr.split(" ");
+        String[] references = (referencesStr == null) ? new String[] {} : referencesStr.split(" ");
         doc.addField("references", references);
         
         doc.addLabel("inbox");
