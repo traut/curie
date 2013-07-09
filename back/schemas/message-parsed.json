@@ -69,6 +69,13 @@
                 "to": { "$ref": "#/definitions/emailAddresses" },
                 "cc": { "$ref": "#/definitions/emailAddresses" },
                 "bcc": { "$ref": "#/definitions/emailAddresses" },
+                "in-reply-to": { "type": "string" },
+                "references": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
                 "subject": { "type": "string" },
                 "body": {
                     "type": "array",
