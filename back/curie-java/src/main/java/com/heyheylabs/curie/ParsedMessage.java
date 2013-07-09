@@ -63,8 +63,8 @@ public class ParsedMessage implements Validatable {
         HashMap<String, Object> data = new HashMap<String, Object>();
         data.put("id", this.id);
         data.put("received", new Date());
-        data.put("labels", labels);
         
+        data.put("labels", labels);        
         data.put("fields", fields);
         return data;
     }

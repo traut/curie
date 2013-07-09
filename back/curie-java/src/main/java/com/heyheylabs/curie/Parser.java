@@ -129,6 +129,12 @@ public class Parser {
         doc.addField("bcc", email.getRecipients(RecipientType.BCC));
         doc.addField("subject", email.getSubject());
         
+        doc.addField("in-reply-to", email.getHeader("In-Reply-To", null)); 
+        
+        String referencesStr = email.getHeader("References", null);
+        String[] references = (referencesStr == null) ? new String[] {""} : referencesStr.split(" ");
+        doc.addField("references", references);
+        
         doc.addLabel("inbox");
         
         List<HashMap<String, String>> attachments = new LinkedList<HashMap<String, String>>();

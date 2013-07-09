@@ -75,7 +75,7 @@
                     "items": {
                         "type": "string"
                     }
-                }
+                },
                 "subject": { "type": "string" },
                 "body": {
                     "type": "array",
