@@ -135,8 +135,6 @@ public class Parser {
         String[] references = (referencesStr == null) ? new String[] {} : referencesStr.split(" ");
         doc.addField("references", references);
         
-        doc.addLabel("inbox");
-        
         List<HashMap<String, String>> attachments = new LinkedList<HashMap<String, String>>();
         List<HashMap<String, String>> bodyParts = new LinkedList<HashMap<String, String>>();
         handlePart(email, bodyParts, attachments);

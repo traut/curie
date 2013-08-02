@@ -7,6 +7,8 @@
 local_settings.py
 .env
 .sass-cache
+.classpath
+.project
 var
 snapshot.db
 

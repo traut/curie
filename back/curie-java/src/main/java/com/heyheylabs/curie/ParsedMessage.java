@@ -17,18 +17,11 @@ public class ParsedMessage implements Validatable {
     public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
     private HashMap<String, Object> fields;
-    private LinkedList<String> labels;
     private String id;
-    
 
     public ParsedMessage(String id) {
         fields = new HashMap<String, Object>();
-        labels = new LinkedList<String>();
         this.id = id;
-    }
-
-    public void addLabel(String label) {
-        labels.add(label);
     }
 
     public void addField(String field, Address[] recipients) {
@@ -63,8 +56,6 @@ public class ParsedMessage implements Validatable {
         HashMap<String, Object> data = new HashMap<String, Object>();
         data.put("id", this.id);
         data.put("received", new Date());
-        
-        data.put("labels", labels);        
         data.put("fields", fields);
         return data;
     }

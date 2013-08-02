@@ -11,15 +11,6 @@
 
     <repositories>
         <repository>
-            <id>com.github.JavaBeanstalkClient</id>
-            <url>https://raw.github.com/jpeffer/JavaBeanstalkClient</url>
-            <!-- use snapshot version -->
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </snapshots>
-        </repository>
-        <repository>
             <id>com.github.jsonSchemaValidator</id>
             <url>https://raw.github.com/fge/json-schema-validator</url>
             <!-- use snapshot version -->
@@ -37,7 +28,7 @@
         <dependency>
             <groupId>com.surftools</groupId>
             <artifactId>BeanstalkClient</artifactId>
-            <version>1.4.7-SNAPSHOT</version>
+            <version>1.4.6</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>

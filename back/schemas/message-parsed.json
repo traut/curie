@@ -38,7 +38,7 @@
                 "filename": { "type": "string" },
                 "file": { "type": "string" }
             },
-            "required": ["filename", "file"]
+            "required": ["file"]
         }
     },
     "additionalProperties": false,
@@ -50,14 +50,6 @@
         "received": {
             "type": "string",
             "format": "date-time"
-        },
-        "labels": {
-            "type": "array",
-            "minItems": 1,
-            "items": {
-                "type": "string"
-            },
-            "uniqueItems": true
         },
         "fields": {
             "type": "object",
