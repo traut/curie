@@ -26,6 +26,7 @@ From: Sergey Polzunov <sergey@polzunov.com>
 Date: Mon, 11 Mar 2013 00:07:30 +0100
 X-Google-Sender-Auth: OvAPPGxpkqH0dnN_GWWQF3bH_Z8
 Message-ID: <CABjC=OuD7e4mGwokiWtoqYVX_s2KayE7n=vRw2dXrJ9anhJXqA@mail.gmail.com>
+References: <CABjC=OsuboJJWPdMRY=QbTragOz-tSBijOj68ZVo-BvfESwVzg@mail.gmail.com>\r\n <C6E219BC-ED2A-422B-9A60-C401F3C29E32@smscoin.com>
 Subject: test email
 To: some@curie.heyheylabs.com
 Content-Type: text/plain; charset=UTF-8

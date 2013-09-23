@@ -43,25 +43,38 @@ public class ParserTest {
         return null;
     }
 
-    @Test
+    @SuppressWarnings("rawtypes")
+	@Test
     public void testPlainEmail() throws MessagingException, IOException {
         InputStream is = ClassLoader.getSystemResourceAsStream("plain-email.txt");
         String mid = "plain-email";
         
         Pair<ParsedMessage,RawMessage> pair = parser.parseMessage(mid, is);
         
-        assertEquals(true, store.isValid(pair.getLeft()));
-        assertEquals(true, store.isValid(pair.getRight()));
+        ParsedMessage parsed = pair.getLeft();
+        RawMessage raw = pair.getRight();
         
-        Map<String, Object> data = pair.getLeft().asDataMap();
-        List<HashMap<String, String>> body = (List<HashMap<String, String>>) ((Map) data.get("fields")).get("body");
+        Map data = parsed.asDataMap();
+        Map fields = (Map) data.get("fields");
+        
+        assertEquals(true, store.isValid(parsed));
+		assertEquals(true, store.isValid(raw));
+        
+        
+		List body = (List) fields.get("body");
         
         assertEquals(getFirstForType(body, "text"), "Hey, testing queue\n\n\nSergey");
         
-        assertEquals(mid, pair.getLeft().asDataMap().get("id"));
-        assertEquals(mid, pair.getRight().asDataMap().get("id"));
+        assertEquals(mid, data.get("id"));
+        assertEquals(mid, raw.asDataMap().get("id"));
+        
+        List references = (List) fields.get("references");
+        
+		assertEquals(2, references.size());
+        assertEquals("<CABjC=OsuboJJWPdMRY=QbTragOz-tSBijOj68ZVo-BvfESwVzg@mail.gmail.com>", references.get(0));
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void testHtmlAndTextEmail() throws MessagingException, IOException {
         InputStream is = ClassLoader.getSystemResourceAsStream("html-and-text-email.txt");
@@ -71,9 +84,9 @@ public class ParserTest {
         assertEquals(true, store.isValid(pair.getLeft()));
         assertEquals(true, store.isValid(pair.getRight()));
 
-        Map<String, Object> data = pair.getLeft().asDataMap();
+        Map data = pair.getLeft().asDataMap();
 
-        List<HashMap<String, String>> body = (List<HashMap<String, String>>) ((Map) data.get("fields")).get("body");
+        List body = (List) ((Map) data.get("fields")).get("body");
         assertNotNull(getFirstForType(body, "text"));
     }
 
@@ -87,8 +100,8 @@ public class ParserTest {
         assertEquals(true, store.isValid(doc.getRight()));
 
         Map<String, Object> data = doc.getLeft().asDataMap();
-        HashMap<String, Object> fields = (HashMap<String, Object>) data.get("fields");
-        List<HashMap<String, String>> attachments = (List<HashMap<String, String>>) fields.get("attachments");
+        Map fields = (Map) data.get("fields");
+        List attachments = (List) fields.get("attachments");
         
         assertEquals(1, attachments.size());
         

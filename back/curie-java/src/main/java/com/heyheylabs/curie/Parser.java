@@ -6,6 +6,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -21,14 +24,20 @@ import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMessage.RecipientType;
+import javax.swing.plaf.ListUI;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.github.fge.jsonschema.exceptions.ProcessingException;
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
 
 
 /*
@@ -132,7 +141,7 @@ public class Parser {
         doc.addField("in-reply-to", email.getHeader("In-Reply-To", null)); 
         
         String referencesStr = email.getHeader("References", null);
-        String[] references = (referencesStr == null) ? new String[] {} : referencesStr.split(" ");
+        List references = (referencesStr == null) ? Collections.EMPTY_LIST : cleanUp(Arrays.asList(referencesStr.split("\\s+")));
         doc.addField("references", references);
         
         List<HashMap<String, String>> attachments = new LinkedList<HashMap<String, String>>();
@@ -218,5 +227,13 @@ public class Parser {
         }
 
         return charset;
+    }
+    
+    private List<String> cleanUp(List<String> values) { 
+    	return Lists.newArrayList(Collections2.transform(values, new Function<String, String>() {
+    		public String apply(String value) {
+    			return StringEscapeUtils.unescapeJava(value).trim();
+    		}
+		}));
     }
 }
