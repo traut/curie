@@ -2,11 +2,6 @@ var settings = {
 
     DOMAIN : 'curie.heyheylabs.com',
 
-    MAIL_ACCESS_MAP : {
-        "t@curie.heyheylabs.com" : ["t@curie.heyheylabs.com", "dev@arrr.tv", "webmaster@arrr.tv"],
-        "some@curie.heyheylabs.com" : ["some@curie.heyheylabs.com"]
-    },
-
     STORAGE_PATH : "/home/curie/storage/",
     DRAFTS_PATH : "/home/curie/drafts/",
 
@@ -21,12 +16,6 @@ var settings = {
 
     COOKIE_NAME_SESSION : 'curie.sid',
     COOKIE_EXIPE_IN : 15 * 60 * 1000, // 15 min
-
-    // FIXME: soon to be removed
-    ACCOUNTS : {
-        "t@curie.heyheylabs.com": "p",
-        "some@curie.heyheylabs.com": "p",
-    }
 }
 
 module.exports = settings;

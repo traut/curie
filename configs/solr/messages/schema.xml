@@ -6,6 +6,8 @@
    <field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
    <field name="_version_" type="long" indexed="true" stored="true"/>
 
+   <field name="account" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
+
    <field name="received" type="date" indexed="true" stored="true" required="true"/>
    <field name="indexed" type="date" indexed="true" stored="true" default="NOW" multiValued="false"/>
 

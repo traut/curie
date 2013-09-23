@@ -3,12 +3,12 @@
     <head>
         <title>Curie</title>
 
-        <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.css" type="text/css" media="screen" charset="utf-8">
-        <link rel="stylesheet" href="/static/bootstrap/css/bootstrap-responsive.css" type="text/css">
+        <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.css" type="text/css" media="screen" charset="utf-8"/>
+        <link rel="stylesheet" href="/static/bootstrap/css/bootstrap-responsive.css" type="text/css"/>
 
-        <link rel="stylesheet" href="/static/css/base.css" type="text/css" media="screen" charset="utf-8">
+        <link rel="stylesheet" href="/static/css/base.css" type="text/css" media="screen" charset="utf-8"/>
 
-        <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,600&subset=latin,cyrillic-ext,cyrillic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,600&subset=latin,cyrillic-ext,cyrillic' rel='stylesheet' type='text/css'/>
 
 
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
@@ -119,7 +119,6 @@
 
                 function createDataConnection() {
 
-                    stateModel.trigger("login-success");
 
                     var channel = window.readCookie("curie.channel");
                     if (!channel) {
@@ -142,6 +141,7 @@
                         stateModel.trigger("login-fail");
                     });
                     socket.on('connect', function() {
+                        stateModel.trigger("login-success");
                         reconnectInterval = RECONNECT_TIMEOUT_START;
                         hideAlert(); // maybe we were showing some connection-related alerts
 

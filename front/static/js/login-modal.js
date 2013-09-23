@@ -1,7 +1,7 @@
 
-function auth(email, password) {
+function auth(login, password) {
     $.post("/auth", {
-        login : email,
+        login : login,
         password : password
     }, function(response) {
         console.info(response);
@@ -19,7 +19,7 @@ LoginModal = function() {
     var modalObj = $("#loginModal");
 
     var formObjId = "#loginForm";
-    var emailInputId = "#inputEmail";
+    var loginInputId = "#inputLogin";
     var passwordInputId = "#inputPassword";
 
     var modalLoader = "#modalLoader";
@@ -52,16 +52,16 @@ LoginModal = function() {
                 $(":input", modalObj).attr("disabled", true);
                 $(modalLoader, modalObj).show();
 
-                var email = $(emailInputId, formObjId).val();
+                var login = $(loginInputId, formObjId).val();
                 var password = $(passwordInputId, formObjId).val();
 
-                if (!email || !password) {
+                if (!login || !password) {
                     $(":input", modalObj).removeAttr("disabled");
                     $(modalLoader, modalObj).hide();
                     return false;
                 }
 
-                auth(email, password);
+                auth(login, password);
 
                 return false;
             });
@@ -72,11 +72,11 @@ LoginModal = function() {
 
             $(modalLoader, modalObj).hide();
             $(":input", modalObj).removeAttr("disabled");
-            $(emailInputId, formObjId).val('');
+            $(loginInputId, formObjId).val('');
             $(passwordInputId, formObjId).val('');
 
             modalObj.modal('show');
-            $(emailInputId, formObjId).focus();
+            $(loginInputId, formObjId).focus();
         },
         hide : function () {
             modalObj.modal('hide');

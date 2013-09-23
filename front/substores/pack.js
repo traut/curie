@@ -12,36 +12,35 @@ PackStore = function() {
     return {
         getMessagePreviews : function(handshake, options, callback) {
             var pack = options.pack;
-            var toEmail = handshake.session.user.email;
+            var hash = handshake.session.user.hash;
 
-            log.info("Searching for pack=" + pack + ", toEmail=" + toEmail);
+            log.info("Searching for pack=" + pack + "; hash=" + hash);
 
-            queryForLabel(toEmail, pack, function(err, docs) {
+            queryForLabel(hash, pack, function(err, docs) {
                 if (err) {
                     callback(err, []);
                     return;
                 }
                 var msgs = [];
                 if (docs && docs.length > 0) {
-                    console.info(docs);
                     msgs = docs.map(utils.emailFromDoc);
                 }
                 callback(null, msgs);
             });
         },
         getPacks : function(handshake, options, callback) {
-            var email = handshake.session.user.email;
-            log.info("Getting packs list for " + email);
+            var hash = handshake.session.user.hash;
+            log.info("Getting packs list for " + hash);
             async.parallel({
                 packs : function(callback) {
-                    utils.solr.query(utils.accessControl(email), {
+                    utils.solr.query(utils.accessControl(hash), {
                         rows: 0,
                         facet: true,
                         'facet.field' : "labels"
                     }, callback);
                 },
                 unreadCounts : function(callback) {
-                    var query = "+unread:true " + utils.accessControl(email);
+                    var query = "+unread:true " + utils.accessControl(hash);
                     utils.solr.query(query, {
                         rows: 0,
                         facet: true,
@@ -78,7 +77,7 @@ PackStore = function() {
             var packName = options.pack,
                 groupField = options.groupField;
 
-            log.info("Getting groups for pack=" + packName + ", groupField=" + groupField + ", user=" + handshake.session.user.email);
+            log.info("Getting groups for pack=" + packName + ", groupField=" + groupField + "; user=" + handshake.session.user.hash);
 
             var groupFieldMapping = {
                 from : 'from.email',
@@ -86,11 +85,10 @@ PackStore = function() {
 
             var groupByFieldRealName = groupFieldMapping[groupField];
 
-            var query = "+labels:" + packName + utils.accessControl(handshake.session.user.email);
+            var query = "+labels:" + packName + utils.accessControl(handshake.session.user.hash);
 
             var facetQuery = query + " +unread:true";
 
-            //+unread:true +( header_to_email:"t@curie.heyheylabs.com" header_to_email:"dev@arrr.tv" header_to_email:"webmaster@arrr.tv")
             async.parallel({
                 groups : function(callback) {
                     utils.solr.query(query, {
@@ -139,10 +137,8 @@ PackStore = function() {
 };
 
 
-function queryForLabel(toEmail, label, callback){
-    var email = utils.solrEscape(toEmail);
-
-    var query = '+labels:' + label + utils.accessControl(toEmail);
+function queryForLabel(hash, label, callback){
+    var query = '+labels:' + label + utils.accessControl(hash);
 
     utils.solr.query(query, {
         sort: "received desc",

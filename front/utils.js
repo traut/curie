@@ -7,20 +7,16 @@ var util = require('util'),
     fs = require('fs'),
     cookie = require('cookie'),
     cookie_signature = require('cookie-signature'),
-    async = require('async');
+    async = require('async'),
 
-var settings = require('./settings');
+    users = require("./users.js"),
+    settings = require('./settings.js');
 
 var solr = solrLib.createClient();
 var solrEscape = solrLib.valueEscape
 
-function accessControlQueryPart(email) {
-    var query = " +(";
-    for(i in settings.MAIL_ACCESS_MAP[email]) {
-        query += ' to.email:"' + solrEscape(settings.MAIL_ACCESS_MAP[email][i]) + '"';
-    }
-    query += ") ";
-    return query;
+function accessControlQueryPart(accountHash) {
+    return ' +account:"' + solrEscape(accountHash) + '"';
 }
 
 

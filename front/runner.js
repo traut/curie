@@ -8,6 +8,7 @@ var http = require('http'),
     parseSignedCookie = require('express/node_modules/connect').utils.parseSignedCookie,
 
     settings = require('./settings'),
+    users = require("./users.js"),
     utils = require('./utils'),
     store = require("./store.js"),
     feed = require("./feed.js");
@@ -51,21 +52,21 @@ app.post('/auth', function (req, res) {
     var login = req.body.login;
     var password = req.body.password;
 
-    log.info("Login for user=" + login + ", pass=" + password);
-    if (settings.ACCOUNTS[login] == password) {
-
-        var channel = crypto.createHash('sha512').update(login).digest('hex');
-
-        req.session.user = {
-            email : login,
-            channel : channel
-        };
-        req.session.save();
-        res.cookie("curie.channel", channel, {httpOnly: false});
-        res.send({status : 'ok'});
-    } else {
-        res.send({status : 'error', message : "Not valid"});
-    }
+    log.info("Signing in user=" + login);
+    users.signIn(login, password, function(err, account) {
+        if (account) {
+            var channel = crypto.createHash('sha512').update(account.hash).digest('hex');
+            req.session.user = {
+                hash : account.hash,
+                channel : channel
+            };
+            req.session.save();
+            res.cookie("curie.channel", channel, {httpOnly: false});
+            res.send({status : 'ok'});
+        } else {
+            res.send({status : 'error', message : "No account found"});
+        }
+    });
 });
 
 app.get('/logout', function (req, res) {

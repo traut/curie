@@ -1,8 +1,8 @@
 (function() {
   var template = Handlebars.template, templates = Handlebars.templates = Handlebars.templates || {};
 templates['messageGroup'] = template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [2,'>= 1.0.0-rc.3'];
-helpers = helpers || Handlebars.helpers; data = data || {};
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression, self=this;
 
 function program1(depth0,data) {
@@ -45,8 +45,8 @@ function program1(depth0,data) {
   return buffer;
   });
 templates['groupView'] = template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [2,'>= 1.0.0-rc.3'];
-helpers = helpers || Handlebars.helpers; data = data || {};
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression, self=this;
 
 function program1(depth0,data) {
@@ -85,8 +85,8 @@ function program1(depth0,data) {
   return buffer;
   });
 templates['messageList'] = template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [2,'>= 1.0.0-rc.3'];
-helpers = helpers || Handlebars.helpers; data = data || {};
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, functionType="function", self=this;
 
 function program1(depth0,data) {
@@ -107,16 +107,16 @@ function program1(depth0,data) {
   return buffer;
   });
 templates['loginModal'] = template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [2,'>= 1.0.0-rc.3'];
-helpers = helpers || Handlebars.helpers; data = data || {};
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div class=\"modal-body\">\n    <div class=\"header text-center\">\n        <img src=\"/static/img/curie.gif\" class=\"logo\"/><h1>Curie</h1>\n    </div>\n    <br/>\n\n    <div class=\"alert alert-error hide\" id=\"errorNote\"></div>\n    <form class=\"form-horizontal\" id=\"loginForm\">\n        <div class=\"control-group\">\n            <div class=\"controls\">\n                <input type=\"email\" id=\"inputEmail\" placeholder=\"Email\" name=\"email\" tabindex=\"2\">\n            </div>\n        </div>\n        <div class=\"control-group\">\n            <div class=\"controls\">\n                <input type=\"password\" id=\"inputPassword\" placeholder=\"Password\" name=\"password\" tabindex=\"3\">\n            </div>\n        </div>\n        <div class=\"control-group\">\n            <div class=\"controls\">\n                <button type=\"submit\" class=\"btn\" tabindex=\"4\" onFocus=\"this.tabIndex=1;\" onBlur=\"this.tabIndex=4;\">Sign in</button>\n                <img src=\"/static/img/loader2.gif\" id=\"modalLoader\" style=\"margin-right:-16px;\" class=\"hide\"/>\n            </div>\n        </div>\n    </form>\n</div>\n";
+  return "<div class=\"modal-body\">\n    <div class=\"header text-center\">\n        <img src=\"/static/img/curie.gif\" class=\"logo\"/><h1>Curie</h1>\n    </div>\n    <br/>\n\n    <div class=\"alert alert-error hide\" id=\"errorNote\"></div>\n    <form class=\"form-horizontal\" id=\"loginForm\">\n        <div class=\"control-group\">\n            <div class=\"controls\">\n                <input type=\"login\" id=\"inputLogin\" placeholder=\"Login\" name=\"login\" tabindex=\"2\">\n            </div>\n        </div>\n        <div class=\"control-group\">\n            <div class=\"controls\">\n                <input type=\"password\" id=\"inputPassword\" placeholder=\"Password\" name=\"password\" tabindex=\"3\">\n            </div>\n        </div>\n        <div class=\"control-group\">\n            <div class=\"controls\">\n                <button type=\"submit\" class=\"btn\" tabindex=\"4\" onFocus=\"this.tabIndex=1;\" onBlur=\"this.tabIndex=4;\">Sign in</button>\n                <img src=\"/static/img/loader2.gif\" id=\"modalLoader\" style=\"margin-right:-16px;\" class=\"hide\"/>\n            </div>\n        </div>\n    </form>\n</div>\n";
   });
 templates['packList'] = template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [2,'>= 1.0.0-rc.3'];
-helpers = helpers || Handlebars.helpers; data = data || {};
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, self=this, functionType="function", escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing;
 
 function program1(depth0,data) {
@@ -131,11 +131,11 @@ function program1(depth0,data) {
   buffer += escapeExpression(stack1)
     + "\" class=\"pack\" name=\"";
   options = {hash:{},inverse:self.noop,fn:self.program(4, program4, data),data:data};
-  stack2 = ((stack1 = helpers.slugifySelector),stack1 ? stack1.call(depth0, depth0.name, options) : helperMissing.call(depth0, "slugifySelector", depth0.name, options));
+  stack2 = ((stack1 = helpers.slugifySelector || depth0.slugifySelector),stack1 ? stack1.call(depth0, depth0.name, options) : helperMissing.call(depth0, "slugifySelector", depth0.name, options));
   if(stack2 || stack2 === 0) { buffer += stack2; }
   buffer += "\">";
   options = {hash:{},inverse:self.noop,fn:self.program(4, program4, data),data:data};
-  stack2 = ((stack1 = helpers.shortify),stack1 ? stack1.call(depth0, depth0.name, 23, options) : helperMissing.call(depth0, "shortify", depth0.name, 23, options));
+  stack2 = ((stack1 = helpers.shortify || depth0.shortify),stack1 ? stack1.call(depth0, depth0.name, 23, options) : helperMissing.call(depth0, "shortify", depth0.name, 23, options));
   if(stack2 || stack2 === 0) { buffer += stack2; }
   buffer += "\n    \n    <span class=\"pull-right counters unread ";
   stack2 = helpers.unless.call(depth0, depth0.unread, {hash:{},inverse:self.noop,fn:self.program(6, program6, data),data:data});
@@ -171,8 +171,8 @@ function program6(depth0,data) {
   return buffer;
   });
 templates['hotkeysModal'] = template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [2,'>= 1.0.0-rc.3'];
-helpers = helpers || Handlebars.helpers; data = data || {};
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression, self=this;
 
 function program1(depth0,data) {
@@ -206,8 +206,8 @@ function program2(depth0,data) {
   return buffer;
   });
 templates['messageRow'] = template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [2,'>= 1.0.0-rc.3'];
-helpers = helpers || Handlebars.helpers; data = data || {};
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, stack2, options, functionType="function", escapeExpression=this.escapeExpression, self=this, helperMissing=helpers.helperMissing;
 
 function program1(depth0,data) {
@@ -284,7 +284,7 @@ function program11(depth0,data) {
   buffer += escapeExpression(stack1)
     + "</div>\n            <div class=\"span3 dateField\">";
   options = {hash:{},inverse:self.noop,fn:self.program(9, program9, data),data:data};
-  stack2 = ((stack1 = helpers.dateformat),stack1 ? stack1.call(depth0, depth0.received, "HH:mm, dddd, MMM Do", options) : helperMissing.call(depth0, "dateformat", depth0.received, "HH:mm, dddd, MMM Do", options));
+  stack2 = ((stack1 = helpers.dateformat || depth0.dateformat),stack1 ? stack1.call(depth0, depth0.received, "HH:mm, dddd, MMM Do", options) : helperMissing.call(depth0, "dateformat", depth0.received, "HH:mm, dddd, MMM Do", options));
   if(stack2 || stack2 === 0) { buffer += stack2; }
   buffer += "</div>\n        ";
   stack2 = helpers['if'].call(depth0, depth0.url, {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data});
@@ -293,8 +293,8 @@ function program11(depth0,data) {
   return buffer;
   });
 templates['message'] = template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [2,'>= 1.0.0-rc.3'];
-helpers = helpers || Handlebars.helpers; data = data || {};
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, stack2, options, functionType="function", escapeExpression=this.escapeExpression, self=this, helperMissing=helpers.helperMissing;
 
 function program1(depth0,data) {
@@ -368,7 +368,7 @@ function program13(depth0,data) {
   
   var buffer = "", stack1, stack2;
   buffer += "\n        <div class=\"body"
-    + escapeExpression(((stack1 = data.index),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = data),stack1 == null || stack1 === false ? stack1 : stack1.index)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\">\n        ";
   stack2 = (typeof depth0 === functionType ? depth0.apply(depth0) : depth0);
   if(stack2 || stack2 === 0) { buffer += stack2; }
@@ -378,7 +378,7 @@ function program13(depth0,data) {
 
   buffer += "    <button type=\"button\" class=\"close\" aria-hidden=\"true\">&times;</button>\n    <p>\n        <strong>Received:</strong> ";
   options = {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data};
-  stack2 = ((stack1 = helpers.dateformat),stack1 ? stack1.call(depth0, depth0.received, "HH:mm:ss, dddd, MMM Do, YYYY", options) : helperMissing.call(depth0, "dateformat", depth0.received, "HH:mm:ss, dddd, MMM Do, YYYY", options));
+  stack2 = ((stack1 = helpers.dateformat || depth0.dateformat),stack1 ? stack1.call(depth0, depth0.received, "HH:mm:ss, dddd, MMM Do, YYYY", options) : helperMissing.call(depth0, "dateformat", depth0.received, "HH:mm:ss, dddd, MMM Do, YYYY", options));
   if(stack2 || stack2 === 0) { buffer += stack2; }
   buffer += "<br/>\n        <strong>From:</strong> ";
   stack2 = helpers['if'].call(depth0, depth0.from_name, {hash:{},inverse:self.program(5, program5, data),fn:self.program(3, program3, data),data:data});
@@ -400,8 +400,8 @@ function program13(depth0,data) {
   return buffer;
   });
 templates['draft'] = template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [2,'>= 1.0.0-rc.3'];
-helpers = helpers || Handlebars.helpers; data = data || {};
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, stack2, options, self=this, helperMissing=helpers.helperMissing;
 
 function program1(depth0,data) {
@@ -418,21 +418,21 @@ function program3(depth0,data) {
 
   buffer += "<div class=\"draftView\" >\n    <div class=\"draftBody\">\n        <form class=\"form-horizontal\">\n            <div class=\"control-group\">\n                <input name=\"to\" type=\"text\" data-provide=\"typeahead\" placeholder=\"To\">\n            </div>\n            <div class=\"control-group\">\n                <input name=\"subject\" type=\"text\" data-provide=\"typeahead\" placeholder=\"Subject\">\n            </div>\n            <div class=\"control-group\">\n                <textarea rows=\"6\" name=\"body\"></textarea>\n            </div>\n        </form>\n    </div>\n    <div class=\"draftFooter row-fluid\">\n        <div class=\"span8 modal-footer\">\n            <div class=\"pull-left created\">\n                <span class=\"muted\">Created:</span> ";
   options = {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data};
-  stack2 = ((stack1 = helpers.dateformat),stack1 ? stack1.call(depth0, depth0.created, "HH:mm, dddd, MMM Do", options) : helperMissing.call(depth0, "dateformat", depth0.created, "HH:mm, dddd, MMM Do", options));
+  stack2 = ((stack1 = helpers.dateformat || depth0.dateformat),stack1 ? stack1.call(depth0, depth0.created, "HH:mm, dddd, MMM Do", options) : helperMissing.call(depth0, "dateformat", depth0.created, "HH:mm, dddd, MMM Do", options));
   if(stack2 || stack2 === 0) { buffer += stack2; }
   buffer += "\n            </div>\n            <a href=\"#new\" class=\"btn\">Discard</a>\n            <button onClick=\"javascript:console.info('Sending the message');alert('Ta-da!');\" class=\"btn btn-primary\">Send</button>\n        </div>\n        <div class=\"span4 ";
   stack2 = helpers.unless.call(depth0, depth0.saved, {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data});
   if(stack2 || stack2 === 0) { buffer += stack2; }
   buffer += " saved muted\">Saved <span class=\"savedValue\">";
   options = {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data};
-  stack2 = ((stack1 = helpers.date_ago),stack1 ? stack1.call(depth0, depth0.saved, options) : helperMissing.call(depth0, "date_ago", depth0.saved, options));
+  stack2 = ((stack1 = helpers.date_ago || depth0.date_ago),stack1 ? stack1.call(depth0, depth0.saved, options) : helperMissing.call(depth0, "date_ago", depth0.saved, options));
   if(stack2 || stack2 === 0) { buffer += stack2; }
   buffer += "</span></div>\n    </div>\n</div>\n";
   return buffer;
   });
 templates['messageGroupList'] = template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [2,'>= 1.0.0-rc.3'];
-helpers = helpers || Handlebars.helpers; partials = partials || Handlebars.partials; data = data || {};
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); partials = this.merge(partials, Handlebars.partials); data = data || {};
   var buffer = "", stack1, self=this, functionType="function", escapeExpression=this.escapeExpression;
 
 function program1(depth0,data) {
