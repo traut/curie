@@ -77,9 +77,29 @@ public class ParserTest {
     @SuppressWarnings("rawtypes")
     @Test
     public void testHtmlAndTextEmail() throws MessagingException, IOException {
-        InputStream is = ClassLoader.getSystemResourceAsStream("html-and-text-email.txt");
-        String mid = "html-and-text-email";
-        Pair<ParsedMessage, RawMessage> pair = parser.parseMessage(mid, is);
+    	
+    	String filename = "html-and-text-email.txt";
+    	
+        InputStream is = ClassLoader.getSystemResourceAsStream(filename);
+        Pair<ParsedMessage, RawMessage> pair = parser.parseMessage(filename, is);
+        
+        assertEquals(true, store.isValid(pair.getLeft()));
+        assertEquals(true, store.isValid(pair.getRight()));
+
+        Map data = pair.getLeft().asDataMap();
+
+        List body = (List) ((Map) data.get("fields")).get("body");
+        assertNotNull(getFirstForType(body, "text"));
+    }
+    
+    @SuppressWarnings("rawtypes")
+    @Test
+    public void testBodyAsMultipartInline() throws MessagingException, IOException {
+        
+    	String filename = "body-in-parts.txt";
+    	
+    	InputStream is = ClassLoader.getSystemResourceAsStream(filename);
+        Pair<ParsedMessage, RawMessage> pair = parser.parseMessage(filename, is);
         
         assertEquals(true, store.isValid(pair.getLeft()));
         assertEquals(true, store.isValid(pair.getRight()));
