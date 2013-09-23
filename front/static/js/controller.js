@@ -125,6 +125,7 @@ function Controller() {
         });
 
         packBlocks.map(function(packs) {
+            console.info("123", packs);
             packs.fetch({
                 success : function() {
                     packs.each(function(model) {

@@ -14,8 +14,8 @@ SearchStore = function() {
             var searchQuery = options.ctx.query,
                 format = options.ctx.format;
 
-            //FIXME: security hole
-            var query = utils.accessControl(handshake.session.user.email) + searchQuery; //solrLib.valueEscape(searchQuery);
+            //FIXME: security hole, no searchQuery validation
+            var query = utils.accessControl(handshake.session.user.hash) + searchQuery; //solrLib.valueEscape(searchQuery);
 
             log.info("Getting search for searchQuery=" + query);
 
