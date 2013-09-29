@@ -5,6 +5,7 @@ import iso8601
 import json
 import solr
 import logging
+import uuid
 
 import sqlite3
 
@@ -17,7 +18,8 @@ logger = logging.getLogger(__name__)
 
 sql = sqlite3.connect('/home/curie/curie/users.db')
 
-solrClient = solr.SolrConnection('http://localhost:8983/solr')
+solrMessages = solr.SolrConnection('http://localhost:8983/solr/messages')
+solrThreads = solr.SolrConnection('http://localhost:8983/solr/threads')
 
 
 def get_schema():
@@ -53,6 +55,11 @@ def create_email_doc(account_hash, blob):
 
     labels = ["inbox"]
 
+    message_id = blob["fields"]["message_id"]
+
+    if not message_id or message_id == "":
+        raise Exception("no message id! mid=%s" % mid)
+
     document = {
         "id" : mid,
         "received" : received,
@@ -74,7 +81,9 @@ def create_email_doc(account_hash, blob):
         "bcc.email" : [a["email"] for a in blob["fields"]["bcc"]],
         "bcc.json" : json.dumps(blob["fields"]["bcc"]),
 
-        "attachment" : [a["filename"] for a in blob["fields"]["attachments"]],
+        "attachment" : filter(None, [a.get("filename") for a in blob["fields"]["attachments"]]),
+
+        "reference" : blob["fields"].get("references", []),
 
         "subject" : blob["fields"].get("subject"),
         "body" : [b.get("value") for b in blob["fields"].get("body")]
@@ -83,30 +92,54 @@ def create_email_doc(account_hash, blob):
     return document
 
 
+def get_parent_message_ids(blob):
+    fields = blob["fields"]
+    references = fields.get("references", [])
+    reply_to = fields.get("in-reply-to", None)
+
+    return references + ([reply_to] if reply_to else [])
+
+
+def get_relatives(account_hash, blob):
+
+    parents = get_parent_message_ids(blob)
+    if parents:
+        parents_query = " OR ".join(["message_id:%s" % solr_escape(ref) for ref in parents])
+    else:
+        parents_query = None
+
+    message_id = blob["fields"]["message_id"]
+    relatives_query = ("+(reference:%s" % solr_escape(message_id)) + ((" OR (%s)" % parents_query) if parents_query else "") + ")";
+
+    query = "+account:%s" % account_hash + " " + relatives_query;
+
+    logger.info("Getting relatives: %s", query)
+
+    response = solrMessages.query(query)
+
+    logger.debug(response.results)
+
+    return response.results
+
+
+
 def get_threads(account_hash, blob):
 
-    mid = blob["id"]
-
-    references = blob.get("references", [])
-    reply_to = blob.get("in-reply-to", None)
-
-    parents = references + ([reply_to] if reply_to else [])
+    parents = get_parent_message_ids(blob)
 
     if not parents:
-        logger.info("No parents for mid=%s" % mid)
+        logger.info("No parents for mid=%s" % blob["id"])
         return
 
-    query = ("+(%s) " % " OR ".join(["child:'%s'" % solr_escape(p) for p in parents])) + " +account:'%s'" % account_hash
+    query = ("+(%s) " % " OR ".join(["child_mid:%s" % solr_escape(p) for p in parents])) + " +account:%s" % account_hash
 
-    print query
-    response = solrClient.query(query)
+    
+    logger.info("Getting threads: %s", query)
+    response = solrThreads.query(query)
 
-    print response
+    logger.debug(response.results)
 
-    for r in response.results:
-        print r
-
-    return response.results or None
+    return response.results
 
 
 def process(filename):
@@ -128,18 +161,41 @@ def process(filename):
         logger.error("No hashes found for %s", filename)
         return
 
-    for h in hashes:
-        email_doc = create_email_doc(h, message_blob)
-        thread_docs = get_threads(h, message_blob)
+    for account in hashes:
+        email_doc = create_email_doc(account, message_blob)
 
-        logger.warn("Email: %s...", str(email_doc)[:150])
+        threads = get_threads(account, message_blob)
+        logger.info("%s threads found for mid=%s, account=%s", "No" if not threads else len(threads), mid, account)
 
+        relatives = get_relatives(account, message_blob)
+        logger.info("%s relatives found for mid=%s, account=%s", "No" if not relatives else len(relatives), mid, account)
 
-        if not thread_docs:
-            logger.info("No threads found for mid=%s, account=%s", mid, h)
+        if relatives and not threads:
+            thread = dict(
+                id = str(uuid.uuid4()),
+                account = account,
+                child_id = [r['id'] for r in relatives] + [email_doc["id"]],
+                child_mid = [r["message_id"] for r in relatives] + [email_doc["message_id"]],
+            )
+            logger.info("Thread created: %s" % thread)
+            solrThreads.add(**thread)
+        elif threads:
+            for t in threads:
+                t['child_id'].append(email_doc["id"])
+                t['child_mid'].append(email_doc["message_id"])
+                t['_version_'] = 1
+                del t['score']
+                solrThreads.add(**t)
 
-    #solrClient.add(**document)
-    #solrClient.commit()
+        import pprint
+        pprint.pprint(email_doc)
+
+        #logger.warn("Email: %s...", str(email_doc)[:150])
+
+        solrMessages.add(**email_doc)
+
+    #solrMessages.commit()
+    #solrThreads.commit()
 
 
 if __name__ == '__main__':

@@ -21,6 +21,7 @@ from settings import *
 
 def move_file(filename, destdir):
 
+    #FIXME: bullshit. hash should be calculated out of message id probably
     hashed = hashlib.sha256(filename).hexdigest()
     subdir = os.path.join(destdir, hashed[:2], hashed[2:4], hashed[4:6])
 

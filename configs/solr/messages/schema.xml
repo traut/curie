@@ -40,6 +40,8 @@
        <field name="bcc.email" type="text_ws_lower" indexed="true" stored="false" multiValued="true" />
        <field name="bcc.json" type="string" indexed="false" stored="true" multiValued="false"/>
 
+       <field name="reference" type="text_ws" indexed="true" stored="true" multiValued="true"/>
+
        <field name="attachment" type="string" indexed="true" stored="true" multiValued="true"/>
 
        <field name="subject" type="text_general" indexed="true" stored="true" />
@@ -50,7 +52,6 @@
        <!-- not supported for now 
        <field name="orig_date" type="date" indexed="true" stored="true" />
        <field name="in_reply_to" type="string" indexed="true" stored="true"/>
-       <field name="reference" type="text_ws" indexed="true" stored="true" multiValued="true"/>
        <field name="keyword" type="text_commaDelimited_lower" indexed="true" stored="true" multiValued="true"/>
        <field name="sender" type="string_email" indexed="true" stored="true"/>
         -->
