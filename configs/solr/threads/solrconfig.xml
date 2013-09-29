@@ -770,7 +770,7 @@
      <lst name="defaults">
        <str name="echoParams">explicit</str>
        <int name="rows">10</int>
-       <str name="df">child</str>
+       <str name="df">child_mid</str>
      </lst>
     <!--
        <lst name="appends">
@@ -1601,6 +1601,13 @@
        http://wiki.apache.org/solr/UpdateRequestProcessor
 
     --> 
+
+    <updateRequestProcessorChain name="uuid">
+        <processor class="solr.UUIDUpdateProcessorFactory">
+            <str name="fieldName">id</str>
+        </processor>
+        <processor class="solr.RunUpdateProcessorFactory" />
+    </updateRequestProcessorChain>
   <!-- Deduplication
 
        An example dedup update processor that creates the "id" field

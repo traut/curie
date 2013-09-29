@@ -4,13 +4,15 @@
  <fields>
 
    <field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
+
    <field name="_version_" type="long" indexed="true" stored="true"/>
 
    <field name="account" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
 
    <field name="updated" type="date" indexed="true" stored="true" default="NOW" required="true"/>
 
-   <field name="child" type="string" indexed="true" stored="true" multiValued="true"/>
+   <field name="child_id" type="string" indexed="true" stored="true" multiValued="true"/>
+   <field name="child_mid" type="string" indexed="true" stored="true" multiValued="true"/>
 
    
  </fields>
