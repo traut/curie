@@ -45,52 +45,52 @@ var hotkeys = {
         'j' : {
             doc : 'Choose a message/group below',
             action : function() {
-                window.curie.appView.propagateActionToPack("down");
+                stateModel.get("activeArrowsListener").trigger("move", "j");
             }
         },
         'k' : {
             doc : 'Choose a message/group above',
             action : function() {
-                window.curie.appView.propagateActionToPack("up");
+                stateModel.get("activeArrowsListener").trigger("move", "k");
             }
         },
         'l' : {
             doc : 'Show/hide selected message/group',
             action : function () {
-                window.curie.appView.getActivePackView().toggleSelectedMessage();
+                stateModel.get("activeArrowsListener").trigger("move", "l");
             }
         },
         'x' : {
             doc : 'Mark/unmark a message/group as selected',
             action : function() {
-                window.curie.appView.propagateActionToPack("mark");
+                stateModel.get("activeArrowsListener").trigger("action", "x");
             }
         },
         'g g' : {
             doc : 'Choose the latest message',
             action : function() {
-                window.curie.appView.propagateActionToPack("first");
+                stateModel.get("activeArrowsListener").trigger("move", "gg");
             }
         },
         'G' : {
             doc : 'Choose the earliest message',
             action : function() {
-                window.curie.appView.propagateActionToPack("last");
+                stateModel.get("activeArrowsListener").trigger("move", "G");
             }
         },
         'm n' : {
             doc : 'Create a new message',
             action : function(e) {
                 e.preventDefault();
-                window.curie.router.navigate("#new", {trigger : true});
+                window.curie.controller.routeToNew();
             }
         },
         'm u' : {
             doc : 'Mark a message as unread',
             action : dummy
         },
-        'm p' : {
-            doc : 'Change message packs',
+        'm l' : {
+            doc : 'Add a label',
             action : dummy
         },
     },

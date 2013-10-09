@@ -59,6 +59,37 @@ function VolatileModel(properties) {
     }
 }
 
+var QUOTE_BLOCK = function() {
+    var random = Math.floor(Math.random() * 100000);
+    var label = "[Quoted block]";
+    return "<p><a onClick='javascript:$(\"#quote" + random + "\").toggle()' class='showQuote'>" + label + "</a><span id='quote" + random + "' class='hide'>$1</span></p>"
+}
+
+function prepareBodyBlocks(message, preferText) {
+
+    var preferText = preferText || (message.body.length > 1);
+
+    message._body = _.map(message.body, function(b) {
+
+        var value = null;
+        if (b.type == 'text') {
+            value = b.value
+                .replace(/(^\s*\>+\s*\>*[\s\S]*$)(?=(^[^\>]+$))/mgi, QUOTE_BLOCK())
+                .replace(/\n{2}/g, "<br/>")
+                .replace(/\n/g, "<br/>");
+        } else if (!preferText) {
+            value = b.value;
+        }
+        return {
+            type : b.type,
+            value : value
+        }
+    });
+
+    message._from = message.from[0];
+    return message;
+}
+
 function setCookie(name, value) {
     document.cookie = name + "=" + value;
 }
@@ -68,6 +99,10 @@ function delCookie(name) {
 
 function isElementInDOM(element) {
     return jQuery.contains(document.documentElement, element[0]);
+}
+
+function isElementInParent(elementParent, element) {
+    return jQuery.contains(elementParent[0], element[0]);
 }
 
 function updateElementClass(el, value, cls) {
@@ -92,6 +127,7 @@ function escapeSelector(str) {
         return str;
     }
 }
+
 function slugifySelector(str) {
     if (str) {
         return str.replace(/([ #;?%&,.+*~\':"!^$[\]()=>|\/@])/g,'__');
@@ -99,12 +135,40 @@ function slugifySelector(str) {
         return str;
     }
 }
+
 function utf8_to_b64(str) {
     return encodeURIComponent(window.btoa(unescape(encodeURIComponent(str))));
 }
  
 function b64_to_utf8(str) {
     return decodeURIComponent(escape(window.atob(decodeURIComponent(str))));
+}
+
+function getNextIndex(currentIndex, actionType, itemsLength) {
+    var nextIndex = null;
+
+    switch (actionType) {
+        case "up": 
+            nextIndex = currentIndex - 1;
+            nextIndex = (nextIndex < 0) ? (itemsLength - 1) : nextIndex;
+            break;
+        case "down":
+            nextIndex = currentIndex + 1;
+            nextIndex = (nextIndex >= itemsLength) ? 0 : nextIndex;
+            break;
+        case "first":
+            nextIndex = 0;
+            break;
+        case "last":
+            nextIndex = itemsLength - 1;
+            break;
+    }
+    return nextIndex;
+}
+
+function isEmail(email) {
+    var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+    return regex.test(email);
 }
 
 function elementInViewport(el) {
@@ -145,14 +209,22 @@ Handlebars.registerHelper('shortify', function(value, maxlength) {
 Handlebars.registerHelper('slugifySelector', function(value) {
     return slugifySelector(value);
 });
+Handlebars.registerHelper("last", function(array) {
+    return array[array.length-1];
+});
 Handlebars.registerPartial("messageRow", Handlebars.templates.messageRow);
 Handlebars.registerPartial("messageList", Handlebars.templates.messageList);
+Handlebars.registerPartial("messageView", Handlebars.templates.message);
 
-Backbone.View.prototype.close = function () {
+Handlebars.registerPartial("draftView", Handlebars.templates.draft);
+
+Backbone.View.prototype.close = function (a, b) {
+    console.info(a, b);
     if (this.beforeClose) {
         this.beforeClose();
     }
-    this.remove();
+    //this.remove();
+    this.$el && this.$el.hide();//this.$el.empty();
     this.unbind();
 };
 

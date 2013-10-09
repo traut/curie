@@ -31,9 +31,10 @@
         <script src="/static/js/searchController.js" type="text/javascript"></script>
         <script src="/static/js/controller.js" type="text/javascript"></script>
 
-        <script src="/static/js/views.js" type="text/javascript"></script>
+        <script src="/static/js/views/packList.js" type="text/javascript"></script>
         <script src="/static/js/views/pack.js" type="text/javascript"></script>
         <script src="/static/js/views/message.js" type="text/javascript"></script>
+        <script src="/static/js/views/thread.js" type="text/javascript"></script>
         <script src="/static/js/views/search.js" type="text/javascript"></script>
         <script src="/static/js/views/draft.js" type="text/javascript"></script>
 
@@ -81,7 +82,7 @@
                         </ul>
                     </div>
                     <ul class="nav nav-list packs">
-                        <li id="newMessageLi"><a href="#new">new message</a></li>
+                        <li id="newMessageLi"><a href="#" onClick="javascript:window.curie.controller.routeToNew();return false">new message</a></li>
                     </ul>
                     <div class="text-center">
                         <br/>
@@ -102,9 +103,9 @@
 
                 window.curie = window.curie || {};
 
-                var PERIODIC_FETCH = 0;//20 * 1000;
-                var RECONNECT_TIMEOUT_START = 100;
-                var reconnectInterval = RECONNECT_TIMEOUT_START;
+                var PERIODIC_FETCH = 0;//10 * 1000;//20 * 1000;
+                var RECONNECT_DELAY = 100;
+                var RECONNECT_GIVE_UP_RETRIES = 10;
 
                 function dummy() {};
 
@@ -116,6 +117,9 @@
                 function hideAlert() {
                     $("#errorAlert").html("").hide();
                 }
+
+                stateModel.on("connection:established", hideAlert);
+                stateModel.on("connection:error", showAlert);
 
                 function createDataConnection() {
 
@@ -131,31 +135,39 @@
                     var initialData = {
                         secure: true,
                         port: 443,
-                        'force new connection': true
+                        'force new connection': true,
+                        'reconnect': true,
+                        'reconnection delay': RECONNECT_DELAY,
+                        'max reconnection attempts': RECONNECT_GIVE_UP_RETRIES
                     }
 
                     var socket = window.curie.socket = io.connect('/stream/' + channel, initialData);
 
                     socket.on('error', function(reason) {
-                        //showAlert("Socket error", reason);
-                        stateModel.trigger("login-fail");
+                        stateModel.trigger("connection:error", "Connection error", reason);
+                        stateModel.trigger("logout");
                     });
                     socket.on('connect', function() {
-                        stateModel.trigger("login-success");
-                        reconnectInterval = RECONNECT_TIMEOUT_START;
-                        hideAlert(); // maybe we were showing some connection-related alerts
-
                         console.info("Connection to " + channel + " created");
+                        stateModel.trigger("login-success");
+                        stateModel.trigger("connection:established");
 
                         //FIXME: move to controller
                         initDataLoad();
                     });
+                    socket.on('reconnect', function() {
+                        stateModel.trigger("connection:established");
+
+                        console.info("Reconnected to " + channel);
+                    });
+                    socket.on('reconnecting', function(delay, attempt) {
+                        console.info("Reconnecting for " + attempt + " time, with delay " + delay);
+                        if (attempt == RECONNECT_GIVE_UP_RETRIES) {
+                            stateModel.trigger("logout");
+                        }
+                    });
                     socket.on("disconnect", function(reason) {
-                        showAlert("Disconnected", reason);
-                        setTimeout(function() {
-                            console.info("reconnecting");
-                            socket.socket.connect();
-                        }, (reconnectInterval *= 2)); 
+                        stateModel.trigger("connection:error", "Disconnect", reason);
                     });
                 }
 
@@ -180,8 +192,11 @@
 
             </script>
             <div class="span9" id="packView">
-                <div id="messageViews"></div>
-                <div id="messageLists"></div>
+                <div id="view" class="popupView">
+                    <button type="button" class="close" aria-hidden="true">&times;</button>
+                    <div class="content"></div>
+                </div>
+                <div id="list"></div>
             </div>
         </div>
 

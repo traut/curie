@@ -4,6 +4,7 @@ var isodate = require("isodate"),
 
     settings = require('../settings');
     utils = require('../utils');
+    converter = require('../converter');
 
 var log = utils.getLogger("store.pack");
 
@@ -23,14 +24,16 @@ PackStore = function() {
                 }
                 var msgs = [];
                 if (docs && docs.length > 0) {
-                    msgs = docs.map(utils.emailFromDoc);
+                    msgs = docs.map(converter.solrToEmailPreview);
                 }
+                msgs = utils.mergeToThreads(msgs);
                 callback(null, msgs);
             });
         },
         getPacks : function(handshake, options, callback) {
             var hash = handshake.session.user.hash;
             log.info("Getting packs list for " + hash);
+
             async.parallel({
                 packs : function(callback) {
                     utils.solr.query(utils.accessControl(hash), {
@@ -62,6 +65,9 @@ PackStore = function() {
 
                 var packs = [];
                 Object.keys(labelsMap).forEach(function(key) {
+                    if (key == "draft") { // skipping predefined
+                        return;
+                    }
                     packs.push({
                         id : crypto.createHash('md5').update(key).digest("hex"),
                         name : key,
@@ -69,6 +75,7 @@ PackStore = function() {
                         unread : unreadsMap[key]
                     });
                 });
+                console.info(packs);
 
                 callback(null, packs);
             });
@@ -127,7 +134,7 @@ PackStore = function() {
                         pack : packName,
                         size : group.doclist.numFound,
                         unread : unreadCounts[group.groupValue] || null,
-                        topMessages : group.doclist.docs.map(utils.emailFromDoc),
+                        topMessages : group.doclist.docs.map(converter.solrToEmailPreview),
                     };
                 }, this);
                 callback(null, groups);
@@ -142,7 +149,7 @@ function queryForLabel(hash, label, callback){
 
     utils.solr.query(query, {
         sort: "received desc",
-        rows: settings.NUM_ROWS,
+        rows: settings.NUM_ROWS * 2,
     }, function(err, response) {
         if (err) {
             log.error("Error when querying query=" + query + ": %s", err, {});

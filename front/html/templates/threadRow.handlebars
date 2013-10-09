@@ -1,0 +1,12 @@
+<div id="message-row-{{ id }}" class="row messageRow {{#if unreadCount }}unread{{/if}} threadRow">
+    {{#if url }}
+    <a href="#{{ url }}">
+    {{/if}}
+
+    {{> messageRow latest }}
+
+
+    {{#if url }}
+    </a>
+    {{/if}}
+</div>

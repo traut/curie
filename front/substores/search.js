@@ -5,6 +5,7 @@ var isodate = require("isodate"),
 
     settings = require('../settings'),
     utils = require('../utils');
+    converter = require('../converter');
 
 var log = utils.getLogger("store.search");
 
@@ -36,7 +37,7 @@ SearchStore = function() {
                 var messages = [];
                 var unreadCounts = {};
                 if (responseObj.response.docs && responseObj.response.docs.length > 0) {
-                    messages = responseObj.response.docs.map(utils.emailFromDoc);
+                    messages = responseObj.response.docs.map(converter.solrToEmailPreview);
                     unreadCounts = utils.flatToDict(responseObj.facet_counts.facet_fields.unread);
                 }
 

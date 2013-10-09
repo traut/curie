@@ -19,25 +19,35 @@ var PackView = Backbone.View.extend({
         this.model.groups.on("reset", this.render, this);
         this.model.on("reset", this.render, this);
 
+        this.on("move", this.moveMarker, this);
+        this.on("mark", this.markSelected, this);
+
         this.activeStyle = PACK_STYLES.LIST;
 
         this.showMessageFunction = this.options.showMessageFunction || "showMessage"; // to reverse to a proper link (pack vs search links)
 
         this.styles = {
-            list : {
+            listOld : {
                 models : this.model.messages,
                 el : $('<div id="messages-list" class="messageList"></div>'),
                 selector : ".messageRow",
                 idPrefix : "message-row-",
                 views : {},
-                viewClass : MessageRowView
+                viewClass : MessageRowView,
+            },
+            list : {
+                models : this.model.messages,
+                el : $('<div id="messages" class="messageList"></div>'),
+                selector : ".messageRow",
+                idPrefix : "message-row-",
+                views : {},
+                viewClass : WrappedRowView,
             },
             tiles : {
                 models : this.model.groups,
                 el : $('<div id="pack-groups" class="packGroups"></div>'),
                 selector : ".packGroup",
                 idPrefix : "message-group-",
-                views : {},
                 views : {},
                 viewClass : MessageGroupView,
             },
@@ -81,7 +91,8 @@ var PackView = Backbone.View.extend({
         _.each(modelsWithoutViews, function(model) {
             style.views[model.id] = new style.viewClass({
                 model : model,
-                rootUrl : this.rootUrl
+                rootUrl : this.rootUrl,
+                pack : this.model.get("name"),
             });
             console.info("subview added for " + model.id + " to style " + this.activeStyle);
         }, this);
@@ -131,7 +142,7 @@ var PackView = Backbone.View.extend({
         var style = this.getActiveStyle();
         if (!isElementInDOM(style.el)) {
             console.info("adding PackView to DOM: pack=" + this.model.get('name') + ", " + this.activeStyle);
-            $("#messageLists", "#packView").html(style.el);
+            $("#list", "#packView").html(style.el);
         } else {
             console.info("DOM element for PackView name=" + this.model.get('name') + " is in tree already");
         }
@@ -149,6 +160,7 @@ var PackView = Backbone.View.extend({
             return;
         }
         this.render();
+
     },
 
     render : function(i, activePackName) {
@@ -160,6 +172,7 @@ var PackView = Backbone.View.extend({
             if (!view) {
                 view = this.createSubView(model);
             }
+            //FIXME: I'm so sorry for the next two lines
             if ($("#" + style.idPrefix + model.id, style.el).length == 0) {
                 var existingDOMel = $(style.selector + ":nth-child(" + (index + 1) + ")", style.el);
                 if (existingDOMel.length == 0) {
@@ -171,7 +184,25 @@ var PackView = Backbone.View.extend({
 
         }, this);
 
+        console.info("settings pack " + this.model.get("name") + " as an activeArrowsListener");
+        stateModel.set("activeArrowsListener", this);
+
+
         return this;
+    },
+
+    moveMarker : function(m) {
+        var style = this.getActiveStyle();
+        console.info(style);
+
+        var view = style.views[style.models.models[0].id];
+        console.info(view);
+        view.set("selected", true);
+        if (m == "j") {
+        }
+    },
+
+    markSelected : function(a) {
     }
 });
 

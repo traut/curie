@@ -2,13 +2,18 @@
 function DraftController() {
 
 
-    stateModel.on("newDraft", function(draftId) {
+    stateModel.on("showDraft", function(draftId) {
 
-        stateModel.set("activePackName", "draft/" + (draftId || ""));
+        console.info("showing draft");
 
-        console.info("creating new draft view");
+        //stateModel.set("activePackName", "draft/" + (draftId || ""));
 
-        var draftModel = (draftId) ? new Draft({ id : draftId }) : new Draft({ created : new Date() });
+        var fromField = [{
+            email : 't@curie.heyheylabs.com',
+            name : 'Test Guy'
+        }];
+
+        var draftModel = (draftId) ? new Draft({ id : draftId }) : new Draft({ created : new Date(), from: fromField });
 
         var draftView = new DraftView({
             model : draftModel
@@ -17,20 +22,31 @@ function DraftController() {
         draftModel.on("change:id", function(m, value) {
             if (value) {
                 console.info("new draft id, navigating!");
-                window.curie.router.navigate("#new/" + value);
-                stateModel.set("activePackName", "draft/" + value);
+
+                var activeName = stateModel.get("activePackName");
+                window.curie.router.navigate(window.curie.router.reverse('showDraft', {pack : activeName, draftid : value}));
+
             }
         });
 
-        draftView.render();
+        var showDraft = function() {
+            draftView.render();
+            draftView.$el.show();
+            console.info("done", draftView.$el);
+        }
 
-    }, this);
-
-    stateModel.on("change:activePackName", function(i, activePackName) {
-        if (activePackName && activePackName.indexOf("draft") == -1) {
-            console.info("triggering hideDraft!");
-            stateModel.trigger("hideDraft");
+        if (draftId) {
+            draftModel.fetch({ success : showDraft });
+        } else {
+            showDraft();
         }
     }, this);
+
+//    stateModel.on("change:activePackName", function(i, activePackName) {
+//        if (activePackName && activePackName.indexOf("draft") == -1) {
+//            console.info("triggering hideDraft!");
+//            stateModel.trigger("hideDraft");
+//        }
+//    }, this);
 
 }

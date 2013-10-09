@@ -2,20 +2,20 @@ var Draft = Backbone.Model.extend({
     defaults: {
         id : null,
 
-        from : [],
+        from : [], // should be a proper EmailAddress object
         to : [],
         cc : [],
         bcc : [],
 
-        subject : null,
-        body : null,
-        in_reply_to : null,
+        subject : '',
+        body : '',
+        in_reply_to : '',
 
         // dates
         created : null,
         saved : null,
 
-        attachment : []
+        attachments : []
     },
     urlRoot : "/draft",
 
@@ -27,31 +27,49 @@ var Draft = Backbone.Model.extend({
 var MessageLight = Backbone.Model.extend({
     defaults: {
         id : null,
-        to_name : null,
-        to_email : null,
-        from_name : null,
-        from_email : null,
+
+        from : null,
+        to : null,
+        cc : null,
+        bcc : null,
+
         subject : null,
-        unread : null,
+
         received : null,
+        unread : null,
         labels : [],
+        
+        thread : null,
+        messages : [],
     },
     initialize: function() {
+    },
+    getLatestMessage : function() {
+        if (this.get("thread")) {
+            var messages = this.get("messages");
+            return messages[0];
+        }
     }
 });
 
 var Message = Backbone.Model.extend({
     defaults: {
         id : null,
-        to_name : null,
-        to_email : null,
-        from_name : null,
-        from_email : null,
+
+        from : null,
+        to : null,
+        cc : null,
+        bcc : null,
+
         subject : null,
-        unread : null,
+
         received : null,
+        unread : null,
         labels : [],
-        body : null
+
+        body : null,
+
+        attachments : []
     },
     urlRoot: "/messages",
 });
@@ -70,6 +88,19 @@ var Messages = Backbone.Collection.extend({
         });
         return models;
     },
+});
+
+var Thread = Backbone.Model.extend({
+    defaults: {
+        id : null,
+
+        received : null,
+        unreadCount : null,
+
+        labels : [],
+        messages : []
+    },
+    urlRoot: "/threads",
 });
 
 
@@ -153,46 +184,6 @@ var Pack = Backbone.Model.extend({
         this.groups.fetch(options);
         this.messages.fetch(options);
     },
-    propagateEvent : function(actionType) {
-        if (this.get("activeViewType") == "list") {
-            var current = this.messages.findWhere({ selected : true });
-            var currentIndex = this.messages.indexOf(current);
-
-            var nextIndex = null;
-            var markIndex = null;
-            switch (actionType) {
-                case "up": 
-                    nextIndex = currentIndex - 1;
-                    nextIndex = (nextIndex < 0) ? (this.messages.length - 1) : nextIndex;
-                    break;
-                case "down":
-                    nextIndex = currentIndex + 1;
-                    nextIndex = (nextIndex >= this.messages.length) ? 0 : nextIndex;
-                    break;
-                case "mark":
-                    markIndex = currentIndex;
-                    break;
-                case "last":
-                    nextIndex = this.messages.length - 1;
-                    break;
-                case "first":
-                    nextIndex = 0;
-                    break;
-            }
-            if (nextIndex != null) {
-                this.messages.where({selected : true}).forEach(function(m) {
-                    m.set('selected', false);
-                });
-                this.messages.at(nextIndex).set('selected', true);
-            }
-            if (markIndex != null) {
-                var model = this.messages.at(markIndex);
-                model.set('marked', !model.get("marked"));
-                console.info(this.messages.at(markIndex), model.get("marked"));
-            }
-
-        }
-    }
 });
 
 var Packs = Backbone.Collection.extend({
@@ -207,7 +198,6 @@ var StateModel = Backbone.Model.extend({
     defaults: {
         activePackName : null,
         selectedPackName : null,
-        selectedMessage : null,
     },
     markedMessages : new Messages(),
 });

@@ -1,4 +1,21 @@
 
+/*
+ * properties
+ *      activePackName
+ *      activeArrowsListener
+ *
+ *      selectedPackName #FIXME: needs refactoring to a global listener
+ *
+ * events
+ *      navigateToActivePack
+ *      showMessage (messageId)
+ *      showThread (threadId)
+ *      showDraft (draftId)
+ *
+ *      searchRequest (query64)
+ *
+ *
+ */
 var stateModel = new StateModel();
 
 function Controller() {
@@ -21,7 +38,7 @@ function Controller() {
     });
     var predefinedPacks = new Packs([
         {name : "sent"},
-        {name : "drafts"},
+        {name : "draft"},
     ], {
         urlRoot : '/packs',
     });
@@ -75,6 +92,7 @@ function Controller() {
         if (selectedName) {
             stateModel.set("activePackName", selectedName);
         }
+        $(".messageList").removeClass("disabled");
     }, this);
 
     stateModel.on("navigateToActivePack", function() {
@@ -92,27 +110,42 @@ function Controller() {
                 {trigger : true}
             );
         }
+        $(".messageList").removeClass("disabled");
     }, this);
 
 
     stateModel.on("showMessage", function(messageId) {
-        var message = new Message({
-            id : messageId
-        });
+        var message = new Message({ id : messageId });
 
         message.fetch({
             success : function() {
                 var view = new MessageView({
                     model : message
                 });
-                $("#messageViews").html(view.render(window.pageYOffset).$el);
+                view.render(window.pageYOffset);
+                view.$el.show();
+                $(".messageList").addClass("disabled");
             }
         });
+    }, this);
 
+    stateModel.on("showThread", function(threadId) {
+        var thread = new Thread({ id : threadId });
+
+        thread.fetch({
+            success : function() {
+                var view = new ThreadView({
+                    model : thread
+                });
+                view.render(window.pageYOffset);
+                view.$el.show();
+                $(".messageList").addClass("disabled");
+            }
+        });
     }, this);
 
     stateModel.on("logout", function() {
-        //delCookie("curie.channel");
+        delCookie("curie.channel");
         window.location = "/logout";
     });
 
@@ -163,6 +196,20 @@ function Controller() {
             });
         });
 
+    }
+
+    this.routeToNew = function() {
+        var pack = stateModel.get("activePackName");
+
+        if (pack == null || pack == undefined) {
+            pack = "inbox";
+        }
+
+        window.curie.router.navigate(
+            window.curie.router.reverse('showDraft', {pack : pack, draftid : ''}),
+            {trigger : true}
+        );
+        console.info("navigating to new in pack " + pack);
     }
 
 }

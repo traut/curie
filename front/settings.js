@@ -2,12 +2,17 @@ var settings = {
 
     DOMAIN : 'curie.heyheylabs.com',
 
-    STORAGE_PATH : "/home/curie/storage/",
-    DRAFTS_PATH : "/home/curie/drafts/",
+    STORAGE : {
+        MESSAGES : "/home/curie/storage/emails/",
+        DRAFTS : "/home/curie/storage/drafts/",
+    },
+
 
     NUM_ROWS : 30,
     NUM_GROUPS : 10,
     NUM_ROWS_IN_GROUP : 5,
+
+    INFINITY : 100,
 
     LOG_FILE : '/home/curie/curie/front/curie.log',
 

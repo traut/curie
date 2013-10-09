@@ -2,13 +2,13 @@
     <div class="draftBody">
         <form class="form-horizontal">
             <div class="control-group">
-                <input name="to" type="text" data-provide="typeahead" placeholder="To">
+                <input name="to" type="text" data-provide="typeahead" placeholder="To" value="{{#each to}}{{ email }} {{/each}}"/>
             </div>
             <div class="control-group">
-                <input name="subject" type="text" data-provide="typeahead" placeholder="Subject">
+                <input name="subject" type="text" data-provide="typeahead" placeholder="Subject" value="{{ subject }}"/>
             </div>
             <div class="control-group">
-                <textarea rows="6" name="body"></textarea>
+                <textarea rows="6" name="body">{{#each body}}{{ value }}{{/each}}</textarea>
             </div>
         </form>
     </div>
@@ -17,7 +17,7 @@
             <div class="pull-left created">
                 <span class="muted">Created:</span> {{#dateformat created 'HH:mm, dddd, MMM Do'}}{{/dateformat}}
             </div>
-            <a href="#new" class="btn">Discard</a>
+            <button type="button" class="btn" aria-hidden="true" name="discard">Discard</button>
             <button onClick="javascript:console.info('Sending the message');alert('Ta-da!');" class="btn btn-primary">Send</button>
         </div>
         <div class="span4 {{#unless saved}}hide{{/unless}} saved muted">Saved <span class="savedValue">{{#date_ago saved }}{{/date_ago}}</span></div>

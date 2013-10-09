@@ -2,14 +2,18 @@ var CHECK_ON_CHANGES_SEC = 3;
 
 var DraftView = Backbone.View.extend({
     template : Handlebars.templates.draft,
+    el : '#packView #view', //$('<div id="message-' + this.model.id + '" class="row messageView"></div>');
     events : {
         "input form input,textarea" : "fieldChanged",
+        "click button.close" : "closeAndNavigate",
+        "click button[name=discard]" : "closeAndNavigate",
     },
     initialize : function() {
 
         this.currentInterval = setInterval(this.saveDraft.bind(this), CHECK_ON_CHANGES_SEC * 1000);
 
-        stateModel.on("newDraft hideDraft", this.cleanUp, this);
+        stateModel.on("escPressed", this.closeAndNavigate, this);
+        stateModel.on("navigateToActivePack", this.cleanUp, this);
 
         this.model.on("change:saved", this.updateSaved, this);
 
@@ -18,9 +22,12 @@ var DraftView = Backbone.View.extend({
         console.info("rendering newMessage view");
 
         var html = this.template(this.model.toJSON());
-        this.$el.append($(html));
+        $(".content", this.$el).html($(html));
 
-        $("#packView").append(this.$el);
+        var topOffset = window.pageYOffset || 15;
+        this.$el.css("top", topOffset);
+
+        //$("#packView").append(this.$el);
         $("input[name=to]", this.$el).focus();
 
         return this;
@@ -43,7 +50,17 @@ var DraftView = Backbone.View.extend({
     fieldChanged : function(e) {
         var data = {};
         var field = e.currentTarget;
-        data[field.name] = field.value;
+
+        //FIXME: lame
+        if (field.name == "to") {
+            var text = field.value;
+            if (isEmail(text)) {
+                data[field.name] = [{email : field.value}];
+            }
+        } else {
+            data[field.name] = field.value;
+        }
+
         this.model.set(data);
 
         this.model.changedByUser = true;
@@ -53,11 +70,13 @@ var DraftView = Backbone.View.extend({
         savedBox.text(Handlebars.helpers.date_ago(value));
         savedBox.parent("div").show();
     },
+    closeAndNavigate : function() {
+        stateModel.trigger("navigateToActivePack");
+    },
     cleanUp : function() {
         console.info("Cleanup for draft [check for leaks]", this.model);
-        this.close();
         clearInterval(this.currentInterval);
-        stateModel.off("hideDraft newDraft", this.cleanUp, this);
+        this.close();
     }
 });
 

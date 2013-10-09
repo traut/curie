@@ -14,6 +14,7 @@ packStore = require('./substores/pack');
 messageStore = require('./substores/message');
 draftStore = require('./substores/draft');
 searchStore = require('./substores/search');
+threadStore = require('./substores/thread');
 
 
 
@@ -23,11 +24,14 @@ router.match('/packs', 'GET').to('packStore.getPacks');
 router.match('/packs/:pack/messages', 'GET').to('packStore.getMessagePreviews');
 router.match('/packs/:pack/groups/:groupField', 'GET').to('packStore.getGroups');
 
+router.match('/threads/:threadId', 'GET').to('threadStore.getThread');
+
 router.match('/messages/:messageId', 'GET').to('messageStore.getMessage');
 router.match('/messages/:messageId', 'PATCH').to('messageStore.patchMessage');
 
 router.match('/search', 'GET').to('searchStore.getSearch');
 
+router.match('/draft/:draftId', 'GET').to('draftStore.getDraft');
 router.match('/draft/:draftId', 'POST').to('draftStore.updateDraft');
 router.match('/draft', 'PUT').to('draftStore.updateDraft');
 
@@ -35,6 +39,8 @@ router.match('/draft', 'PUT').to('draftStore.updateDraft');
 var stores = {
     packStore : packStore.PackStore(),
     messageStore : messageStore.MessageStore(),
+    threadStore : threadStore.ThreadStore(),
+
     draftStore : draftStore.DraftStore(),
     searchStore : searchStore.SearchStore()
 }

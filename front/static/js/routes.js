@@ -2,13 +2,16 @@
 var AppRouter = Backbone.Router.extend({
 
     routes : {
-        "p/:pack": "showPack",
-        "p/:pack/:message": "showMessage",
+        "p/:pack/new/:draftid": "showDraft",
+        "p/:pack/new/": "showDraft",
 
-        "new/:draftid": "newDraft",
-        "new": "newDraft",
+        "p/:pack/:message": "showMessage",
+        "p/:pack": "showPack",
+
+        "p/:pack/t/:thread": "showThread",
 
         "search/:encodedquery/:message": "showSearchMessage",
+        "search/:encodedquery/:thread": "showSearchThread",
         "search/:encodedquery": "search",
 
         "": "showDashboard",
@@ -40,6 +43,7 @@ var AppRouter = Backbone.Router.extend({
     showPack : function(pack) {
         console.info("Showing pack " + pack);
         stateModel.set("activePackName", pack);
+        stateModel.trigger("navigateToActivePack");
     },
 
     showMessage : function(pack, message) {
@@ -47,9 +51,19 @@ var AppRouter = Backbone.Router.extend({
         stateModel.trigger("showMessage", message);
     },
 
+    showThread : function(pack, thread) {
+        stateModel.set("activePackName", pack);
+        stateModel.trigger("showThread", thread);
+    },
+
     showSearchMessage : function(encodedquery, message) {
         this.search(encodedquery);
         stateModel.trigger("showMessage", message);
+    },
+
+    showSearchThread : function(encodedquery, thread) {
+        this.search(encodedquery);
+        stateModel.trigger("showThread", thread);
     },
 
     showGroup : function(pack, group) {
@@ -61,8 +75,10 @@ var AppRouter = Backbone.Router.extend({
         stateModel.set("activePackName", null);
     },
 
-    newDraft : function(draftId) {
-        stateModel.trigger("newDraft", draftId);
+    showDraft : function(pack, draftId) {
+        console.info("settings pack to " + pack);
+        stateModel.set("activePackName", pack);
+        stateModel.trigger("showDraft", draftId);
     },
 
     search : function(encodedquery) {

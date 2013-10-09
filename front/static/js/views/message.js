@@ -1,27 +1,21 @@
 
 var MessageView = Backbone.View.extend({
     template : Handlebars.templates.message,
+    el : '#packView #view', //$('<div id="message-' + this.model.id + '" class="row messageView"></div>');
     events : {
-        "click button.close" : "closeMessage",
+        "click button.close" : "close",
     },
     initialize : function() {
-        this.model.on("change", this.render, this);
-        stateModel.on("escPressed", this.closeOnEsc, this);
-
-        this.$el = $('<div id="message-' + this.model.id + '" class="row messageView"></div>');
+        //this.model.on("change", this.render, this);
+        stateModel.on("escPressed", this.closeAndNavigate, this);
+        stateModel.on("navigateToActivePack", this.close, this);
     },
     render : function(yOffset) {
         console.info("rendering message " + this.model.id);
 
-
         var data = this.model.toJSON();
-
-        //FIXME: create a separate formatter class
-        data.body = _.map(data.body, function(b) {
-            return b.replace(/\n{2}/g, "<br/>").replace(/\n/g, "<br/>");
-        });
-
-        this.$el.html(this.template(data));
+        prepareBodyBlocks(data);
+        $(".content", this.$el).html(this.template(data));
 
         var self = this;
         setTimeout(function() {
@@ -36,14 +30,8 @@ var MessageView = Backbone.View.extend({
 
         return this;
     },
-    closeMessage : function() {
-        this.close();
+    closeAndNavigate : function() {
         stateModel.trigger("navigateToActivePack");
-    },
-    closeOnEsc : function() {
-        if (isElementInDOM(this.$el)) {
-            this.closeMessage();
-        }
     },
     setUnreadTo : function(bool, successCallback, errorCallback) {
         this.model.save({unread : bool}, {
@@ -52,18 +40,20 @@ var MessageView = Backbone.View.extend({
             error : errorCallback || dummy
         });
     },
-    hide : function() {
-        this.setToUnreadTrue = false;
-        this.$el.hide();
-    },
-    show : function() {
-        console.info("Show called for message " + this.model.id);
-        if (!jQuery.contains(document.documentElement, this.$el[0])) { // the element removed from DOM
-            console.info("Message " + this.model.id + " is not in DOM. adding");
-            $("#message-row-" + this.model.id).after(this.$el.hide());
-        }
-        this.$el.show();
+});
 
+var WrappedRowView = Backbone.View.extend({
+    initialize : function(options) {
+        if (this.model.get("thread")) {
+            this.wrappedView = new ThreadRowView({ model : this.model, rootUrl : this.options.rootUrl });
+        } else if (this.model.get("labels") && this.model.get("labels").indexOf("draft") > -1) {
+            this.wrappedView = new MessageRowView({ model : this.model, rootUrl : this.options.rootUrl + '/new', template : Handlebars.templates.draftRow });
+        } else {
+            this.wrappedView = new MessageRowView({ model : this.model, rootUrl : this.options.rootUrl });
+        }
+    },
+    render : function() {
+        return this.wrappedView.render();
     }
 });
 
@@ -71,9 +61,10 @@ var MessageRowView = Backbone.View.extend({
     template : Handlebars.templates.messageRow,
     initialize : function() {
 
-        stateModel.on("change:selectedMessage", this.updateSelected, this);
-        stateModel.markedMessages.on("add", this.setMarked, this);
-        stateModel.markedMessages.on("remove", this.unsetMarked, this);
+        this.template = this.options.template || this.template;
+
+        this.on("change:selected", this.updateSelected, this);
+        this.on("change:marked", this.updateMarked, this);
 
         this.model.on("change:unread", this.updateUnread, this);
         this.model.on("remove", this.removeMessage, this);
@@ -99,7 +90,15 @@ var MessageRowView = Backbone.View.extend({
     updateUnread : function(m, value) {
         updateElementClass(this.$el, value, "unread");
     },
-    updateSelected : function(i, mid) {
+    updateSelected : function(a, b) {
+        console.info("update selected", a, b);
+        return;
+        if (nextIndex != null) {
+            this.messages.where({selected : true}).forEach(function(m) {
+                m.set('selected', false);
+            });
+            this.messages.at(nextIndex).set('selected', true);
+        }
         if (mid != this.model.id) {
             updateElementClass(this.$el, false, "selected");
             return;
@@ -109,16 +108,15 @@ var MessageRowView = Backbone.View.extend({
             $('html, body').animate({scrollTop : this.$el.offset().top - 200}, 10);
         }
     },
-    setMarked : function(m, coll) {
-        if (m == this.model) {
-            updateElementClass(this.$el, true, "marked");
+    updateMarked : function(m, coll) {
+        console.info("update marked", a, b);
+        //updateElementClass(this.$el, true, "marked");
+        if (markIndex != null) {
+            var model = this.messages.at(markIndex);
+            model.set('marked', !model.get("marked"));
+            console.info(this.messages.at(markIndex), model.get("marked"));
         }
     },
-    unsetMarked : function(m, coll) {
-        if (m == this.model) {
-            updateElementClass(this.$el, false, "marked");
-        }
-    }
 });
 
 

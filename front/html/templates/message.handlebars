@@ -1,15 +1,34 @@
-    <button type="button" class="close" aria-hidden="true">&times;</button>
-    <p>
-        <strong>Received:</strong> {{#dateformat received 'HH:mm:ss, dddd, MMM Do, YYYY'}}{{/dateformat}}<br/>
-        <strong>From:</strong> {{# if from_name }} {{ from_name }} <span class="muted">&lt;{{ from_email }}&gt;</span> {{ else }} {{ from_email }} {{/if}}<br/>
-        <strong>To:</strong> {{# if to_name }} {{ to_name }} <span class="muted">&lt;{{ to_email }}&gt;</span> {{ else }} {{ to_email }} {{/if}}<br/>
-        <strong>Subject:</strong> {{ subject }}<br/>
-    </p>
-    <div class="pull-right">
-        {{#each labels}} <span class="badge">{{ this }}</span>{{/each}}
-    </div>
-    {{#each body }}
-        <div class="body{{@index}}">
-        {{{ this }}}
+    <div class="message">
+        <p class="messageHeader lead">
+            <span class="muted pull-right">{{#dateformat received 'HH:mm, MMM Do'}}{{/dateformat}}</span>
+            {{ subject }}
+            <span class="muted">by
+                {{# if _from.name }}
+                <a href="#new/{{ _from.email }}" title="{{ _from.name }} <{{ _from.email }}>" class="from">{{ _from.name }}</a>
+                {{ else }}
+                {{ _from.email }}
+                {{/if}}
+            </span>
+        </p>
+        <div class="pull-right">
+            {{#each labels}} <span class="badge">{{ this }}</span>{{/each}}
         </div>
-    {{/each }}
+        {{#each _body }}
+            <div class="body{{@index}}">
+            {{{ this.value }}}
+            </div>
+        {{/each }}
+
+        {{ attachment }}
+
+        {{#if attachments }}
+        <p>
+            <ul class="inline">
+            {{#each attachments }}
+                <li><a href="/attachment/{{ file }}">{{ filename }}</a></li>
+            {{/each}}
+            </ul>
+        </p>
+        {{/if}}
+    </div>
+

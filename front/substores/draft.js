@@ -5,6 +5,8 @@ var isodate = require("isodate"),
 
     settings = require('../settings'),
     utils = require('../utils');
+    solrUtils = require('../solrUtils');
+    converter = require('../converter');
 
 var log = utils.getLogger("store.draft");
 
@@ -12,68 +14,72 @@ DraftStore = function() {
     return {
         getDraft : function(handshake, options, callback) {
             var draftId = options.draftId;
+            var userHash = handshake.session.user.hash;
 
             if (!draftId) {
                 callback("No draftId specified", null);
                 return;
             }
-            var path = utils.draftPath(handshake.session.user.email, draftId);
+            var path = utils.draftPath(userHash, draftId);
 
-            //FIXME: possible security hole
-            readDraftFromFile(path, function(err, result) {
+            async.parallel({
+                fs : function(callback) {
+                    utils.readFromFile(path, callback);
+                },
+                solr : function(callback) {
+                    solrUtils.getMessage(userHash, draftId, callback);
+                }
+            }, function(err, results) {
                 if (err) {
                     callback(err, null);
                     return;
                 }
-                console.info(result);
-                callback(null, result);
+                var email = converter.parsedAndSolrToEmail(results.fs, results.solr);
+                email.draft = true;
+
+                callback(null, email);
+                log.info("Draft " + draftId + " was send");
+
             });
         },
         updateDraft : function(handshake, options, callback) {
-            var draftId = options.draftId,
-                msg = options.item;
+            var draft = options.item;
+            var userHash = handshake.session.user.hash;
 
-            var fromEmail = handshake.session.user.email;
+            draft.id = draft.id || utils.uniqueId();
+            draft.account = userHash;
+            draft.__message_id = utils.createMessageId(draft.id);
+            draft.__references = (draft.in_reply_to == null || draft.in_reply_to == '') ? [] : [draft.in_reply_to];
+            draft.body = [{ type : "text", value : draft.body }];
 
-            if (!draftId) {
-                log.info("new draft received", msg, {});
-                draftId = crypto.createHash('md5').update(msg + "").digest("hex");
-            }
-
-            var path = utils.draftPath(fromEmail, draftId);
-
-            writeDraftToFile(path, msg, function(err) {
+            async.parallel({
+                fs : function(callback) {
+                    var parsed = converter.draftToParsed(draft);
+                    if (parsed == null) {
+                        callback("Can't save draft", null);
+                        return;
+                    }
+                    utils.writeToFile(
+                        utils.draftPath(userHash, draft.id),
+                        parsed,
+                        callback);
+                },
+                solr : function(callback) {
+                    indexDraft(draft, callback);
+                }
+            }, function(err, results) {
+                console.info("HERE");
                 if (err) {
                     callback(err, null);
                     return;
                 }
-                console.info("File " + path + " created");
-                callback(null, {success : true});
+                var path = results.fs;
+                console.info("Sending back ", draft);
+                callback(null, draft);
             });
-
-            //FIXME
 
         }
     }
-}
-
-function writeDraftToFile(path, item, callback) {
-    var body = JSON.stringify(item, null, 4);
-
-    var fd = fs.openSync(path, 'w');
-    fs.flock(fd, 'ex', function(err) {
-        if (err) {
-            log.error("Can't lock a file " + path, err);
-            callback(err, null);
-            return;
-        }
-        fs.writeFileSync(path, body);
-        callback(null, null);
-
-        fs.flock(fd, 'un');
-        fs.closeSync(fd);
-    });
-
 }
 
 function readDraftFromFile(path, callback) {
@@ -94,6 +100,22 @@ function readDraftFromFile(path, callback) {
     } else {
         log.error("Requested path doesn't exists path=" + path);
         callback("Path " + path + " doesn't exists!", null);
+    }
+}
+
+function indexDraft(draft, callback) {
+    if (draft && draft.id) {
+        solrUtils.getMessage(draft.account, draft.id, function(err, result) {
+            if (err) {
+                log.error("Can't retrieve a draft: " + draft.id, err);
+                callback(err, null);
+                return;
+            }
+
+            solrUtils.indexMessage(converter.draftToDoc(draft), callback);
+        });
+    } else {
+        callback("No draft id to search for", null);
     }
 }
 

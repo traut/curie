@@ -4,7 +4,6 @@ function auth(login, password) {
         login : login,
         password : password
     }, function(response) {
-        console.info(response);
         if (response.status == 'error') {
             console.error("Can't authenthicate: " + response.message);
             stateModel.trigger("login-fail");
@@ -32,7 +31,6 @@ LoginModal = function() {
     });
 
     stateModel.on("login-success", function() {
-        console.info("LOGIN SUCCESS");
         $(".mainBlock", ".app").show();
         controller.hide();
     });
