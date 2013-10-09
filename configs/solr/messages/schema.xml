@@ -15,7 +15,7 @@
    <field name="unread" type="boolean" indexed="true" stored="true" default="true" multiValued="false"/>
 
 
-   <field name="thread_count" type="int" indexed="true" stored="true" multiValued="false"/>
+   <field name="threads" type="string" indexed="true" stored="true" multiValued="true"/>
 
 
    <!-- Fields from the email -->

@@ -23,6 +23,6 @@
   <cores adminPath="/admin/cores" defaultCoreName="messages" host="${host:}" hostPort="${jetty.port:}" hostContext="${hostContext:}" zkClientTimeout="${zkClientTimeout:15000}">
 
     <core name="messages" instanceDir="messages" />
-    <core name="threads" instanceDir="threads" />
+    <!-- <core name="threads" instanceDir="threads" /> -->
   </cores>
 </solr>

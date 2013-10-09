@@ -14,6 +14,7 @@
    <field name="child_id" type="string" indexed="true" stored="true" multiValued="true"/>
    <field name="child_mid" type="string" indexed="true" stored="true" multiValued="true"/>
 
+
    
  </fields>
 
