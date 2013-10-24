@@ -1,17 +1,17 @@
     <div class="message">
-        <p class="messageHeader lead">
-            <span class="muted pull-right">{{#dateformat received 'HH:mm, MMM Do'}}{{/dateformat}}</span>
-            {{ subject }}
-            <span class="muted">by
-                {{# if _from.name }}
-                <a href="#new/{{ _from.email }}" title="{{ _from.name }} <{{ _from.email }}>" class="from">{{ _from.name }}</a>
-                {{ else }}
-                {{ _from.email }}
-                {{/if}}
+        <p class="messageHeader">
+            <span class="lead">
+                <span class="muted pull-right date">{{#dateformat received 'HH:mm, MMM Do'}}{{/dateformat}}</span>
+                {{ subject }}
+                <span class="headerRow">from {{> emailAddressWithLink _from }}</span>
+                <br/>
             </span>
+            {{#if to }}<span class="headerRow">to: {{#commaJoined to }} {{> emailAddressWithLink this }}{{/commaJoined }}</span>{{/if }}
+            {{#if cc }}<span class="headerRow">cc: {{#commaJoined cc }} {{> emailAddressWithLink this }}{{/commaJoined }}</span>{{/if }}
+            {{#if bcc }}<span class="headerRow">bcc: {{#commaJoined bcc }} {{> emailAddressWithLink this }}{{/commaJoined }}</span>{{/if }}
         </p>
         <div class="pull-right">
-            {{#each labels}} <span class="badge">{{ this }}</span>{{/each}}
+            {{#each labels}} <a class="badge mutedWithHover" href="#p/{{ this }}">{{ this }}</a>{{/each}}
         </div>
         {{#each _body }}
             <div class="body{{@index}}">

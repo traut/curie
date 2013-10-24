@@ -59,6 +59,29 @@ function VolatileModel(properties) {
     }
 }
 
+var tagBody = '(?:[^"\'>]|"[^"]*"|\'[^\']*\')*';
+
+var tagOrComment = new RegExp(
+    '<(?:'
+    // Comment body.
+    + '!--(?:(?:-*[^->])*--+|-?)'
+    // Special "raw text" elements whose content should be elided.
+    + '|script\\b' + tagBody + '>[\\s\\S]*?</script\\s*'
+    + '|style\\b' + tagBody + '>[\\s\\S]*?</style\\s*'
+    // Regular name
+    + '|/?[a-z]'
+    + tagBody
+    + ')>',
+    'gi');
+function removeTags(html) {
+  var oldHtml;
+  do {
+    oldHtml = html;
+    html = html.replace(tagOrComment, '');
+  } while (html !== oldHtml);
+  return html.replace(/</g, '&lt;');
+}
+
 var QUOTE_BLOCK = function() {
     var random = Math.floor(Math.random() * 100000);
     var label = "[Quoted block]";
@@ -73,10 +96,11 @@ function prepareBodyBlocks(message, preferText) {
 
         var value = null;
         if (b.type == 'text') {
-            value = b.value
-                .replace(/(^\s*\>+\s*\>*[\s\S]*$)(?=(^[^\>]+$))/mgi, QUOTE_BLOCK())
-                .replace(/\n{2}/g, "<br/>")
-                .replace(/\n/g, "<br/>");
+            value = removeTags(b.value)
+                //.replace(/(^\s*\>+\s*\>*[\s\S]*$)(?=(^[^\>]+$))/mgi, QUOTE_BLOCK());
+                .replace(/(^\s*\>+\s*\>*[\s\S]*$)/mgi, QUOTE_BLOCK())
+                .replace(/((\r\n|\n)\s*){3,}/mg, "<br/>")
+                .replace(/(\r\n|\n)\s*/g, "<br/>");
         } else if (!preferText) {
             value = b.value;
         }
@@ -123,14 +147,6 @@ function getUrl(object) {
 function escapeSelector(str) {
     if (str) {
         return str.replace(/([ #;?%&,.+*~\':"!^$[\]()=>|\/@])/g,'\\$1');
-    } else {
-        return str;
-    }
-}
-
-function slugifySelector(str) {
-    if (str) {
-        return str.replace(/([ #;?%&,.+*~\':"!^$[\]()=>|\/@])/g,'__');
     } else {
         return str;
     }
@@ -191,35 +207,7 @@ function elementInViewport(el) {
     );
 }
 
-Handlebars.registerHelper('dateformat', function(stamp, format) {
-    return (stamp) ? moment(stamp).format(format) : "";
-});
-Handlebars.registerHelper('date_ago', function(stamp) {
-    if (stamp) {
-        return moment(stamp).fromNow()
-    }
-    return '';
-});
-Handlebars.registerHelper('shortify', function(value, maxlength) {
-    if (value.length > maxlength) {
-        return value.slice(0, maxlength) + "...";
-    }
-    return value;
-});
-Handlebars.registerHelper('slugifySelector', function(value) {
-    return slugifySelector(value);
-});
-Handlebars.registerHelper("last", function(array) {
-    return array[array.length-1];
-});
-Handlebars.registerPartial("messageRow", Handlebars.templates.messageRow);
-Handlebars.registerPartial("messageList", Handlebars.templates.messageList);
-Handlebars.registerPartial("messageView", Handlebars.templates.message);
-
-Handlebars.registerPartial("draftView", Handlebars.templates.draft);
-
 Backbone.View.prototype.close = function (a, b) {
-    console.info(a, b);
     if (this.beforeClose) {
         this.beforeClose();
     }

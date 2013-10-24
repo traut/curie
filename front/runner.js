@@ -116,6 +116,11 @@ io.configure(function (){
 
             handshakeData.session = session;
 
+            function touchSession() {
+                session._garbage = Date();
+                session.touch();
+            }
+
             log.info("User " + session.user.email + " authorized");
 
             var channel = session.user.channel;
@@ -129,27 +134,37 @@ io.configure(function (){
                     log.info("Connection created " + socket.id);
 
                     socket.on('create', function(data) {
+                        touchSession();
+
                         log.log("info", "create %j", data, {});
                         store.create(socket, data.cast, data.item);
                     });
                     socket.on('read', function(data) {
-                        session.touch();
+                        touchSession();
+
                         log.log("info", "read %j", data, {});
                         store.read(socket, data.cast, data.ctx);
                     });  
                     socket.on('update', function(data) {
+                        touchSession();
+
                         log.log("info", "update %j", data, {});
                         store.update(socket, data.cast, data.item);
                     }); 
                     socket.on('patch', function(data) {
+                        touchSession();
+
                         log.log("info", "patch %j", data, {});
                         store.patch(socket, data.cast, data.changed);
                     }); 
                     socket.on('delete', function(data) {
+                        touchSession();
+
                         log.log("info", "delete %j", data, {});
-                        store.destroy(socket, data.cast);       
+                        store.destroy(socket, data.cast, data.item);
                     });
                     socket.on("disconnect", function() {
+
                         log.info("Disconnect received for " + channel);
                     });
 

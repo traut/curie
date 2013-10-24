@@ -8,11 +8,6 @@ var log = utils.getLogger("convert");
 var jay = new JaySchema();
 var messageSchema = require('../back/schemas/message-parsed.json');
 
-var LABELS = {
-    DRAFT : "draft",
-    INBOX : "inbox",
-}
-
 function EmailAddress(email, name) {
     return {
         email : email,
@@ -52,6 +47,8 @@ function solrToEmailPreview(doc) {
         subject : get_first(doc.subject),
 
         received : isodate(get_first(doc.received)).getTime(),
+        indexed : isodate(get_first(doc.indexed)).getTime(),
+
         unread : get_first(doc.unread),
         labels : as_list(doc.labels),
 
@@ -83,7 +80,8 @@ function draftToParsed(draft) {
 
     var draftParsed = {
         id : draft.id,
-        received: draft.created,
+
+        received: draft.received.toISOString(),
 
         fields : {
             message_id : draft.__message_id,
@@ -113,24 +111,23 @@ function draftToParsed(draft) {
 
 function draftToDoc(draft) {
 
-    draft.labels = draft.labels || [];
-    draft.labels.push(LABELS.DRAFT);
-
     function pluck(list, field) {
         return list.map(function(a) { return a[field]; });
     }
 
+    var _from = draft.from[0];
+
     var doc = {
         id : draft.id,
 
-        received : draft.created,
+        received: draft.received.toISOString(),
         account : draft.account,
 
         message_id : draft.__message_id || "",
 
-        "from.email" : pluck(draft.from, 'email'),
-        "from.name" : pluck(draft.from, 'name'),
-        "from.json" : JSON.stringify(draft.from),
+        "from.email" : _from.email, //pluck(draft.from, 'email'),
+        "from.name" : _from.name, //pluck(draft.from, 'name'),
+        "from.json" : JSON.stringify(_from), //JSON.stringify(draft.from),
 
         "to.email" : pluck(draft.to, 'email'),
         "to.name" : pluck(draft.to, 'name'),

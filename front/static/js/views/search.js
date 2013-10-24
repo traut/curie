@@ -8,6 +8,8 @@ var GroupView = Backbone.View.extend({
 
     initialize : function() {
 
+        console.info("WTF?");
+
         this.model.messages.on("add", this.addMessage, this);
         this.model.messages.on("remove", this.removeMessage, this);
 

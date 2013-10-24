@@ -37,7 +37,6 @@ function Controller() {
         url : '/packs',
     });
     var predefinedPacks = new Packs([
-        {name : "sent"},
         {name : "draft"},
     ], {
         urlRoot : '/packs',
@@ -97,7 +96,7 @@ function Controller() {
 
     stateModel.on("navigateToActivePack", function() {
         var activeName = stateModel.get("activePackName");
-        //FIXME: come up with the better solution
+        //FIXME: come up with a better solution
         if (activeName.indexOf("search/") == 0) {
             var query = activeName.split("search/")[1];
             window.curie.router.navigate(
@@ -105,6 +104,7 @@ function Controller() {
                 {trigger : true}
             );
         } else {
+            console.info("navigating to " + activeName);
             window.curie.router.navigate(
                 window.curie.router.reverse('showPack', {pack : activeName}),
                 {trigger : true}
@@ -205,10 +205,20 @@ function Controller() {
             pack = "inbox";
         }
 
-        window.curie.router.navigate(
-            window.curie.router.reverse('showDraft', {pack : pack, draftid : ''}),
-            {trigger : true}
-        );
+        //FIXME: come up with a better solution
+        if (pack.indexOf("search/") == 0) {
+            var query = pack.split("search/")[1];
+            window.curie.router.navigate(
+                window.curie.router.reverse('showSearchDraft', {encodedquery : query, draftid : ''}),
+                {trigger : true}
+            );
+        } else {
+            window.curie.router.navigate(
+                window.curie.router.reverse('showDraft', {pack : pack, draftid : ''}),
+                {trigger : true}
+            );
+        }
+
         console.info("navigating to new in pack " + pack);
     }
 

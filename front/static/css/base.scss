@@ -4,6 +4,17 @@ body {
     font-family: 'Open Sans', sans-serif;
 }
 
+@mixin muted {
+    filter:alpha(opacity=50); opacity:.50;
+}
+
+@mixin mutedWithHover {
+    @include muted;
+    &:hover {
+        filter:alpha(opacity=1); opacity:1;
+    }
+}
+
 .container-fluid {
     padding-left: 0px;
 }
@@ -99,12 +110,27 @@ button.close {
     color: black;
 }
 
+.emailWithBraces {
+    &:before {
+        content: "<";
+    }
+    &:after {
+        content: ">";
+    }
+}
+
+.muted {
+    font-weight: normal;
+    @include muted;
+}
+
+.mutedWithHover {
+    @include mutedWithHover;
+}
+
 .messageRow {
     a {
         color: black;
-    }
-    .muted {
-        font-weight: normal;
     }
     &.unread {
         .dateField {
@@ -129,10 +155,16 @@ button.close {
     .emailField {
         overflow: hidden;
         white-space: nowrap;
+        .email {
+            @include muted;
+        }
+        .emailWithBraces {
+            @include muted;
+        }
     }
     .subjectField {
         overflow: hidden;
-        white-space: nowrap;
+        white-space: pre-wrap;
     }
     [class*="span"] {
         min-height: 0px;
@@ -179,16 +211,13 @@ button.close {
     display:none;
 
     .messageHeader {
-        .muted {
-            filter:alpha(opacity=50); opacity:.50;
-            &:hover {
-                filter:alpha(opacity=1); opacity:1;
-            }
+        .date {
+            margin-left: 10px;
         }
-        a.from {
-            &:hover {
-                filter:alpha(opacity=1); opacity:1;
-            }
+        span.headerRow {
+            @include muted;
+        }
+        a.email {
             color: inherit;
         }
     }

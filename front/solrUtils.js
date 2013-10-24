@@ -38,7 +38,26 @@ function indexMessage(message, callback) {
     });
 }
 
+function deleteMessage(messageId, callback) {
+    utils.solr.del(messageId, null, function(err) {
+        if (err) {
+            log.error("Can't delete a doc", {docId : messageId, err: err});
+            callback(err, null);
+            return;
+        }
+        utils.solr.commit(function(err) {
+            if (err) {
+                callback(err, null);
+                return;
+            }
+            log.info("Delete for " + messageId + " successful");
+            callback()
+        });
+    });
+}
+
 module.exports = {
     getMessage : getMessage,
-    indexMessage : indexMessage
+    indexMessage : indexMessage,
+    deleteMessage : deleteMessage
 }

@@ -2,7 +2,7 @@
     <div class="draftBody">
         <form class="form-horizontal">
             <div class="control-group">
-                <input name="to" type="text" data-provide="typeahead" placeholder="To" value="{{#each to}}{{ email }} {{/each}}"/>
+                <input name="to" type="text" data-provide="typeahead" placeholder="To" value="{{#each to}}{{ email }}{{/each}}"/>
             </div>
             <div class="control-group">
                 <input name="subject" type="text" data-provide="typeahead" placeholder="Subject" value="{{ subject }}"/>
@@ -15,11 +15,14 @@
     <div class="draftFooter row-fluid">
         <div class="span8 modal-footer">
             <div class="pull-left created">
-                <span class="muted">Created:</span> {{#dateformat created 'HH:mm, dddd, MMM Do'}}{{/dateformat}}
+                <span class="muted">Saved:</span> <span class="savedValue">{{#dateformat received 'HH:mm:SS, dddd, MMM Do'}}{{/dateformat}}</span>
             </div>
-            <button type="button" class="btn" aria-hidden="true" name="discard">Discard</button>
-            <button onClick="javascript:console.info('Sending the message');alert('Ta-da!');" class="btn btn-primary">Send</button>
+            <button class="btn btn-danger" aria-hidden="true" name="discard"><i class="icon-trash icon-white"></i></button>
+            <button class="btn" aria-hidden="true" name="cancel">Cancel</button>
+            <button class="btn btn-primary" name="send">Send</button>
         </div>
+        <!--
         <div class="span4 {{#unless saved}}hide{{/unless}} saved muted">Saved <span class="savedValue">{{#date_ago saved }}{{/date_ago}}</span></div>
+        -->
     </div>
 </div>

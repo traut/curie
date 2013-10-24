@@ -31,9 +31,10 @@ router.match('/messages/:messageId', 'PATCH').to('messageStore.patchMessage');
 
 router.match('/search', 'GET').to('searchStore.getSearch');
 
-router.match('/draft/:draftId', 'GET').to('draftStore.getDraft');
-router.match('/draft/:draftId', 'POST').to('draftStore.updateDraft');
-router.match('/draft', 'PUT').to('draftStore.updateDraft');
+router.match('/drafts/:draftId', 'GET').to('draftStore.getDraft');
+router.match('/drafts/:draftId', 'POST').to('draftStore.updateDraft');
+router.match('/drafts/:draftId', 'DELETE').to('draftStore.deleteDraft');
+router.match('/drafts', 'PUT').to('draftStore.updateDraft');
 
 
 var stores = {
@@ -55,7 +56,7 @@ var routeCall = function(handshake, cast, item, method, callback) {
         callback("Can't parse url='" + cast.url + "', method='" + method + "'", null);
         return;
     }
-    log.info("routing call", cast, {});
+    log.info("routing call", cast, params);
     params.ctx = cast.ctx;
     params.item = item;
     stores[params.controller][params.action](handshake, params, callback);
@@ -109,9 +110,16 @@ var patch = function (socket, cast, changed) {
     });
 };
  
-var destroy = function (socket, cast) {
-    var e = utils.eventSignature('delete', cast), data = [];
-    socket.emit(e, {success : true});            
+var destroy = function (socket, cast, item) {
+    routeCall(socket.handshake, cast, item, "DELETE", function(err, results) {
+        var signature = utils.eventSignature('delete', cast);
+        if (err) {
+            log.error("delete", err);
+            socket.emit(signature, {error : err});
+            return
+        }
+        socket.emit(signature, {success : true, response : results});
+    });
 };
 
 module.exports = {

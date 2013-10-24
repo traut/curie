@@ -4,20 +4,21 @@ var PACK_STYLES = {
     TILES : "tiles"
 };
 
-var groups = [];
-
 var PackView = Backbone.View.extend({
     initialize : function() {
 
         stateModel.on("change:activePackName", this.changeActivePack, this);
         stateModel.on("showPackAs", this.changePackStyle, this);
 
-        this.model.messages.on("add", this.addMessage, this);
-        this.model.groups.on("add", this.addGroup, this);
+        this.model.messages.on("add", this.placeSubview, this);
+        this.model.messages.on("reset", this.renderAll, this);
+        this.model.messages.on("change", this.rerenderSubview, this);
 
-        this.model.messages.on("reset", this.render, this);
+        this.model.messages.on("sort", this.renderAll, this);
+
+        this.model.groups.on("add", this.addGroup, this);
         this.model.groups.on("reset", this.render, this);
-        this.model.on("reset", this.render, this);
+
 
         this.on("move", this.moveMarker, this);
         this.on("mark", this.markSelected, this);
@@ -88,13 +89,14 @@ var PackView = Backbone.View.extend({
         var modelsWithoutViews = _.filter(collection.models, function(model) {
             return !style.views[model.id]
         }, this);
+
         _.each(modelsWithoutViews, function(model) {
             style.views[model.id] = new style.viewClass({
                 model : model,
                 rootUrl : this.rootUrl,
                 pack : this.model.get("name"),
             });
-            console.info("subview added for " + model.id + " to style " + this.activeStyle);
+            console.info("subview added for " + model.id + " to style " + this.activeStyle, style.views[model.id]);
         }, this);
         return style.views[model.id];
     },
@@ -106,14 +108,6 @@ var PackView = Backbone.View.extend({
 
             this.activeStyle = newStyle;
             this.insertElement();
-            this.render();
-        }
-    },
-
-    addMessage : function(model, collection) {
-        if (this.activeStyle == PACK_STYLES.LIST) {
-            console.info("Adding message", model);
-            this.createSubView(model, collection);
             this.render();
         }
     },
@@ -163,31 +157,55 @@ var PackView = Backbone.View.extend({
 
     },
 
+    placeSubview : function(model, collection) {
+
+        var style = this.getActiveStyle();
+        var view = style.views[model.id] || this.createSubView(model);
+
+        var modelIndex = collection.indexOf(model);
+        var uiIndex = $("#" + style.idPrefix + model.id, style.el).index();
+
+
+        if (!view.$el) {
+            view.render();
+        }
+
+        var squatter = $(style.selector + ":nth-child(" + (modelIndex + 1) + ")", style.el);
+        var newRow = view.$el;
+
+        if (uiIndex != modelIndex) {
+            console.info(this.model.get("name"), "ui=" + uiIndex, "collection=" + modelIndex, "model=" + model.id);
+            $(view.$el, style.el).remove();
+        } else {
+            return;
+        }
+
+        if (squatter.length == 0) {
+            style.el.append(newRow);
+        } else {
+            squatter.before(newRow);
+        }
+    },
+
+    rerenderSubview : function(model, collection) {
+        console.info(model.id);
+        var style = this.getActiveStyle();
+        var view = style.views[model.id] || this.createSubView(model);
+        $(view.$el, style.el).replaceWith(view.render().$el);
+    },
+
+    renderAll : function(collection, redrawModel) {
+        collection.each(function(model, index) {
+            this.placeSubview(model, collection);
+        }, this);
+    },
+
     render : function(i, activePackName) {
 
         var style = this.getActiveStyle();
-
-        style.models.map(function(model, index) {
-            var view = style.views[model.id];
-            if (!view) {
-                view = this.createSubView(model);
-            }
-            //FIXME: I'm so sorry for the next two lines
-            if ($("#" + style.idPrefix + model.id, style.el).length == 0) {
-                var existingDOMel = $(style.selector + ":nth-child(" + (index + 1) + ")", style.el);
-                if (existingDOMel.length == 0) {
-                    style.el.append(view.render().$el);
-                } else {
-                    existingDOMel.after(view.render().$el);
-                }
-            }
-
-        }, this);
-
-        console.info("settings pack " + this.model.get("name") + " as an activeArrowsListener");
-        stateModel.set("activeArrowsListener", this);
-
-
+        this.renderAll(this.model.messages);
+//        console.info("settings pack " + this.model.get("name") + " as an activeArrowsListener");
+//        stateModel.set("activeArrowsListener", this);
         return this;
     },
 

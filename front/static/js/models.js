@@ -1,29 +1,3 @@
-var Draft = Backbone.Model.extend({
-    defaults: {
-        id : null,
-
-        from : [], // should be a proper EmailAddress object
-        to : [],
-        cc : [],
-        bcc : [],
-
-        subject : '',
-        body : '',
-        in_reply_to : '',
-
-        // dates
-        created : null,
-        saved : null,
-
-        attachments : []
-    },
-    urlRoot : "/draft",
-
-    initialize: function() {
-        this.changedByUser = false;
-    }
-});
-
 var MessageLight = Backbone.Model.extend({
     defaults: {
         id : null,
@@ -42,8 +16,6 @@ var MessageLight = Backbone.Model.extend({
         thread : null,
         messages : [],
     },
-    initialize: function() {
-    },
     getLatestMessage : function() {
         if (this.get("thread")) {
             var messages = this.get("messages");
@@ -57,22 +29,40 @@ var Message = Backbone.Model.extend({
         id : null,
 
         from : null,
-        to : null,
-        cc : null,
-        bcc : null,
+        to : [],
+        cc : [],
+        bcc : [],
 
-        subject : null,
+        in_reply_to_mid : null,
+
+        subject : '',
 
         received : null,
         unread : null,
         labels : [],
 
-        body : null,
+        body : [],
 
         attachments : []
     },
     urlRoot: "/messages",
+    initialize : function() {
+        stateModel.on("fetch:message:" + this.get("id"), this.fetch, this);
+        this.on("destroy", this.unbind, this);
+    },
+    unbind : function() {
+        stateModel.off("fetch:message:" + this.get("id"), this.fetch);
+    }
 });
+
+
+var Draft = Message.extend({
+    urlRoot: "/drafts",
+    initialize: function() {
+        this.changedByUser = false;
+    }
+});
+
 
 var Messages = Backbone.Collection.extend({
     model : MessageLight,
@@ -139,7 +129,14 @@ var SearchResults = Backbone.Model.extend({
         this.ctx = {
             query : this.get("query")
         }
-        this.set("name", this.generateName());
+
+        var name = this.generateName();
+        this.set("name", name);
+
+        stateModel.on("fetch:pack:" + name, function() {
+            console.info("fetch:pack:" + name  + " received");
+            this.fetchAll();
+        }, this);
     },
     generateName : function(query) {
         return "search/" + utf8_to_b64(query || this.get("query")); 
@@ -150,6 +147,11 @@ var SearchResults = Backbone.Model.extend({
         return response;
     },
     fetchAll : function(options) {
+        options = options || {};
+        options.success = function(collection) {
+            collection.sort();
+        }
+
         this.fetch(options);
     }
 });
@@ -179,8 +181,20 @@ var Pack = Backbone.Model.extend({
         this.messages = new Messages();
         this.messages.url = '/packs/' + packName + '/messages';
 
+        stateModel.on("fetch:pack:" + packName, function() {
+            console.info("fetch:pack:" + packName + " received");
+            this.fetchAll();
+        }, this);
+
     },
     fetchAll : function(options) {
+        console.info("fetch all " + this.get("name"));
+
+        options = options || {};
+        options.success = function(collection) {
+            collection.sort();
+        }
+
         this.groups.fetch(options);
         this.messages.fetch(options);
     },

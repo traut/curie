@@ -74,6 +74,23 @@ button.close {
   font-weight: 800;
   color: black; }
 
+.emailWithBraces:before {
+  content: "<"; }
+.emailWithBraces:after {
+  content: ">"; }
+
+.muted {
+  font-weight: normal;
+  filter: alpha(opacity=50);
+  opacity: .50; }
+
+.mutedWithHover {
+  filter: alpha(opacity=50);
+  opacity: .50; }
+  .mutedWithHover:hover {
+    filter: alpha(opacity=1);
+    opacity: 1; }
+
 .messageRow {
   margin: 5px 0px;
   padding: 0px 5px;
@@ -85,8 +102,6 @@ button.close {
   border-radius: 4px; }
   .messageRow a {
     color: black; }
-  .messageRow .muted {
-    font-weight: normal; }
   .messageRow.unread .dateField {
     font-weight: normal; }
   .messageRow.selected {
@@ -103,9 +118,15 @@ button.close {
   .messageRow .emailField {
     overflow: hidden;
     white-space: nowrap; }
+    .messageRow .emailField .email {
+      filter: alpha(opacity=50);
+      opacity: .50; }
+    .messageRow .emailField .emailWithBraces {
+      filter: alpha(opacity=50);
+      opacity: .50; }
   .messageRow .subjectField {
     overflow: hidden;
-    white-space: nowrap; }
+    white-space: pre-wrap; }
   .messageRow [class*="span"] {
     min-height: 0px;
     vertical-align: middle; }
@@ -137,17 +158,13 @@ button.close {
   border-radius: 5px;
   border: 1px solid #bbbbbb;
   display: none; }
-  .popupView .messageHeader .muted {
+  .popupView .messageHeader .date {
+    margin-left: 10px; }
+  .popupView .messageHeader span.headerRow {
     filter: alpha(opacity=50);
     opacity: .50; }
-    .popupView .messageHeader .muted:hover {
-      filter: alpha(opacity=1);
-      opacity: 1; }
-  .popupView .messageHeader a.from {
+  .popupView .messageHeader a.email {
     color: inherit; }
-    .popupView .messageHeader a.from:hover {
-      filter: alpha(opacity=1);
-      opacity: 1; }
   .popupView a.showQuote {
     cursor: pointer; }
   .popupView .body1 {

@@ -2,9 +2,6 @@
 var AppRouter = Backbone.Router.extend({
 
     routes : {
-        "p/:pack/new/:draftid": "showDraft",
-        "p/:pack/new/": "showDraft",
-
         "p/:pack/:message": "showMessage",
         "p/:pack": "showPack",
 
@@ -13,6 +10,13 @@ var AppRouter = Backbone.Router.extend({
         "search/:encodedquery/:message": "showSearchMessage",
         "search/:encodedquery/:thread": "showSearchThread",
         "search/:encodedquery": "search",
+
+        "p/:pack/new/to-:email": "showDraftWithTo",
+        "p/:pack/new/:draftid": "showDraft",
+        "p/:pack/new/": "showDraft",
+        "search/:encodedquery/new/to-:email": "showSearchDraftWithTo",
+        "search/:encodedquery/new/:draftid": "showSearchDraft",
+        "search/:encodedquery/new/": "showSearchDraft",
 
         "": "showDashboard",
     },
@@ -76,9 +80,23 @@ var AppRouter = Backbone.Router.extend({
     },
 
     showDraft : function(pack, draftId) {
-        console.info("settings pack to " + pack);
         stateModel.set("activePackName", pack);
         stateModel.trigger("showDraft", draftId);
+    },
+
+    showSearchDraft : function(encodedquery, draftId) {
+        this.search(encodedquery);
+        stateModel.trigger("showDraft", draftId);
+    },
+
+    showDraftWithTo : function(pack, email) {
+        stateModel.set("activePackName", pack);
+        stateModel.trigger("showDraftTo", email);
+    },
+
+    showSearchDraftWithTo : function(encodedquery, email) {
+        this.search(encodedquery);
+        stateModel.trigger("showDraftTo", email);
     },
 
     search : function(encodedquery) {

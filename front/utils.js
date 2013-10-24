@@ -9,9 +9,11 @@ var util = require('util'),
     cookie = require('cookie'),
     cookie_signature = require('cookie-signature'),
     async = require('async'),
+    beanstalk = require('nodestalker'),
 
     users = require("./users.js"),
     settings = require('./settings.js');
+
 
 var solr = solrLib.createClient();
 var solrEscape = solrLib.valueEscape
@@ -36,7 +38,7 @@ function accessControlQueryPart(accountHash) {
 
 
 function createMessageId(internalId) {
-    return util.format("<%s@%s>", internalId, settings.DOMAIN);
+    return util.format("<%s.%s@%s>", new Date().getTime(), internalId, settings.DOMAIN);
 }
 
 
@@ -158,6 +160,10 @@ function readFromFile(path, callback, plainText) {
     }
 }
 
+function deleteFile(path, callback) {
+    fs.unlink(path, callback);
+}
+
 
 
 
@@ -226,6 +232,18 @@ function mergeToThreads(messages) {
     return combined;
 }
 
+function pushToQueue(queue, message) {
+    var client = beanstalk.Client();
+    client.use(queue).onSuccess(function(data) {
+        console.info(data);
+        client.put(message).onSuccess(function(data) {
+            console.log(data);
+            client.disconnect();
+        });
+    });
+
+}
+
  
 module.exports = {
     solr : solr,
@@ -241,6 +259,9 @@ module.exports = {
 
     writeToFile : writeToFile,
     readFromFile : readFromFile,
+    deleteFile : deleteFile,
+
+    pushToQueue : pushToQueue,
 
     getLogger : getLogger,
 

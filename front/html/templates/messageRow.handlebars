@@ -2,13 +2,22 @@
         {{#if url }}
         <a href="#{{ url }}">
         {{/if}}
-        {{# if from.name }}
-            <div class="span4 emailField">{{ from.name }} <span class="muted">&lt;{{ from.email }}&gt;</span></div>
+
+        {{#isOutcoming this }}
+            <div class="span4 emailField">To:
+            {{# if to }}
+                {{#commaJoined to}}
+                    {{> emailAddress }}
+                {{/commaJoined}}
+            {{/if}}
+            </div>
         {{ else }}
-            <div class="span4 emailField">{{ from.email }}</div>
-        {{/if}}
-            <div class="span5 subjectField">{{ subject }}</div>
-            <div class="span3 dateField">{{#dateformat received 'HH:mm, dddd, MMM Do'}}{{/dateformat}}</div>
+            <div class="span4 emailField">{{> emailAddress from }}</div>
+        {{/isOutcoming }}
+
+        <div class="span5 subjectField">{{ subject }}</div>
+        <div class="span3 dateField">{{#dateformat received 'HH:mm, dddd, MMM Do'}}{{/dateformat}}</div>
+
         {{#if url }}
         </a>
         {{/if}}

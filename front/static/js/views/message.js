@@ -3,7 +3,7 @@ var MessageView = Backbone.View.extend({
     template : Handlebars.templates.message,
     el : '#packView #view', //$('<div id="message-' + this.model.id + '" class="row messageView"></div>');
     events : {
-        "click button.close" : "close",
+        "click button.close" : "closeAndNavigate",
     },
     initialize : function() {
         //this.model.on("change", this.render, this);
@@ -47,14 +47,17 @@ var WrappedRowView = Backbone.View.extend({
         if (this.model.get("thread")) {
             this.wrappedView = new ThreadRowView({ model : this.model, rootUrl : this.options.rootUrl });
         } else if (this.model.get("labels") && this.model.get("labels").indexOf("draft") > -1) {
-            this.wrappedView = new MessageRowView({ model : this.model, rootUrl : this.options.rootUrl + '/new', template : Handlebars.templates.draftRow });
+            this.wrappedView = new MessageRowView({ model : this.model, rootUrl : this.options.rootUrl + '/new' });
         } else {
             this.wrappedView = new MessageRowView({ model : this.model, rootUrl : this.options.rootUrl });
         }
+        this.$el = null;
     },
     render : function() {
-        return this.wrappedView.render();
-    }
+        var val = this.wrappedView.render();
+        this.$el = val.$el;
+        return val;
+    },
 });
 
 var MessageRowView = Backbone.View.extend({
@@ -72,8 +75,6 @@ var MessageRowView = Backbone.View.extend({
         this.hashUrl = this.options.rootUrl + "/" + this.model.id;
     },
     render : function() {
-        console.info("rendering messageRowView " + this.model.get("id"));
-
         var data = this.model.toJSON();
         data.url = this.hashUrl;
         var html = this.template(data);
@@ -126,7 +127,7 @@ var MessageGroupView = Backbone.View.extend({
         this.model.on("change:unread", this.updateBadge, this);
         this.model.on("remove", this.removeGroup, this);
 
-        var query = "+header_from_email_raw:" + this.model.get("value");
+        var query = "+from.email:" + this.model.get("value");
         this.hashUrl = window.curie.router.reverse("search", {
             encodedquery : btoa(query)
         });
@@ -166,7 +167,7 @@ var MessageGroupListView = Backbone.View.extend({
         this.model.on("change:unread", this.updateBadge, this);
         this.model.on("remove", this.removeGroup, this);
 
-        var query = "+header_from_email_raw:" + this.model.get("value");
+        var query = "+from.email:" + this.model.get("value");
         this.hashUrl = window.curie.router.reverse("search", {
             encodedquery : btoa(query)
         });

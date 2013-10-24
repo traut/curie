@@ -1,10 +1,18 @@
+
+var requestsRegistry = {};
+
 Backbone.sync = function (method, model, options) {
 
     console.info("Backbone.sync", method, model, options);
 
+    model.syncRequests = model.syncRequests || {};
+
+    console.info(method, model.syncRequests[method]);
+
+    var callID = model.syncRequests[method] = new Date().getTime();
+
     var socket = window.curie.socket; // grab active socket from global namespace; io.connect() was used to create socket
 
- 
     /*
      * Create signature object that will emitted to server with every request. 
      * This is used on the server to push an event back to the client listener.
@@ -30,6 +38,7 @@ Backbone.sync = function (method, model, options) {
         if (cast.ctx) signature += (':' + cast.ctx);
         return signature;
     };
+
      
     // Save a new model to the server.
     var create = function () {  
@@ -53,6 +62,10 @@ Backbone.sync = function (method, model, options) {
         var signature = eventSignature('read', cast);
 
         socket.once(signature, function (data) {
+            if (model.syncRequests[method] != callID) {
+                console.info("Call is outdated, ignoring", method, model);
+                return;
+            }
             if (data.error) {
                 console.error("Error with sync.read", data.error);
                 return;
@@ -70,6 +83,10 @@ Backbone.sync = function (method, model, options) {
         socket.emit('update', {'cast' : cast, item : model.attributes }); // model.attribues is the model data
         console.info("emitted!", {'cast' : cast, item : model.attributes });
         socket.once(signature, function (data) { 
+            if (model.syncRequests[method] != callID) {
+                console.info("Call is outdated, ignoring", method, model);
+                return;
+            }
             if (data.error) {
                 console.error("Error with sync.update", data.error);
                 return;

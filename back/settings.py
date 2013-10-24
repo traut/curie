@@ -1,4 +1,5 @@
 
+STORAGE_EMAILS = '/home/curie/storage/emails'
 STORAGE = '/home/curie/storage/'
 
 QUEUE_SERVER_NAME = 'localhost'
