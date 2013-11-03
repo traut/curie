@@ -43,9 +43,7 @@ var PackListView = Backbone.View.extend({
         var packFound = this.model.findWhere({name : packName});
 
         if (packFound) {
-            console.info("UPDATE ACTIVE", packName, packSelector, packFound, this.model);
             $("a[name=" + packSelector + "].pack", this.$el).parents("li").addClass(cls);
-            console.info("CLASS ADDED TO", $("a[name=" + packSelector + "].pack", this.$el));
             this.updateDocumentTitle(packName, packFound.get("unread"));
         }
     },
@@ -64,7 +62,6 @@ var PackListView = Backbone.View.extend({
         var packName = model.get('name');
         var packSelector = slugifySelector(packName);
         var badge = $(".nav a[name=" + packSelector + "].pack .counters");
-        console.warn("BADGE: ", badge);
         if (value == 0) {
             badge.hide();
         } else {

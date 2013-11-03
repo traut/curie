@@ -66,6 +66,7 @@ var Draft = Message.extend({
 
 var Messages = Backbone.Collection.extend({
     model : MessageLight,
+    page : 1,
     getUnreadCount : function() {
         return this.where({unread : true}).length;
     },
@@ -78,6 +79,11 @@ var Messages = Backbone.Collection.extend({
         });
         return models;
     },
+    loadNextPage : function() {
+        page++;
+
+        console.info("Messages.loadNextPage(" + page + ")");
+    }
 });
 
 var Thread = Backbone.Model.extend({
@@ -91,6 +97,13 @@ var Thread = Backbone.Model.extend({
         messages : []
     },
     urlRoot: "/threads",
+    parse : function(resp, options) {
+        var messages = resp.messages.map(function(m) {
+            return initEntity("Message", Message, m);
+        });
+        resp.messages = messages;
+        return resp;
+    },
 });
 
 
@@ -198,6 +211,9 @@ var Pack = Backbone.Model.extend({
         this.groups.fetch(options);
         this.messages.fetch(options);
     },
+    nextPage : function() {
+        this.messages.loadNextPage();
+    }
 });
 
 var Packs = Backbone.Collection.extend({

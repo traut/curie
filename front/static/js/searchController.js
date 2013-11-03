@@ -19,6 +19,7 @@ function SearchController() {
 
         if (!searchModel || query != searchModel.get("query")) {
             searchModel = new SearchResults({ query : query });
+            //FIXME: memory and event leak
             searchView = createSearchPackView(searchModel);
             searchView.model.fetch({update: true});
         }

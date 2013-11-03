@@ -90,7 +90,7 @@ var QUOTE_BLOCK = function() {
 
 function prepareBodyBlocks(message, preferText) {
 
-    var preferText = preferText || (message.body.length > 1);
+    var preferText = preferText && (message.body.length > 1);
 
     message._body = _.map(message.body, function(b) {
 
@@ -99,16 +99,22 @@ function prepareBodyBlocks(message, preferText) {
             value = removeTags(b.value)
                 //.replace(/(^\s*\>+\s*\>*[\s\S]*$)(?=(^[^\>]+$))/mgi, QUOTE_BLOCK());
                 .replace(/(^\s*\>+\s*\>*[\s\S]*$)/mgi, QUOTE_BLOCK())
-                .replace(/((\r\n|\n)\s*){3,}/mg, "<br/>")
+                //.replace(/((\r\n|\n)\s*){3,}/mg, "<br/>")
+                //.replace(/(\r\n|\n)\s*/g, "<br/>");
                 .replace(/(\r\n|\n)\s*/g, "<br/>");
         } else if (!preferText) {
+            value = b.value;
+        } else {
             value = b.value;
         }
         return {
             type : b.type,
-            value : value
+            value : value,
+            hidden : (preferText && b.type != 'text')
         }
     });
+
+    message._multipleTypes = message._body.length > 1;
 
     message._from = message.from[0];
     return message;

@@ -93,6 +93,18 @@ var hotkeys = {
             doc : 'Add a label',
             action : dummy
         },
+        'm h' : {
+            doc : 'Show opened message as HTML',
+            action : function(e) {
+                stateModel.trigger("message:show:type", "html");
+            }
+        },
+        'm t' : {
+            doc : 'Show opened message as plain text',
+            action : function(e) {
+                stateModel.trigger("message:show:type", "text");
+            }
+        },
     },
     globalActions : {
         '/' : {

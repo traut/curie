@@ -7,7 +7,6 @@ function slugifySelector(str) {
 }
 
 Handlebars.registerHelper('isOutcoming', function(message, options) {
-    console.info(message, options);
     if (_.contains(message.labels, 'sent') || _.contains(message.labels, 'draft')) {
         return options.fn(message);
     } else {

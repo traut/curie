@@ -17,7 +17,9 @@ PackStore = function() {
 
             log.info("Searching for pack=" + pack + "; hash=" + hash);
 
-            queryForLabel(hash, pack, function(err, docs) {
+            var page = 1;
+
+            queryForLabel(hash, pack, page, function(err, docs) {
                 if (err) {
                     callback(err, []);
                     return;
@@ -75,8 +77,6 @@ PackStore = function() {
                         unread : unreadsMap[key]
                     });
                 });
-                console.info(packs);
-
                 callback(null, packs);
             });
         },
@@ -144,12 +144,15 @@ PackStore = function() {
 };
 
 
-function queryForLabel(hash, label, callback){
+function queryForLabel(hash, label, page, callback){
     var query = '+labels:' + label + utils.accessControl(hash);
 
+    var amount = settings.NUM_ROWS;
+
     utils.solr.query(query, {
-        sort: "received desc",
-        rows: settings.NUM_ROWS * 2,
+        sort : "received desc",
+        start : amount * (page - 1),
+        rows : amount,
     }, function(err, response) {
         if (err) {
             log.error("Error when querying query=" + query + ": %s", err, {});
@@ -158,7 +161,11 @@ function queryForLabel(hash, label, callback){
         }
         var responseObj = JSON.parse(response);
         log.info("query=" + query + ", results.length=" + responseObj.response.docs.length);
-        callback(null, responseObj.response.docs);
+        callback(null, {
+            fullSize : responseObj.response.numFound,
+            page : page,
+            messages : responseObj.response.docs
+        });
     });
 }
 

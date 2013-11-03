@@ -131,50 +131,6 @@ button.close {
     min-height: 0px;
     vertical-align: middle; }
 
-.messageList {
-  margin-top: 10px;
-  /*
-  &.disabled {
-      -webkit-filter: blur(10px);
-      -moz-filter: blur(10px);
-      -o-filter: blur(10px);
-      -ms-filter: blur(10px);
-      filter: blur(10px);
-      pointer-events: none;
-      overflow-y: hidden;
-  }
-  */ }
-
-.popupView {
-  padding: 15px;
-  margin: 5px;
-  width: 95%;
-  background-color: white;
-  z-index: 9999;
-  position: absolute;
-  top: 0;
-  left: 2%;
-  box-shadow: 0px 0px 10px #cccccc;
-  border-radius: 5px;
-  border: 1px solid #bbbbbb;
-  display: none; }
-  .popupView .messageHeader .date {
-    margin-left: 10px; }
-  .popupView .messageHeader span.headerRow {
-    filter: alpha(opacity=50);
-    opacity: .50; }
-  .popupView .messageHeader a.email {
-    color: inherit; }
-  .popupView a.showQuote {
-    cursor: pointer; }
-  .popupView .body1 {
-    color: #999999;
-    margin-left: 10px;
-    padding-left: 10px;
-    border-left: 1px solid #aaaaaa; }
-  .popupView .body2 {
-    color: #888888; }
-
 .threadView .message {
   margin: 10px 0px;
   padding: 10px;
@@ -284,6 +240,51 @@ button.close {
   margin-left: 0px; }
   #packView .title {
     margin: 10px 0px; }
+  #packView .contentView .content {
+    margin-top: 10px;
+    /*
+    &.disabled {
+        -webkit-filter: blur(10px);
+        -moz-filter: blur(10px);
+        -o-filter: blur(10px);
+        -ms-filter: blur(10px);
+        filter: blur(10px);
+        pointer-events: none;
+        overflow-y: hidden;
+    }
+    */ }
+  #packView .contentView .loadMore {
+    margin: 10px auto;
+    width: 50%; }
+  #packView .popupView {
+    padding: 15px;
+    margin: 5px;
+    width: 95%;
+    background-color: white;
+    z-index: 9999;
+    position: absolute;
+    top: 0;
+    left: 2%;
+    box-shadow: 0px 0px 10px #cccccc;
+    border-radius: 5px;
+    border: 1px solid #bbbbbb;
+    display: none; }
+    #packView .popupView .messageHeader .date {
+      margin-left: 10px; }
+    #packView .popupView .messageHeader span.headerRow {
+      filter: alpha(opacity=50);
+      opacity: .50; }
+    #packView .popupView .messageHeader a.email {
+      color: inherit; }
+    #packView .popupView a.showQuote {
+      cursor: pointer; }
+    #packView .popupView .body-text {
+      overflow-x: auto; }
+    #packView .popupView .quoted {
+      color: #999999;
+      margin-left: 10px;
+      padding-left: 10px;
+      border-left: 1px solid #aaaaaa; }
 
 #loginModal {
   width: 300px;
@@ -295,6 +296,9 @@ button.close {
   #loginModal .form-horizontal .controls {
     margin-left: 0px; }
 
+@media (max-width: 767px) {
+  #loginModal.modal {
+    left: 50%; } }
 #hotkeysModal {
   width: 800px;
   margin-left: -400px;

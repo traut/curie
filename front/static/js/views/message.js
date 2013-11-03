@@ -1,21 +1,20 @@
 
 var MessageView = Backbone.View.extend({
     template : Handlebars.templates.message,
-    el : '#packView #view', //$('<div id="message-' + this.model.id + '" class="row messageView"></div>');
     events : {
-        "click button.close" : "closeAndNavigate",
+        "click a[name=showAsBodyType]" : "changeBodyType",
     },
     initialize : function() {
         //this.model.on("change", this.render, this);
-        stateModel.on("escPressed", this.closeAndNavigate, this);
-        stateModel.on("navigateToActivePack", this.close, this);
+        stateModel.on("message:show:type", this.changeBodyTypeHotkey, this);
     },
-    render : function(yOffset) {
+    render : function() {
         console.info("rendering message " + this.model.id);
 
         var data = this.model.toJSON();
-        prepareBodyBlocks(data);
-        $(".content", this.$el).html(this.template(data));
+        prepareBodyBlocks(data, true);
+
+        this.$el.html(this.template(data));
 
         var self = this;
         setTimeout(function() {
@@ -25,13 +24,7 @@ var MessageView = Backbone.View.extend({
             }
         }, 1000);
 
-        var topOffset = yOffset || 15;
-        this.$el.css("top", topOffset);
-
         return this;
-    },
-    closeAndNavigate : function() {
-        stateModel.trigger("navigateToActivePack");
     },
     setUnreadTo : function(bool, successCallback, errorCallback) {
         this.model.save({unread : bool}, {
@@ -40,6 +33,34 @@ var MessageView = Backbone.View.extend({
             error : errorCallback || dummy
         });
     },
+    showBodyType : function(type) {
+        _.each($("div.body", this.$el), function(b) {
+            var body = $(b);
+            if (body.data("type") == type) {
+                body.show();
+            } else {
+                body.hide();
+            }
+        });
+        if ($("div.body", this.$el).length == 1) {
+            $("div.body", this.$el).show();
+        }
+    },
+    changeBodyTypeHotkey : function(value) {
+        this.showBodyType(value);
+    },
+    changeBodyType : function(e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        var target = $(e.target);
+        target.parents(".btn-group").removeClass('open');
+
+        this.showBodyType(target.data("type"));
+    },
+    beforeClose : function() {
+        this.undelegateEvents();
+        stateModel.off("message:show-as", this.changeBodyTypeHotkey);
+    }
 });
 
 var WrappedRowView = Backbone.View.extend({

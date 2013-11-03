@@ -12,11 +12,25 @@
         </p>
         <div class="pull-right">
             {{#each labels}} <a class="badge mutedWithHover" href="#p/{{ this }}">{{ this }}</a>{{/each}}
-        </div>
-        {{#each _body }}
-            <div class="body{{@index}}">
-            {{{ this.value }}}
+            <div class="btn-group">
+                <button class="btn dropdown-toggle" data-toggle="dropdown">
+                    <i class="icon-wrench"></i>
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" style="float:right;right:0;left:auto;">
+                    {{#if _multipleTypes }}
+                    <li class="divider"></li>
+                    <li><a href="#" name="showAsBodyType" data-type="text"><!--<i class="icon-ok"></i>-->Show as text</a></li>
+                    <li><a href="#" name="showAsBodyType" data-type="html">Show as HTML</a></li>
+                    {{/if }}
+                </ul>
             </div>
+        </div>
+
+
+
+        {{#each _body }}
+            <div class="body body-{{ type }} {{#if hidden }}hide{{/if }}" data-type="{{ type }}">{{{ value }}}</div>
         {{/each }}
 
         {{ attachment }}

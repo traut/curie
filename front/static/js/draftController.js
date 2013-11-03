@@ -32,7 +32,6 @@ function DraftController() {
         var showDraft = function() {
             draftView.render();
             draftView.$el.show();
-            console.info("done", draftView.$el);
         }
 
         if (draftId) {

@@ -5,6 +5,8 @@ var PACK_STYLES = {
 };
 
 var PackView = Backbone.View.extend({
+    el : '#packView #contentView',
+    template : Handlebars.templates.pack,
     initialize : function() {
 
         stateModel.on("change:activePackName", this.changeActivePack, this);
@@ -30,33 +32,33 @@ var PackView = Backbone.View.extend({
         this.styles = {
             listOld : {
                 models : this.model.messages,
-                el : $('<div id="messages-list" class="messageList"></div>'),
                 selector : ".messageRow",
                 idPrefix : "message-row-",
+                el : $("<div></div>"),
                 views : {},
                 viewClass : MessageRowView,
             },
             list : {
                 models : this.model.messages,
-                el : $('<div id="messages" class="messageList"></div>'),
                 selector : ".messageRow",
                 idPrefix : "message-row-",
+                el : $("<div></div>"),
                 views : {},
                 viewClass : WrappedRowView,
             },
             tiles : {
                 models : this.model.groups,
-                el : $('<div id="pack-groups" class="packGroups"></div>'),
                 selector : ".packGroup",
                 idPrefix : "message-group-",
+                el : $("<div></div>"),
                 views : {},
                 viewClass : MessageGroupView,
             },
             combined : {
                 models : this.model.groups,
-                el : $('<div id="pack-groups" class="packGroups"></div>'),
                 selector : ".packGroup",
                 idPrefix : "message-group-",
+                el : $("<div></div>"),
                 views : {},
                 viewClass : MessageGroupListView,
             },
@@ -96,7 +98,7 @@ var PackView = Backbone.View.extend({
                 rootUrl : this.rootUrl,
                 pack : this.model.get("name"),
             });
-            console.info("subview added for " + model.id + " to style " + this.activeStyle, style.views[model.id]);
+            console.info("subview added for " + model.id + " to pack=" + this.model.get("name") + ", style=" + this.activeStyle);
         }, this);
         return style.views[model.id];
     },
@@ -128,32 +130,31 @@ var PackView = Backbone.View.extend({
     },
 
     insertElement : function() {
-        _.map(this.styles, function(val, key) {
-            if (this.activeStyle != key) {
-                val.el.remove();
-            }
-        }, this);
         var style = this.getActiveStyle();
+
         if (!isElementInDOM(style.el)) {
-            console.info("adding PackView to DOM: pack=" + this.model.get('name') + ", " + this.activeStyle);
-            $("#list", "#packView").html(style.el);
+            console.info("adding PackView to DOM: pack=" + this.model.get('name') + ", style=" + this.activeStyle);
+
+            var data = {
+                moreAvailable : (this.model.messages.fullSize > this.model.messages.size())
+            };
+
+            var renderedPack = $(this.template(data));
+            renderedPack.find(".content").html(style.el);
+
+            this.$el.html(renderedPack);
+
         } else {
             console.info("DOM element for PackView name=" + this.model.get('name') + " is in tree already");
         }
     },
 
     changeActivePack : function(i, activePackName) {
-        var style = this.getActiveStyle();
         if (this.model.get("name") == activePackName) {
+            console.info("changeActivePack received at", this.model.get("name"),  i, activePackName);
             this.insertElement();
-        } else if (i && this.model.get("name") != activePackName) {
-            console.info("REMOVING pack " + this.model.get("name") + " because active=" + activePackName);
-            _.map(this.styles, function(val, key) {
-                val.el.remove();
-            }, this);
-            return;
+            this.render();
         }
-        this.render();
 
     },
 
@@ -174,7 +175,6 @@ var PackView = Backbone.View.extend({
         var newRow = view.$el;
 
         if (uiIndex != modelIndex) {
-            console.info(this.model.get("name"), "ui=" + uiIndex, "collection=" + modelIndex, "model=" + model.id);
             $(view.$el, style.el).remove();
         } else {
             return;

@@ -25,13 +25,6 @@ function Controller() {
 
     var loginPopup = LoginModal().create();
 
-    //example
-    var storedSearches = new Searches([
-        { query : "+unread:true",},
-        { query : "+received:[NOW/DAY TO NOW/DAY+1DAY]",},
-    ]);
-
-
     // models
     var serverPacks = new Packs([], {
         url : '/packs',
@@ -70,7 +63,7 @@ function Controller() {
                 return m.get("name") == selectedName;
             }));
         } else {
-            currentIndex = null;
+            currentIndex = 0;
         }
 
         var nextIndex = null;
@@ -79,7 +72,10 @@ function Controller() {
         } else if (movement == "above") {
             nextIndex = ((currentIndex) ? currentIndex : flatPacks.length) - 1;
         }
+        console.info(currentIndex, nextIndex, flatPacks);
         stateModel.set("selectedPackName", flatPacks[nextIndex].get("name"));
+
+        console.info(flatPacks[nextIndex].get("name"));
 
         // try if it makes sense to active pack on the move event
         stateModel.trigger("activateSelectedPack");
@@ -91,7 +87,6 @@ function Controller() {
         if (selectedName) {
             stateModel.set("activePackName", selectedName);
         }
-        $(".messageList").removeClass("disabled");
     }, this);
 
     stateModel.on("navigateToActivePack", function() {
@@ -110,36 +105,24 @@ function Controller() {
                 {trigger : true}
             );
         }
-        $(".messageList").removeClass("disabled");
     }, this);
 
+    var popupView = new PopupView();
 
     stateModel.on("showMessage", function(messageId) {
         var message = new Message({ id : messageId });
-
         message.fetch({
             success : function() {
-                var view = new MessageView({
-                    model : message
-                });
-                view.render(window.pageYOffset);
-                view.$el.show();
-                $(".messageList").addClass("disabled");
+                popupView.render(new MessageView({ model : message }));
             }
         });
     }, this);
 
     stateModel.on("showThread", function(threadId) {
         var thread = new Thread({ id : threadId });
-
         thread.fetch({
             success : function() {
-                var view = new ThreadView({
-                    model : thread
-                });
-                view.render(window.pageYOffset);
-                view.$el.show();
-                $(".messageList").addClass("disabled");
+                popupView.render(new ThreadView({ model : thread }));
             }
         });
     }, this);

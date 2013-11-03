@@ -180,65 +180,6 @@ button.close {
     border-radius: 4px;
 }
 
-.messageList {
-    margin-top: 10px;
-    /*
-    &.disabled {
-        -webkit-filter: blur(10px);
-        -moz-filter: blur(10px);
-        -o-filter: blur(10px);
-        -ms-filter: blur(10px);
-        filter: blur(10px);
-        pointer-events: none;
-        overflow-y: hidden;
-    }
-    */
-}
-
-.popupView {
-    padding: 15px;
-    margin: 5px;
-    width: 95%;
-    background-color: rgba(255, 255, 255, 1);
-    z-index: 9999;
-    position: absolute;
-    top: 0;
-    left: 2%;
-    box-shadow: 0px 0px 10px #ccc;
-    border-radius: 5px;
-    border: 1px solid #bbb;
-
-    display:none;
-
-    .messageHeader {
-        .date {
-            margin-left: 10px;
-        }
-        span.headerRow {
-            @include muted;
-        }
-        a.email {
-            color: inherit;
-        }
-    }
-
-    a.showQuote {
-        cursor: pointer;
-    }
-
-    .body0 {
-    }
-
-    .body1 {
-        color: #999999;
-        margin-left: 10px;
-        padding-left: 10px;
-        border-left: 1px solid #aaa;
-    }
-    .body2 {
-        color: #888888;
-    }
-}
 
 .threadView {
     .message {
@@ -398,6 +339,70 @@ button.close {
     .title {
         margin: 10px 0px;
     }
+
+    .contentView {
+        .content {
+            margin-top: 10px;
+            /*
+            &.disabled {
+                -webkit-filter: blur(10px);
+                -moz-filter: blur(10px);
+                -o-filter: blur(10px);
+                -ms-filter: blur(10px);
+                filter: blur(10px);
+                pointer-events: none;
+                overflow-y: hidden;
+            }
+            */
+        }
+        .loadMore {
+            margin: 10px auto;
+            width: 50%;
+        }
+    }
+
+    .popupView {
+        padding: 15px;
+        margin: 5px;
+        width: 95%;
+        background-color: rgba(255, 255, 255, 1);
+        z-index: 9999;
+        position: absolute;
+        top: 0;
+        left: 2%;
+        box-shadow: 0px 0px 10px #ccc;
+        border-radius: 5px;
+        border: 1px solid #bbb;
+
+        display:none;
+
+        .messageHeader {
+            .date {
+                margin-left: 10px;
+            }
+            span.headerRow {
+                @include muted;
+            }
+            a.email {
+                color: inherit;
+            }
+        }
+
+        a.showQuote {
+            cursor: pointer;
+        }
+
+        .body-text {
+            overflow-x: auto;
+        }
+
+        .quoted {
+            color: #999999;
+            margin-left: 10px;
+            padding-left: 10px;
+            border-left: 1px solid #aaa;
+        }
+    }
 }
 
 #loginModal {
@@ -410,6 +415,12 @@ button.close {
     }
     .form-horizontal .controls {
         margin-left: 0px;
+    }
+}
+
+@media (max-width: 767px) {
+    #loginModal.modal {
+        left: 50%;
     }
 }
 

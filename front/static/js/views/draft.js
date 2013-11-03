@@ -1,6 +1,6 @@
 var DraftView = Backbone.View.extend({
     template : Handlebars.templates.draft,
-    el : '#packView #view', //$('<div id="message-' + this.model.id + '" class="row messageView"></div>');
+    el : '#packView #popupView', //$('<div id="message-' + this.model.id + '" class="row messageView"></div>');
     events : {
         "input form input,textarea" : "fieldChanged",
         "click button.close" : "closeAndNavigate",
