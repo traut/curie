@@ -223,17 +223,17 @@ button.close {
   border-bottom: 1px solid #bbbbbb; }
 
 .searchPopup {
-  background-color: rgba(82, 168, 236, 0.1);
+  background-color: rgba(82, 168, 236, 0.2);
   position: fixed;
-  top: 10px;
-  right: 80px;
+  bottom: 10px;
+  right: 30px;
   padding: 10px;
   border-radius: 6px; }
   .searchPopup form {
     margin: 0px; }
     .searchPopup form input {
       margin: 0px;
-      width: 200px; }
+      width: 250px; }
 
 #packView {
   position: relative;
@@ -295,6 +295,8 @@ button.close {
     margin-bottom: 10px; }
   #loginModal .form-horizontal .controls {
     margin-left: 0px; }
+  #loginModal .loader {
+    margin-right: -16px; }
 
 @media (max-width: 767px) {
   #loginModal.modal {

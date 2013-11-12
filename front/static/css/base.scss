@@ -318,17 +318,17 @@ button.close {
 }
 
 .searchPopup {
-    background-color: rgba(82, 168, 236, 0.1);
+    background-color: rgba(82, 168, 236, 0.2);
     position: fixed;
-    top: 10px;
-    right: 80px;
+    bottom: 10px;
+    right: 30px;
     padding: 10px;
     border-radius: 6px;
     form {
         margin: 0px;
         input {
             margin: 0px;
-            width: 200px;
+            width: 250px;
         }
     }
 }
@@ -415,6 +415,9 @@ button.close {
     }
     .form-horizontal .controls {
         margin-left: 0px;
+    }
+    .loader {
+        margin-right: -16px;
     }
 }
 

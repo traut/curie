@@ -3,15 +3,15 @@ var requestsRegistry = {};
 
 Backbone.sync = function (method, model, options) {
 
-    console.info("Backbone.sync", method, model, options);
+    console.info("Backbone.sync", method, model);
 
     model.syncRequests = model.syncRequests || {};
 
-    console.info(method, model.syncRequests[method]);
+    //console.info(method, model.syncRequests[method]);
 
     var callID = model.syncRequests[method] = new Date().getTime();
 
-    var socket = window.curie.socket; // grab active socket from global namespace; io.connect() was used to create socket
+    var socket = curie.controllers.data.getSocket(); // grab active socket from global namespace; io.connect() was used to create socket
 
     /*
      * Create signature object that will emitted to server with every request. 
@@ -63,7 +63,7 @@ Backbone.sync = function (method, model, options) {
 
         socket.once(signature, function (data) {
             if (model.syncRequests[method] != callID) {
-                console.info("Call is outdated, ignoring", method, model);
+                console.info("Call is outdated, ignoring:", method, model.cid);
                 return;
             }
             if (data.error) {

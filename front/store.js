@@ -10,6 +10,7 @@ var barista = require('barista'),
 var log = utils.getLogger("store");
 
 // stores
+accountStore = require('./substores/account');
 packStore = require('./substores/pack');
 messageStore = require('./substores/message');
 draftStore = require('./substores/draft');
@@ -19,6 +20,8 @@ threadStore = require('./substores/thread');
 
 
 var router = new barista.Router();
+
+router.match('/account', 'GET').to('accountStore.getAccountDetails');
 
 router.match('/packs', 'GET').to('packStore.getPacks');
 router.match('/packs/:pack/messages', 'GET').to('packStore.getMessagePreviews');
@@ -38,6 +41,7 @@ router.match('/drafts', 'PUT').to('draftStore.updateDraft');
 
 
 var stores = {
+    accountStore : accountStore.AccountStore(),
     packStore : packStore.PackStore(),
     messageStore : messageStore.MessageStore(),
     threadStore : threadStore.ThreadStore(),

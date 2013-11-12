@@ -2,8 +2,8 @@ var isodate = require("isodate"),
     crypto = require('crypto'),
     async = require('async'),
 
-    settings = require('../settings');
-    utils = require('../utils');
+    settings = require('../settings'),
+    utils = require('../utils'),
     converter = require('../converter');
 
 var log = utils.getLogger("store.pack");
@@ -14,10 +14,9 @@ PackStore = function() {
         getMessagePreviews : function(handshake, options, callback) {
             var pack = options.pack;
             var hash = handshake.session.user.hash;
+            var page = options.ctx.page || 0;
 
-            log.info("Searching for pack=" + pack + "; hash=" + hash);
-
-            var page = 1;
+            log.info("Searching for pack=" + pack + ", page=" + page + ", hash=" + hash);
 
             queryForLabel(hash, pack, page, function(err, docs) {
                 if (err) {
@@ -27,8 +26,8 @@ PackStore = function() {
                 var msgs = [];
                 if (docs && docs.length > 0) {
                     msgs = docs.map(converter.solrToEmailPreview);
+                    msgs = utils.mergeToThreads(msgs);
                 }
-                msgs = utils.mergeToThreads(msgs);
                 callback(null, msgs);
             });
         },
@@ -148,10 +147,11 @@ function queryForLabel(hash, label, page, callback){
     var query = '+labels:' + label + utils.accessControl(hash);
 
     var amount = settings.NUM_ROWS;
+    var start = amount * page;
 
     utils.solr.query(query, {
         sort : "received desc",
-        start : amount * (page - 1),
+        start : start,
         rows : amount,
     }, function(err, response) {
         if (err) {
@@ -160,12 +160,8 @@ function queryForLabel(hash, label, page, callback){
             return;
         }
         var responseObj = JSON.parse(response);
-        log.info("query=" + query + ", results.length=" + responseObj.response.docs.length);
-        callback(null, {
-            fullSize : responseObj.response.numFound,
-            page : page,
-            messages : responseObj.response.docs
-        });
+        log.info("query=" + query + ", start=" + start + ", amount=" + amount + ", results.length=" + responseObj.response.docs.length);
+        callback(null, responseObj.response.docs);
     });
 }
 

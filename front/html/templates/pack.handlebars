@@ -1,4 +1,8 @@
 <div>
+    {{#if query }}
+    <h1 class="lead"><span class="muted">Search:</span> {{ query }}<span class="pull-right muted">{{ size }} found</span></h1>
+    {{/if }}
+
     <div class="content"></div>
     <div class="loadMore {{#unless moreAvailable }}hide{{/unless}}">
         <button class="btn btn-large btn-block" type="button">Load more</button>

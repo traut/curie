@@ -1,226 +1,141 @@
-var PACK_STYLES = {
-    LIST : "list",
-    COMBINED : "combined",
-    TILES : "tiles"
-};
 
-var PackView = Backbone.View.extend({
-    el : '#packView #contentView',
-    template : Handlebars.templates.pack,
+Curie.Views.CollectionGeneric = Backbone.View.extend({
+
     initialize : function() {
 
-        stateModel.on("change:activePackName", this.changeActivePack, this);
-        stateModel.on("showPackAs", this.changePackStyle, this);
+        this.rootUrl = this.options.rootUrl;
+        this.modelViewClass = this.options.modelViewClass || WrappedRowView;
+        this.template = this.options.template;
 
-        this.model.messages.on("add", this.placeSubview, this);
-        this.model.messages.on("reset", this.renderAll, this);
-        this.model.messages.on("change", this.rerenderSubview, this);
+        this.modelViews = {};
 
-        this.model.messages.on("sort", this.renderAll, this);
+        this.$list = $("<div></div>");
 
-        this.model.groups.on("add", this.addGroup, this);
-        this.model.groups.on("reset", this.render, this);
+        this.collection.on("add reset", this.render, this);
+        this.collection.on("sort", this.reorganizeModelViews, this);
 
-
-        this.on("move", this.moveMarker, this);
-        this.on("mark", this.markSelected, this);
-
-        this.activeStyle = PACK_STYLES.LIST;
-
-        this.showMessageFunction = this.options.showMessageFunction || "showMessage"; // to reverse to a proper link (pack vs search links)
-
-        this.styles = {
-            listOld : {
-                models : this.model.messages,
-                selector : ".messageRow",
-                idPrefix : "message-row-",
-                el : $("<div></div>"),
-                views : {},
-                viewClass : MessageRowView,
-            },
-            list : {
-                models : this.model.messages,
-                selector : ".messageRow",
-                idPrefix : "message-row-",
-                el : $("<div></div>"),
-                views : {},
-                viewClass : WrappedRowView,
-            },
-            tiles : {
-                models : this.model.groups,
-                selector : ".packGroup",
-                idPrefix : "message-group-",
-                el : $("<div></div>"),
-                views : {},
-                viewClass : MessageGroupView,
-            },
-            combined : {
-                models : this.model.groups,
-                selector : ".packGroup",
-                idPrefix : "message-group-",
-                el : $("<div></div>"),
-                views : {},
-                viewClass : MessageGroupListView,
-            },
-        };
-
-        if (this.options.title) {
-            _.each(this.styles, function(value, key) {
-
-                var title = $("<div class='lead title'>" + this.options.title + "</div>");
-                //var wrapper = $("<div></div>");
-                //wrapper.append(title);
-                //wrapper.append(value.el);
-                value.el.append(title);
-            }, this);
-        }
-
-        console.info("PackView for " + this.model.get("name") + " initialized");
-
-        this.rootUrl = this.options.rootUrl || window.curie.router.reverse('showPack', { pack : this.model.get("name") })
-    },
-
-    getActiveStyle : function() {
-        return this.styles[this.activeStyle];
-    },
-
-    createSubView : function(model, collection) {
-        var style = this.getActiveStyle();
-        collection = collection || style.models;
-
-        var modelsWithoutViews = _.filter(collection.models, function(model) {
-            return !style.views[model.id]
-        }, this);
-
-        _.each(modelsWithoutViews, function(model) {
-            style.views[model.id] = new style.viewClass({
-                model : model,
-                rootUrl : this.rootUrl,
-                pack : this.model.get("name"),
-            });
-            console.info("subview added for " + model.id + " to pack=" + this.model.get("name") + ", style=" + this.activeStyle);
-        }, this);
-        return style.views[model.id];
-    },
-
-    changePackStyle : function(newStyle) {
-        if (newStyle != this.activeStyle && stateModel.get("activePackName") == this.model.get("name")) {
-
-            this.model.groups.sort();
-
-            this.activeStyle = newStyle;
-            this.insertElement();
-            this.render();
-        }
-    },
-
-    addGroup : function(model, collection) {
-        if (this.activeStyle == PACK_STYLES.COMBINED || this.activeStle == PACK_STYLES.TILES) {
-            console.info("Adding group", model);
-            this.createSubView(model, collection);
-            this.render();
-        }
     },
 
     beforeClose : function() {
-        // remove all DOM elements
-        _.map(this.styles, function(val, key) {
-            val.el.remove();
+        //FIXME: keep up to date
+        this.collection.off("add reset", this.render);
+        this.collection.off("sort", this.reorganizeModelViews);
+    },
+
+
+    getModelsWithoutViews : function() {
+        return this.collection.filter(function(model) {
+            return !this.modelViews[model.id]
         }, this);
     },
 
-    insertElement : function() {
-        var style = this.getActiveStyle();
+    createModelView : function(model) {
+        this.modelViews[model.id] = this.modelViews[model.id] || new this.modelViewClass({
+            model : model,
+            rootUrl : this.rootUrl
+        });
+        this.modelViews[model.id].render();
+        return this.modelViews[model.id];
+    },
 
-        if (!isElementInDOM(style.el)) {
-            console.info("adding PackView to DOM: pack=" + this.model.get('name') + ", style=" + this.activeStyle);
+    createMissingModelViews : function(model, collection) {
+        _.each(this.getModelsWithoutViews(), this.createModelView, this);
+    },
 
-            var data = {
-                moreAvailable : (this.model.messages.fullSize > this.model.messages.size())
-            };
+    reorganizeModelViews : function() {
 
-            var renderedPack = $(this.template(data));
-            renderedPack.find(".content").html(style.el);
+        for(var i = 0; i < this.collection.length; i++) {
 
+
+            var model = this.collection.at(i);
+            var modelView = this.modelViews[model.id] || this.createModelView(model);
+
+            var uiIndex = this.$list.children().index(modelView.$el);
+
+            if (i != uiIndex) {
+                if (uiIndex > -1) {
+                    modelView.$el.detach()
+                }
+            } else {
+                // this model is in place
+                continue;
+            }
+
+            var squatter = this.$list.children().eq(i);
+
+            //if (squatter.length == 0) {
+            if (squatter.length == 0) {
+                this.$list.append(modelView.$el);
+            } else {
+                $(squatter, this.$list).before(modelView.$el);
+            }
+        }
+    },
+
+    render : function() {
+
+        _.keys(this.modelViews, function(mid) {
+            this.modelViews[mid].close();
+            delete this.modelViews[mid];
+        });
+
+        if (this.getModelsWithoutViews().length > 0){
+            this.createMissingModelViews();
+            this.reorganizeModelViews();
+        }
+
+        if (this.$el.has(this.$list).length == 0) {
+
+            var renderOptions = this.options.renderOptions || {};
+
+            _.extend(renderOptions, {
+                // FIXME: should be dynamically rendered
+                moreAvailable : (this.collection.length > 0) && (this.model.total > this.collection.length),
+                size : this.model.total
+            });
+
+            var renderedPack = $(this.options.template(renderOptions));
+            renderedPack.find(".content").html(this.$list);
             this.$el.html(renderedPack);
-
-        } else {
-            console.info("DOM element for PackView name=" + this.model.get('name') + " is in tree already");
-        }
-    },
-
-    changeActivePack : function(i, activePackName) {
-        if (this.model.get("name") == activePackName) {
-            console.info("changeActivePack received at", this.model.get("name"),  i, activePackName);
-            this.insertElement();
-            this.render();
+            console.info("packview for " + this.model.get("name") + " attached to element");
         }
 
+        return this.$el;
     },
-
-    placeSubview : function(model, collection) {
-
-        var style = this.getActiveStyle();
-        var view = style.views[model.id] || this.createSubView(model);
-
-        var modelIndex = collection.indexOf(model);
-        var uiIndex = $("#" + style.idPrefix + model.id, style.el).index();
+});
 
 
-        if (!view.$el) {
-            view.render();
-        }
 
-        var squatter = $(style.selector + ":nth-child(" + (modelIndex + 1) + ")", style.el);
-        var newRow = view.$el;
-
-        if (uiIndex != modelIndex) {
-            $(view.$el, style.el).remove();
-        } else {
-            return;
-        }
-
-        if (squatter.length == 0) {
-            style.el.append(newRow);
-        } else {
-            squatter.before(newRow);
-        }
+Curie.Views.Pack = Curie.Views.CollectionGeneric.extend({
+    events : {
+        "click .loadMore button" : "loadNextPage"
     },
-
-    rerenderSubview : function(model, collection) {
-        console.info(model.id);
-        var style = this.getActiveStyle();
-        var view = style.views[model.id] || this.createSubView(model);
-        $(view.$el, style.el).replaceWith(view.render().$el);
+    initialize : function(options) {
+        options = options || {};
+        _.extend(options, {
+            modelViewClass : WrappedRowView,
+            template : Handlebars.templates.pack,
+            rootUrl : this.options.rootUrl || window.curie.router.reverse('showPack', { pack : this.model.get("name") }),
+        });
+        Curie.Views.CollectionGeneric.prototype.initialize.apply(this, [options]);
     },
-
-    renderAll : function(collection, redrawModel) {
-        collection.each(function(model, index) {
-            this.placeSubview(model, collection);
-        }, this);
-    },
-
-    render : function(i, activePackName) {
-
-        var style = this.getActiveStyle();
-        this.renderAll(this.model.messages);
-//        console.info("settings pack " + this.model.get("name") + " as an activeArrowsListener");
-//        stateModel.set("activeArrowsListener", this);
-        return this;
-    },
-
-    moveMarker : function(m) {
-        var style = this.getActiveStyle();
-        console.info(style);
-
-        var view = style.views[style.models.models[0].id];
-        console.info(view);
-        view.set("selected", true);
-        if (m == "j") {
-        }
-    },
-
-    markSelected : function(a) {
+    loadNextPage : function() {
+        console.info("Loading next page");
+        this.model.nextPage();
     }
 });
 
+
+Curie.Views.SearchResults = Curie.Views.Pack.extend({
+    initialize : function(options) {
+        options = options || {};
+        var query = this.model.get("query");
+        _.extend(options, {
+            rootUrl : 'search/' + utf8_to_b64(query),
+            renderOptions : {
+                query : query
+            }
+        });
+        Curie.Views.Pack.prototype.initialize.apply(this, [options]);
+    },
+});

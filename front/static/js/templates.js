@@ -109,16 +109,34 @@ function program1(depth0,data) {
 templates['pack'] = template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  var buffer = "", stack1, self=this;
+  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression, self=this;
 
 function program1(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "\n    <h1 class=\"lead\"><span class=\"muted\">Search:</span> ";
+  if (stack1 = helpers.query) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.query; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "<span class=\"pull-right muted\">";
+  if (stack1 = helpers.size) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.size; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + " found</span></h1>\n    ";
+  return buffer;
+  }
+
+function program3(depth0,data) {
   
   
   return "hide";
   }
 
-  buffer += "<div>\n    <div class=\"content\"></div>\n    <div class=\"loadMore ";
-  stack1 = helpers.unless.call(depth0, depth0.moreAvailable, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
+  buffer += "<div>\n    ";
+  stack1 = helpers['if'].call(depth0, depth0.query, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n\n    <div class=\"content\"></div>\n    <div class=\"loadMore ";
+  stack1 = helpers.unless.call(depth0, depth0.moreAvailable, {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\">\n        <button class=\"btn btn-large btn-block\" type=\"button\">Load more</button>\n    </div>\n</div>\n";
   return buffer;
@@ -209,7 +227,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div class=\"modal-body\">\n    <div class=\"header text-center\">\n        <img src=\"/static/img/curie.gif\" class=\"logo\"/><h1>Curie</h1>\n    </div>\n    <br/>\n\n    <div class=\"alert alert-error hide\" id=\"errorNote\"></div>\n    <form class=\"form-horizontal\" id=\"loginForm\">\n        <div class=\"control-group\">\n            <div class=\"controls\">\n                <input type=\"text\" id=\"inputLogin\" placeholder=\"Login\" name=\"login\" tabindex=\"2\">\n            </div>\n        </div>\n        <div class=\"control-group\">\n            <div class=\"controls\">\n                <input type=\"password\" id=\"inputPassword\" placeholder=\"Password\" name=\"password\" tabindex=\"3\">\n            </div>\n        </div>\n        <div class=\"control-group\">\n            <div class=\"controls\">\n                <button type=\"submit\" class=\"btn\" tabindex=\"4\" onFocus=\"this.tabIndex=1;\" onBlur=\"this.tabIndex=4;\">Sign in</button>\n                <img src=\"/static/img/loader2.gif\" id=\"modalLoader\" style=\"margin-right:-16px;\" class=\"hide\"/>\n            </div>\n        </div>\n    </form>\n</div>\n";
+  return "<div class=\"modal-body\">\n    <div class=\"header text-center\"><img src=\"/static/img/curie.gif\" class=\"logo\"/><h1>Curie</h1></div>\n    <br/>\n    <div class=\"alert alert-error hide\"></div>\n    <form class=\"form-horizontal\">\n        <div class=\"control-group\">\n            <div class=\"controls\">\n                <input type=\"text\" placeholder=\"Login\" name=\"login\" tabindex=\"2\">\n            </div>\n        </div>\n        <div class=\"control-group\">\n            <div class=\"controls\">\n                <input type=\"password\" placeholder=\"Password\" name=\"password\" tabindex=\"3\">\n            </div>\n        </div>\n        <div class=\"control-group\">\n            <div class=\"controls\">\n                <button type=\"submit\" class=\"btn\" tabindex=\"4\" onFocus=\"this.tabIndex=1;\" onBlur=\"this.tabIndex=4;\">Sign in</button>\n                <img src=\"/static/img/loader2.gif\" id=\"modalLoader\" class=\"hide loader\"/>\n            </div>\n        </div>\n    </form>\n</div>\n";
   });
 templates['thread'] = template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
@@ -235,7 +253,7 @@ function program1(depth0,data) {
 templates['packList'] = template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  var buffer = "", stack1, self=this, functionType="function", escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing;
+  var buffer = "", stack1, self=this, helperMissing=helpers.helperMissing, functionType="function", escapeExpression=this.escapeExpression;
 
 function program1(depth0,data) {
   
@@ -243,19 +261,19 @@ function program1(depth0,data) {
   buffer += "\n<li ";
   stack1 = helpers['if'].call(depth0, depth0.active, {hash:{},inverse:self.noop,fn:self.program(2, program2, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += ">\n    <a href=\"#";
-  if (stack1 = helpers.hashUrl) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.hashUrl; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1)
-    + "\" class=\"pack\" name=\"";
+  buffer += " data-pack=\"";
   options = {hash:{},inverse:self.noop,fn:self.program(4, program4, data),data:data};
   stack2 = ((stack1 = helpers.slugifySelector || depth0.slugifySelector),stack1 ? stack1.call(depth0, depth0.name, options) : helperMissing.call(depth0, "slugifySelector", depth0.name, options));
   if(stack2 || stack2 === 0) { buffer += stack2; }
-  buffer += "\">";
+  buffer += "\">\n    <a href=\"#";
+  if (stack2 = helpers.hashUrl) { stack2 = stack2.call(depth0, {hash:{},data:data}); }
+  else { stack2 = depth0.hashUrl; stack2 = typeof stack2 === functionType ? stack2.apply(depth0) : stack2; }
+  buffer += escapeExpression(stack2)
+    + "\" class=\"pack\">";
   options = {hash:{},inverse:self.noop,fn:self.program(4, program4, data),data:data};
   stack2 = ((stack1 = helpers.shortify || depth0.shortify),stack1 ? stack1.call(depth0, depth0.name, 23, options) : helperMissing.call(depth0, "shortify", depth0.name, 23, options));
   if(stack2 || stack2 === 0) { buffer += stack2; }
-  buffer += "\n    \n    <span class=\"pull-right counters unread ";
+  buffer += "\n        <span class=\"pull-right counters unread ";
   stack2 = helpers.unless.call(depth0, depth0.unread, {hash:{},inverse:self.noop,fn:self.program(6, program6, data),data:data});
   if(stack2 || stack2 === 0) { buffer += stack2; }
   buffer += "\">";
@@ -287,6 +305,14 @@ function program6(depth0,data) {
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\n";
   return buffer;
+  });
+templates['sidebar'] = template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
+  
+
+
+  return "<div id=\"packBlocks\">\n</div>\n<div class=\"packs\" style=\"padding:10px 0px;\">\n    <label class=\"nav-header\">predefined</label>\n    <ul class=\"nav nav-list\">\n        <li><a href=\"#search/KytyZWNlaXZlZDpbTk9XL0RBWSBUTyBOT1cvREFZKzFEQVld\">today</a></li>\n        <li><a href=\"#search/KytyZWNlaXZlZDpbTk9XL0RBWS0xREFZIFRPIE5PVy9EQVld\">yesterday</a></li>\n        <li><a href=\"#search/Kyt1bnJlYWQ6dHJ1ZQ%3D%3D\">all unread</a></li>\n    </ul>\n</div>\n<ul class=\"nav nav-list packs\">\n    <li id=\"newMessageLi\"><a href=\"#\">new message</a></li>\n</ul>\n<!--\n<div class=\"text-center\">\n    <br/>\n    <div class=\"btn-group\">\n        <button class=\"btn\" name=\"showAs\" data-value=\"LIST\"><i class=\"icon-align-justify\"></i></button>\n        <button class=\"btn\" name=\"showAs\" data-value=\"COMBINED\"><i class=\"icon-th-list\"></i></button>\n        <button class=\"btn\" name=\"showAs\" data-value=\"TILES\"><i class=\"icon-th-large\"></i></button>\n    </div>\n</div>\n-->\n<div class=\"muted text-center alert alert-error hide sidebarInfo\" id=\"errorAlert\"></div>\n<br/>\n<div class=\"muted text-center sidebarInfo\" id=\"accountInfo\"></div>\n<div class=\"muted text-center sidebarInfo\" id=\"lastFetchTime\"></div>\n<div class=\"text-center muted\">Hotkeys help: \"?\"</div>\n";
   });
 templates['hotkeysModal'] = template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
@@ -369,6 +395,14 @@ function program5(depth0,data) {
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\n</div>\n";
   return buffer;
+  });
+templates['base'] = template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
+  
+
+
+  return "<div class=\"row-fluid mainBlock hide\">\n    <div class=\"span3\">\n        <div class=\"sidebar-nav sidebar-nav-fixed sidebarNav\" id=\"sidebarView\"></div>\n    </div>\n    <div class=\"span9\" id=\"packView\">\n        <div class=\"popupView\" id=\"popupView\">\n            <button type=\"button\" class=\"close\" aria-hidden=\"true\">&times;</button>\n            <div class=\"content\"></div>\n        </div>\n        <div id=\"contentView\" class=\"contentView\"></div>\n    </div>\n</div>\n\n<div class=\"modal hide\" id=\"hotkeysModal\" data-backdrop=\"true\" data-keyboard=\"true\" data-show=\"true\" tabindex=\"-1\"></div>\n\n<div class=\"searchPopup hide\" id=\"searchPopup\">\n    <form>\n        <div class=\"input-append\">\n          <input type=\"text\" name=\"search\"/>\n          <button class=\"btn\" type=\"submit\"><i class=\"icon-search\"></i></button>\n        </div>\n    </form>\n</div>\n\n";
   });
 templates['messageRow'] = template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];

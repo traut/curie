@@ -13,20 +13,26 @@ SearchStore = function() {
     return {
         getSearch : function(handshake, options, callback) {
             var searchQuery = options.ctx.query,
-                format = options.ctx.format;
+                page = options.ctx.page || 0;
+
+            console.info(options);
 
             //FIXME: security hole, no searchQuery validation
             var query = utils.accessControl(handshake.session.user.hash) + searchQuery; //solrLib.valueEscape(searchQuery);
 
-            log.info("Getting search for searchQuery=" + query);
+            log.info("Getting search for searchQuery=" + query + ", page=" + page);
 
-            var numRows = (format == 'light') ? 0 : settings.NUM_ROWS;
+
+            var amount = settings.NUM_ROWS;
+            //var numRows = (format == 'light') ? 0 : settings.NUM_ROWS;
 
             utils.solr.query(query, {
-                rows : numRows,
                 facet : true,
                 'facet.field' : 'unread',
-                sort : 'received desc'
+                sort : 'received desc',
+
+                start : amount * page,
+                rows : amount,
             }, function(err, response) {
                 if (err) {
                     log.error("Error " + err);
@@ -44,9 +50,11 @@ SearchStore = function() {
                 var response = {
                     id : crypto.createHash('md5').update(query).digest("hex"),
                     query : searchQuery,
-                    messages : messages,
-                    size : responseObj.response.numFound,
                     unread : unreadCounts[true] || 0,
+
+                    page : page,
+                    total : responseObj.response.numFound,
+                    docs : messages,
                 }
                 log.info("Found " + responseObj.response.numFound + " docs, query=" + query);
                 callback(null, response);

@@ -1,11 +1,12 @@
+Curie.Controllers.Data.Search = function () {
 
-function SearchController() {
+    var view = null;
 
     var searchModel = null;
     var searchView = null;
 
     function createSearchPackView(searchModel) {
-        var query = searchModel.get("query")
+        var query = searchModel.get("query");
         return new PackView({
             model : searchModel,
             title : '<span class="muted">Search:</span> ' + query + '',

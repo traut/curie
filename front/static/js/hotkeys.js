@@ -5,84 +5,84 @@ var hotkeys = {
         't j' : {
             doc : 'Choose a pack below',
             action : function() {
-                stateModel.trigger("selectPack", "below");
+                curie.state.trigger("hotkey:packList", "down");
             }
         },
         't k' : {
             doc : 'Choose a pack above',
             action : function() {
-                stateModel.trigger("selectPack", "above");
+                curie.state.trigger("hotkey:packList", "up");
             }
         },
         /*
         't l' : {
             doc : 'Show choosed pack',
             action : function() {
-                stateModel.trigger("activateSelectedPack");
+                curie.state.trigger("activateSelectedPack");
             }
         },
-        */
         'v t' : {
             doc : 'Show current pack as tiles',
             action : function() {
-                stateModel.trigger("showPackAs", "tiles");
+                curie.state.trigger("showPackAs", "tiles");
             }
         },
         'v l' : {
             doc : 'Show current pack as list',
             action : function() {
-                stateModel.trigger("showPackAs", "list");
+                curie.state.trigger("showPackAs", "list");
             }
         },
         'v c' : {
             doc : 'Show current pack as combined view',
             action : function() {
-                stateModel.trigger("showPackAs", "combined");
+                curie.state.trigger("showPackAs", "combined");
             }
         },
+        */
     },
     messageActions : {
         'j' : {
             doc : 'Choose a message/group below',
             action : function() {
-                stateModel.get("activeArrowsListener").trigger("move", "j");
+                curie.state.get("activeArrowsListener").trigger("move", "j");
             }
         },
         'k' : {
             doc : 'Choose a message/group above',
             action : function() {
-                stateModel.get("activeArrowsListener").trigger("move", "k");
+                curie.state.get("activeArrowsListener").trigger("move", "k");
             }
         },
         'l' : {
             doc : 'Show/hide selected message/group',
             action : function () {
-                stateModel.get("activeArrowsListener").trigger("move", "l");
+                curie.state.get("activeArrowsListener").trigger("move", "l");
             }
         },
         'x' : {
             doc : 'Mark/unmark a message/group as selected',
             action : function() {
-                stateModel.get("activeArrowsListener").trigger("action", "x");
+                curie.state.get("activeArrowsListener").trigger("action", "x");
             }
         },
         'g g' : {
             doc : 'Choose the latest message',
             action : function() {
-                stateModel.get("activeArrowsListener").trigger("move", "gg");
+                curie.state.get("activeArrowsListener").trigger("move", "gg");
             }
         },
         'G' : {
             doc : 'Choose the earliest message',
             action : function() {
-                stateModel.get("activeArrowsListener").trigger("move", "G");
+                curie.state.get("activeArrowsListener").trigger("move", "G");
             }
         },
         'm n' : {
             doc : 'Create a new message',
             action : function(e) {
                 e.preventDefault();
-                window.curie.controller.routeToNew();
+                window.curie.controllers.layout.navigateToDraft();
             }
         },
         'm u' : {
@@ -96,13 +96,13 @@ var hotkeys = {
         'm h' : {
             doc : 'Show opened message as HTML',
             action : function(e) {
-                stateModel.trigger("message:show:type", "html");
+                curie.state.trigger("message:show:type", "html");
             }
         },
         'm t' : {
             doc : 'Show opened message as plain text',
             action : function(e) {
-                stateModel.trigger("message:show:type", "text");
+                curie.state.trigger("message:show:type", "text");
             }
         },
     },
@@ -111,7 +111,7 @@ var hotkeys = {
             doc : 'Activate search',
             action : function(e) {
                 e.preventDefault();
-                stateModel.trigger("showSearch");
+                curie.state.trigger("search:show");
             }
         },
         '?' : {
@@ -122,13 +122,13 @@ var hotkeys = {
             doc : 'Logout',
             action : function(e) {
                 e.preventDefault();
-                stateModel.trigger("logout");
+                curie.state.trigger("logout");
             }
         },
         'esc' : {
             doc : 'Go one level up',
             action : function() {
-                stateModel.trigger("escPressed");
+                curie.state.trigger("hotkey:esc");
             }
         },
     }

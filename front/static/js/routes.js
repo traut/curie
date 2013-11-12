@@ -1,5 +1,5 @@
 
-var AppRouter = Backbone.Router.extend({
+Curie.Router = Backbone.Router.extend({
 
     routes : {
         "p/:pack/:message": "showMessage",
@@ -11,7 +11,7 @@ var AppRouter = Backbone.Router.extend({
         "search/:encodedquery/:thread": "showSearchThread",
         "search/:encodedquery": "search",
 
-        "p/:pack/new/to-:email": "showDraftWithTo",
+        "p/:pack/new/to/:email": "showDraftWithTo",
         "p/:pack/new/:draftid": "showDraft",
         "p/:pack/new/": "showDraft",
         "search/:encodedquery/new/to-:email": "showSearchDraftWithTo",
@@ -19,10 +19,6 @@ var AppRouter = Backbone.Router.extend({
         "search/:encodedquery/new/": "showSearchDraft",
 
         "": "showDashboard",
-    },
-
-    initialize : function(controller) {
-        this.controller = controller;
     },
 
     reverse : function(name, options) {
@@ -42,64 +38,85 @@ var AppRouter = Backbone.Router.extend({
         return this.navigate(url, navigateOptions);
     },
 
+    navigateToPack : function(instance) {
+        var url = null;
+        if (instance instanceof Pack) {
+            url = this.reverse('showPack', {pack : instance.get("name")});
+        } else if (instance instanceof SearchResults) {
+            url = this.reverse('search', {encodedquery : instance.queryHash});
+        } else {
+            console.error("Can't navigate to pack", instance);
+            return;
+        }
+        this.navigate(url, {trigger : true});
+    },
+
+    navigateToDraftInContext : function(instance, draftId) {
+        var url = null;
+        if (instance instanceof Pack) {
+            url = this.reverse('showDraft', {pack : instance.get("name"), draftId : draftId});
+        } else if (instance instanceof SearchResults) {
+            url = this.reverse('showSearchDraft', {encodedquery : instance.get("query"), draftId : draftId});
+        } else {
+            console.error("Can't navigate to pack", instance);
+            return;
+        }
+        this.navigate(url, {trigger : true});
+    },
+
     // views
 
     showPack : function(pack) {
-        console.info("Showing pack " + pack);
-        stateModel.set("activePackName", pack);
-        stateModel.trigger("navigateToActivePack");
+        console.info("routing to pack " + pack);
+        curie.state.setPackByName(pack);
     },
 
     showMessage : function(pack, message) {
-        stateModel.set("activePackName", pack);
-        stateModel.trigger("showMessage", message);
+        curie.state.setPackByName(pack);
+        curie.controllers.layout.showMessage(message);
     },
 
     showThread : function(pack, thread) {
-        stateModel.set("activePackName", pack);
-        stateModel.trigger("showThread", thread);
+        curie.state.setPackByName(pack);
+        curie.controllers.layout.showThread(thread);
     },
 
     showSearchMessage : function(encodedquery, message) {
         this.search(encodedquery);
-        stateModel.trigger("showMessage", message);
+        curie.controllers.layout.showMessage(message);
     },
 
     showSearchThread : function(encodedquery, thread) {
         this.search(encodedquery);
-        stateModel.trigger("showThread", thread);
-    },
-
-    showGroup : function(pack, group) {
-        stateModel.set("activePackName", pack);
+        curie.controllers.layout.showThread(thread);
     },
 
     showDashboard : function() {
         console.info("showing dashboard");
-        stateModel.set("activePackName", null);
+        curie.state.setPackByName(null);
     },
 
     showDraft : function(pack, draftId) {
-        stateModel.set("activePackName", pack);
-        stateModel.trigger("showDraft", draftId);
+        curie.state.setPackByName(pack);
+        curie.controllers.layout.showDraft(draftId);
     },
 
     showSearchDraft : function(encodedquery, draftId) {
         this.search(encodedquery);
-        stateModel.trigger("showDraft", draftId);
+        curie.controllers.layout.showDraft(draftId);
     },
 
     showDraftWithTo : function(pack, email) {
-        stateModel.set("activePackName", pack);
-        stateModel.trigger("showDraftTo", email);
+        curie.state.setPackByName(pack);
+        curie.controllers.layout.showDraft(null, email);
     },
 
     showSearchDraftWithTo : function(encodedquery, email) {
         this.search(encodedquery);
-        stateModel.trigger("showDraftTo", email);
+        curie.controllers.layout.showDraft(null, email);
     },
 
     search : function(encodedquery) {
-        stateModel.trigger("searchRequest", encodedquery);
+        curie.controllers.layout.showSearchResults(encodedquery);
     }
 });

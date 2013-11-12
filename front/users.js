@@ -44,7 +44,7 @@ function signIn(login, password, callback) {
 }
 
 function getAccountEmails(hash, callback) {
-    db.all("SELECT email FROM emails, accounts WHERE emails.user_id = accounts.id AND accounts.hash = ?", login, callback);
+    db.all("SELECT email FROM emails, accounts WHERE emails.account_id = accounts.id AND accounts.hash = ?", [hash], callback);
 }
 
 
