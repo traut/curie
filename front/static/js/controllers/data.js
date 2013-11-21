@@ -9,6 +9,7 @@ Curie.Controllers.Data = function () {
         auth : connection.auth,
         getSocket : connection.getSocket,
         getSearchResults : search.getResults,
+        extendAndEncodeQuery : search.extendAndEncodeQuery
     });
 }
 

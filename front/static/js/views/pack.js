@@ -90,7 +90,6 @@ Curie.Views.CollectionGeneric = Backbone.View.extend({
 
             _.extend(renderOptions, {
                 // FIXME: should be dynamically rendered
-                moreAvailable : (this.collection.length > 0) && (this.model.total > this.collection.length),
                 size : this.model.total
             });
 
@@ -99,9 +98,19 @@ Curie.Views.CollectionGeneric = Backbone.View.extend({
             this.$el.html(renderedPack);
             console.info("packview for " + this.model.get("name") + " attached to element");
         }
+        this.updateMoreAvailable();
 
         return this.$el;
     },
+
+    updateMoreAvailable : function() {
+        var moreAvailable = (this.collection.length > 0) && (this.model.total > this.collection.length);
+        if (moreAvailable) {
+            this.$(".loadMore").show();
+        } else {
+            this.$(".loadMore").hide();
+        }
+    }
 });
 
 
@@ -115,7 +124,7 @@ Curie.Views.Pack = Curie.Views.CollectionGeneric.extend({
         _.extend(options, {
             modelViewClass : WrappedRowView,
             template : Handlebars.templates.pack,
-            rootUrl : this.options.rootUrl || window.curie.router.reverse('showPack', { pack : this.model.get("name") }),
+            rootUrl : this.options.rootUrl || curie.router.reverse('showPack', { pack : this.model.get("name") }),
         });
         Curie.Views.CollectionGeneric.prototype.initialize.apply(this, [options]);
     },

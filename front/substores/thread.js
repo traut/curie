@@ -4,7 +4,8 @@ var isodate = require("isodate"),
     async = require('async'),
 
     settings = require('../settings'),
-    utils = require('../utils');
+    utils = require('../utils'),
+    solrUtils = require('../solrUtils'),
     converter = require('../converter');
 
 var log = utils.getLogger("store.thread");
@@ -32,7 +33,13 @@ ThreadStore = function() {
 
                 log.info("Getting " + mids.length + " messages from filesystem");
 
-                var paths = mids.map(utils.messageParsedPath);
+                var paths = messages.map(function(message) {
+                    if (message.labels.indexOf("draft") > -1) {
+                        return utils.draftPath(account, message.id);
+                    } else {
+                        return utils.messageParsedPath(message.id);
+                    }
+                });
 
                 function readAsync(file, callback) {
                     fs.readFile(file, 'utf8', callback);
@@ -63,8 +70,8 @@ ThreadStore = function() {
 }
 
 function queryForThreadMessages(threadId, account, callback) {
-    var query = "+threads:" + threadId + utils.accessControl(account);
-    utils.solr.query(query, {
+    var query = "+threads:" + threadId + solrUtils.accessControl(account);
+    solrUtils.query(query, {
         rows : settings.INFINITY,
         fields : 'id,labels,unread',
         sort : 'received asc'
@@ -73,9 +80,8 @@ function queryForThreadMessages(threadId, account, callback) {
             callback(err, null);
             return;
         }
-        var responseObj = JSON.parse(response);
-        log.info("query=" + query + ", results.length=" + responseObj.response.docs.length);
-        callback(null, responseObj.response.docs);
+        log.info("query=" + query + ", results.length=" + response.response.docs.length);
+        callback(null, response.response.docs);
     });
 }
 

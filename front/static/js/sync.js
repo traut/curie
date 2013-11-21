@@ -81,7 +81,7 @@ Backbone.sync = function (method, model, options) {
         var signature = eventSignature('update', cast);
 
         socket.emit('update', {'cast' : cast, item : model.attributes }); // model.attribues is the model data
-        console.info("emitted!", {'cast' : cast, item : model.attributes });
+        //console.info("emitted!", {'cast' : cast, item : model.attributes });
         socket.once(signature, function (data) { 
             if (model.syncRequests[method] != callID) {
                 console.info("Call is outdated, ignoring", method, model);

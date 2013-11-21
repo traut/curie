@@ -38,10 +38,8 @@ MessageStore = function() {
             });
         },
         patchMessage : function(handshake, options, callback) {
-            log.info("Patching message with params", options);
+            log.info("Patching message with params", {params : options});
             var changed = options.item;
-            changed.id = options.messageId;
-
             var mid = options.messageId;
 
             solrUtils.getMessage(handshake.session.user.hash, mid, function(err, doc) {
@@ -49,19 +47,27 @@ MessageStore = function() {
                     callback(err, null);
                     return;
                 }
-                for(var key in options.changed) {
-                    doc[key] = options.changed[key];
+                var patch = {};
+                if ("unread" in changed) {
+                    patch["unread"] = {set : changed.unread};
                 }
-                doc["_version_"] = 1; // document must exist
-                solrUtils.indexMessage(doc, function(err, doc) {
-                    if (err) {
-                        callback(err, null);
-                        return;
-                    }
-                    callback(null, converter.solrToEmailPreview(doc));
+                solrUtils.updateMessage(doc.id, patch, function(err) {
+                    log.info("patching for " + doc.id  + " is done");
+                    callback(err);
                 });
+//                for(var key in options.changed) {
+//                    doc[key] = options.changed[key];
+//                }
+//                solrUtils.indexMessage(doc, function(err, doc) {
+//                    if (err) {
+//                        callback(err, null);
+//                        return;
+//                    }
+//                });
             });
         },
+        deleteMessage : function(handshake, options, callback) {
+        }
     }
 }
 

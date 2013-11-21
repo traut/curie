@@ -1,24 +1,39 @@
 <div class="draftView" >
     <div class="draftBody">
         <form class="form-horizontal">
-            <div class="control-group">
-                <input name="to" type="text" data-provide="typeahead" placeholder="To" value="{{#each to}}{{ email }}{{/each}}"/>
+            <div name="editable" {{#if embedded}}class="hide"{{/if}}>
+                <div class="control-group">
+                    <input name="to" type="text" data-provide="typeahead" placeholder="To" value="{{#each to}}{{ email }}{{/each}}"/>
+                </div>
+                <div class="control-group">
+                    <input name="subject" type="text" data-provide="typeahead" placeholder="Subject" value="{{ subject }}"/>
+                </div>
+            </div>
+            <div name="readonly" {{#unless embedded}}class="hide"{{/unless}}>
+                <p class="messageHeader">
+                    <span class="muted pull-right date">{{#dateformat received 'HH:mm, MMM Do'}}{{/dateformat}}</span>
+                    {{ subject }}
+                    <span class="headerRow">from {{> emailAddressWithLink from }}</span>
+                    <br/>
+                    {{#if to }}<span class="headerRow">to: {{#commaJoined to }} {{> emailAddressWithLink this }}{{/commaJoined }}</span>{{/if }}
+                    {{#if cc }}<span class="headerRow">cc: {{#commaJoined cc }} {{> emailAddressWithLink this }}{{/commaJoined }}</span>{{/if }}
+                    {{#if bcc }}<span class="headerRow">bcc: {{#commaJoined bcc }} {{> emailAddressWithLink this }}{{/commaJoined }}</span>{{/if }}
+                </p>
             </div>
             <div class="control-group">
-                <input name="subject" type="text" data-provide="typeahead" placeholder="Subject" value="{{ subject }}"/>
-            </div>
-            <div class="control-group">
-                <textarea rows="6" name="body">{{#each body}}{{ value }}{{/each}}</textarea>
+                <textarea {{#if embedded }}rows="2"{{else}}rows="10"{{/if}} name="body">{{#each body}}{{ value }}{{/each}}</textarea>
             </div>
         </form>
     </div>
     <div class="draftFooter row-fluid">
-        <div class="span8 modal-footer">
-            <div class="pull-left created">
-                <span class="muted">Saved:</span> <span class="savedValue">{{#dateformat received 'HH:mm:SS, dddd, MMM Do'}}{{/dateformat}}</span>
+        <div class="modal-footer">
+            <div class="pull-left saved">
+                <span class="muted {{#unless received}}hide{{/unless}}" name="title">Saved: </span><span name="value">{{#dateformat received 'HH:mm:SS, dddd, MMM Do'}}{{/dateformat}}</span>
             </div>
             <button class="btn btn-danger" aria-hidden="true" name="discard"><i class="icon-trash icon-white"></i></button>
+            {{#unless embedded}}
             <button class="btn" aria-hidden="true" name="cancel">Cancel</button>
+            {{/unless }}
             <button class="btn btn-primary" name="send">Send</button>
         </div>
         <!--

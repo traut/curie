@@ -8,18 +8,24 @@ Curie.Services.Cache = function() {
     }
 
     return {
-        get: function(key){
+        get : function(key){
             store || this.reset();
             return store[key];
         },
 
-        set: function(key, object){
+        getInstance : function(modelClass, objId) {
+            var typeName = getClassName(modelClass);
+            var key = typeName + ":" + objId;
+            return store[key];
+        },
+
+        set : function(key, object){
             store || this.reset();
             store[key] = object;
             return object
         },
 
-        reset: function(){
+        reset : function(){
             store = {};
         },
 
@@ -40,6 +46,16 @@ Curie.Services.Cache = function() {
                 return null;
             }
             return store[keys[0]];
+        },
+
+        addInstance : function(m) {
+            var typeName = m.constructor.typeName;
+            var key = typeName + ":" + m.id;
+            if (key in store) {
+                return;
+            }
+            this.set(key, m);
+            return m;
         },
 
         add : function(modelClass, attrs) {

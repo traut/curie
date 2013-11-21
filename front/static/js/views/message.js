@@ -1,8 +1,9 @@
 var WrappedRowView = Backbone.View.extend({
     initialize : function(options) {
-        if (this.model.get("thread")) {
+        if (this.model instanceof Curie.Models.Thread) {
             this.wrappedView = new ThreadRowView({ model : this.model, rootUrl : this.options.rootUrl });
-        } else if (this.model.get("labels") && this.model.get("labels").indexOf("draft") > -1) {
+        //} else if (this.model.get("labels") && this.model.get("labels").indexOf("draft") > -1) {
+        } else if (this.model instanceof Curie.Models.Draft) {
             this.wrappedView = new MessageRowView({ model : this.model, rootUrl : this.options.rootUrl + '/new' });
         } else {
             this.wrappedView = new MessageRowView({ model : this.model, rootUrl : this.options.rootUrl });
@@ -25,16 +26,19 @@ var MessageRowView = Backbone.View.extend({
         this.on("change:selected", this.updateSelected, this);
         this.on("change:marked", this.updateMarked, this);
 
-        this.model.on("change:unread", this.updateUnread, this);
+        //this.model.on("change:unread", this.updateUnread, this);
+        this.model.on("change", this.render, this);
         this.model.on("remove", this.removeMessage, this);
 
         this.hashUrl = this.options.rootUrl + "/" + this.model.id;
     },
-    render : function() {
+    render : function(a, b, c) {
         var data = this.model.toJSON();
         data.url = this.hashUrl;
+        console.info(data, this.model);
         var html = this.template(data);
-        this.$el = $(html);
+        this.$el.html(html);
+        console.info("rendering messagerowview for " + this.model.get("id"), a, b, c);
         return this;
     },
     removeMessage : function(m, collection, options) {
@@ -77,6 +81,7 @@ var MessageView = Backbone.View.extend({
     template : Handlebars.templates.message,
     events : {
         "click a[name=showAsBodyType]" : "changeBodyType",
+        "click a[name=deleteMessageForever]" : "deleteMessageForever",
     },
     initialize : function() {
         //this.model.on("change", this.render, this);
@@ -119,11 +124,16 @@ var MessageView = Backbone.View.extend({
             $("div.body", this.$el).show();
         }
     },
+    deleteMessageForever : function(e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        this.model.destroy();
+        Mousetrap.trigger("esc");
+    },
     changeBodyTypeHotkey : function(value) {
         this.showBodyType(value);
     },
     changeBodyType : function(e) {
-        console.info("changing body type");
         e.preventDefault();
         e.stopImmediatePropagation();
         var target = $(e.target);

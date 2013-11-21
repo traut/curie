@@ -47,9 +47,36 @@ function getAccountEmails(hash, callback) {
     db.all("SELECT email FROM emails, accounts WHERE emails.account_id = accounts.id AND accounts.hash = ?", [hash], callback);
 }
 
+function getAccountDetails(hash, callback) {
+    getAccountEmails(hash, function(err, emails) {
+        if (err) {
+            callback(err);
+            return;
+        }
+        if (!emails || emails == null || emails.length == 0) {
+            callback("No emails for hash " + hash);
+            return;
+        }
+        var primary = {
+            email : emails[0].email,
+            name : "John Smith"
+        };
+        callback(null, {
+            primary : primary,
+            all : emails.map(function(e) {
+                return {
+                    name : null,
+                    email : e.email
+                };
+            })
+        });
+    });
+}
+
 
 module.exports = {
     addAccount : addAccount,
     signIn : signIn,
-    getAccountEmails : getAccountEmails
+    getAccountEmails : getAccountEmails,
+    getAccountDetails : getAccountDetails
 }

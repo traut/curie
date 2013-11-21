@@ -2,35 +2,57 @@
 Curie.Router = Backbone.Router.extend({
 
     routes : {
+        "p/draft/new/:draft": "showDraft",
+
+        "p/:pack/t/:thread": "showThread",
         "p/:pack/:message": "showMessage",
         "p/:pack": "showPack",
 
-        "p/:pack/t/:thread": "showThread",
 
         "search/:encodedquery/:message": "showSearchMessage",
         "search/:encodedquery/:thread": "showSearchThread",
         "search/:encodedquery": "search",
 
-        "p/:pack/new/to/:email": "showDraftWithTo",
-        "p/:pack/new/:draftid": "showDraft",
-        "p/:pack/new/": "showDraft",
-        "search/:encodedquery/new/to-:email": "showSearchDraftWithTo",
-        "search/:encodedquery/new/:draftid": "showSearchDraft",
-        "search/:encodedquery/new/": "showSearchDraft",
-
         "": "showDashboard",
     },
 
+    __fillTemplate : function(tmpl, options) {
+        _.each(options, function(value, key) {
+            tmpl = tmpl.replace(":" + key, value || "");
+        });
+        return tmpl;
+    },
+
     reverse : function(name, options) {
+        var urlTemplates = [];
+
         for(var key in this.routes) {
             if (this.routes[key] == name) {
-                var tmpl = key;
-                _.each(options, function(value, key) {
-                    tmpl = tmpl.replace(":" + key, value);
-                });
-                return tmpl;
+                urlTemplates.push(key);
             }
         }
+
+        if (urlTemplates.length == 1) {
+            return this.__fillTemplate(urlTemplates[0], options);
+        }
+
+        var paramNames = _.keys(options);
+
+        var matchedUrls = urlTemplates.filter(function(t) {
+            var allParamsPresent = _.every(paramNames, function(param) {
+                return t.indexOf(":" + param) > -1;
+            });
+            console.info(t, allParamsPresent, (t.split(':').length - 1) == paramNames.length);
+            return allParamsPresent && (t.split(':').length - 1) == paramNames.length
+        });
+
+        if (matchedUrls.length > 1) {
+            throw new Error("More than one URL match: [" + matchedUrls.join(", ") + "], params=" + paramNames.join(", "));
+        } else if (matchedUrls.length == 0) {
+            throw new Error("No matches found for name=" + name + ", options=" + paramNames.join(", "));
+        }
+
+        return this.__fillTemplate(matchedUrls[0], options);
     },
 
     navigateTo : function(name, options, navigateOptions) {
@@ -51,24 +73,14 @@ Curie.Router = Backbone.Router.extend({
         this.navigate(url, {trigger : true});
     },
 
-    navigateToDraftInContext : function(instance, draftId) {
-        var url = null;
-        if (instance instanceof Pack) {
-            url = this.reverse('showDraft', {pack : instance.get("name"), draftId : draftId});
-        } else if (instance instanceof SearchResults) {
-            url = this.reverse('showSearchDraft', {encodedquery : instance.get("query"), draftId : draftId});
-        } else {
-            console.error("Can't navigate to pack", instance);
-            return;
-        }
-        this.navigate(url, {trigger : true});
-    },
-
     // views
 
     showPack : function(pack) {
         console.info("routing to pack " + pack);
         curie.state.setPackByName(pack);
+        if (curie.state.get("activePack").get("name") == pack) {
+            curie.state.trigger("navigate:activePack");
+        }
     },
 
     showMessage : function(pack, message) {
@@ -96,24 +108,10 @@ Curie.Router = Backbone.Router.extend({
         curie.state.setPackByName(null);
     },
 
-    showDraft : function(pack, draftId) {
-        curie.state.setPackByName(pack);
-        curie.controllers.layout.showDraft(draftId);
-    },
-
-    showSearchDraft : function(encodedquery, draftId) {
-        this.search(encodedquery);
-        curie.controllers.layout.showDraft(draftId);
-    },
-
-    showDraftWithTo : function(pack, email) {
-        curie.state.setPackByName(pack);
-        curie.controllers.layout.showDraft(null, email);
-    },
-
-    showSearchDraftWithTo : function(encodedquery, email) {
-        this.search(encodedquery);
-        curie.controllers.layout.showDraft(null, email);
+    showDraft : function(draft) {
+        curie.state.setPackByName("draft");
+        console.info("showing draft", draft);
+        curie.controllers.layout.showDraft(draft);
     },
 
     search : function(encodedquery) {

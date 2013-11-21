@@ -21,8 +21,9 @@ var SidebarView = Backbone.View.extend({
 
     updateAccountInfo : function(account) {
         account = account || curie.state.get("account");
-        var accountInfo = Handlebars.templates.emailAddress(account.toJSON());
-        this.$("#accountInfo").html(accountInfo);
+        var primaryMailbox = Handlebars.templates.emailAddress(account.get("primary"));
+        console.info(account.get("primary"));
+        this.$("#accountInfo").html(primaryMailbox);
     },
 
     showAlert : function(msg) {

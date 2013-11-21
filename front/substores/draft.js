@@ -52,50 +52,59 @@ DraftStore = function() {
             var draft = options.item;
             var userHash = handshake.session.user.hash;
 
-            log.info("Deleting " + draft.id + ". Getting message");
-            solrUtils.getMessage(userHash, draft.id, function(err, message) {
-                if (err) {
-                    callback(err, null);
-                    return;
-                }
-
-                log.info("Deleting " + draft.id + ". Deleting from index");
-                solrUtils.deleteMessage(draft.id, function(err, message) {
-                    if (err) {
-                        callback(err, null);
-                        return;
-                    }
-
+            async.waterfall([
+                function(_callback) {
+                    log.info("Deleting " + draft.id + ". Getting message");
+                    solrUtils.getMessage(userHash, draft.id, _callback);
+                },
+                function(message, _callback) {
+                    log.info("Deleting " + draft.id + ". Deleting from index");
+                    solrUtils.deleteMessage(draft.id, _callback);
+                },
+                function(message, _callback) {
                     log.info("Deleting " + draft.id + ". Deleting from FS");
-                    utils.deleteFile(utils.draftPath(userHash, draft.id), function(err) {
-                        if (err) {
-                            callback(err, null);
-                            return;
-                        }
-
-                        callback();
-                    });
-
-                });
-
+                    utils.deleteFile(utils.draftPath(userHash, draft.id), _callback);
+                }
+            ], function(err) {
+                callback(err, null);
             });
 
         },
         updateDraft : function(handshake, options, callback) {
             var draft = options.item;
+
             var userHash = handshake.session.user.hash;
+            var userEmails = handshake.session.user.mailboxes;
 
             draft.id = draft.id || utils.uniqueId();
             draft.account = userHash;
-            draft.from = [{ email : "t@curie.heyheylabs.com", name : "Some Guy" }];
-            draft.__references = (draft.in_reply_to == null || draft.in_reply_to == '') ? [] : [draft.in_reply_to];
-            draft.in_reply_to = '';
+            draft.to = draft.to || [];
+            draft.cc = draft.cc || [];
+            draft.bcc = draft.bcc || [];
+            draft.unread = false;
+            draft.attachment = draft.attachment || [];
+            draft.threads = draft.threads || [];
+            draft.currentThread = draft.currentThread || null;
             draft.received = new Date();
+            draft.body = draft.body || [];
+
+            if (draft.from) {
+                var correct = userEmails.all.filter(function(m) {
+                    return m.email == draft.from.email;
+                }).length > 0;
+
+                if (!correct) {
+                    draft.from = userEmails.primary;
+                }
+            } else {
+                draft.from = userEmails.primary;
+            }
 
             draft.__message_id = (draft.sent) ? utils.createMessageId(draft.id) : ('dummy' + draft.id);
 
             var parsed = converter.draftToParsed(draft);
             if (parsed == null) {
+                log.error("Error with", draft);
                 callback("Can't save draft", null);
                 return;
             }
@@ -122,13 +131,7 @@ DraftStore = function() {
 
                 if (draft.sent) {
                     console.info("Sending draft as a message");
-
-                    if (draft.in_reply_to_mid) {
-                        //FIXME: create a new thread and update previous message 
-                    }
-
                     utils.pushToQueue("sent", draft.id);
-
                     callback(null, {status : 'ok', mid : draft.id});
                 } else {
                     console.info("Sending back ", draft);
@@ -162,14 +165,15 @@ function readDraftFromFile(path, callback) {
 }
 
 function indexDraft(draft, callback) {
-    if (draft && draft.id) {
-        solrUtils.getMessage(draft.account, draft.id, function(err, result) {
-            if (err) {
-                log.error("Can't retrieve a draft: " + draft.id, err);
-                callback(err, null);
-                return;
-            }
+    if (!draft || !draft.id) {
+        callback("No draft id to search for", null);
+    }
 
+    async.waterfall([
+        function(_callback) { // checking if the draft is there
+            solrUtils.getMessage(draft.account, draft.id, _callback); 
+        },
+        function(message, _callback) { // filling labels properly
             draft.labels = draft.labels || [];
 
             if (draft.sent) {
@@ -184,12 +188,58 @@ function indexDraft(draft, callback) {
                     draft.labels.push(LABELS.draft);
                 }
             }
+            _callback();
+        },
+        function(_callback) {
+            if (!draft.in_reply_to_mid || draft.in_reply_to_mid == '') {
+                _callback();
+                return;
+            }
 
+            log.info("Creating new thread with draft=" + draft.id + ", message=" + draft.in_reply_to_mid);
+
+            solrUtils.getMessage(draft.account, draft.in_reply_to_mid, function(err, parentMessage) {
+                if (!parentMessage) {
+                    draft.currentThread = null;
+                    _callback();
+                    return;
+                }
+
+                if (!draft.currentThread) {
+                    if (parentMessage.threads && parentMessage.threads.length > 0) {
+                        draft.currentThread = parentMessage.threads[0];
+                        draft.threads = parentMessage.threads;
+                    } else {
+                        draft.currentThread = utils.uuid();
+                        draft.threads = [];
+                    }
+                }
+
+                if (!draft.threads || draft.threads.length == 0) {
+                    draft.threads = [draft.currentThread];
+                } else if (draft.threads.indexOf(draft.currentThread) == -1) {
+                    draft.threads.push(draft.currentThread);
+                }
+
+                if (!parentMessage.threads || parentMessage.threads.indexOf(draft.currentThread) == -1) {
+                    log.info("Updating message " + parentMessage.id + " with thread " + draft.currentThread);
+                    solrUtils.updateMessage(parentMessage.id, {
+                        threads : {add : draft.currentThread},
+                    }, _callback);
+                } else {
+                    _callback();
+                }
+            });
+
+        }], function(err) {
+            if (err) {
+                log.error("Can't index a draft: " + draft.id, err);
+                callback(err, null);
+                return;
+            }
             solrUtils.indexMessage(converter.draftToDoc(draft), callback);
-        });
-    } else {
-        callback("No draft id to search for", null);
-    }
+        }
+    );
 }
 
 module.exports = {

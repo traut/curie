@@ -3,7 +3,7 @@
             <span class="lead">
                 <span class="muted pull-right date">{{#dateformat received 'HH:mm, MMM Do'}}{{/dateformat}}</span>
                 {{ subject }}
-                <span class="headerRow">from {{> emailAddressWithLink _from }}</span>
+                <span class="headerRow">from {{> emailAddressWithLink from }}</span>
                 <br/>
             </span>
             {{#if to }}<span class="headerRow">to: {{#commaJoined to }} {{> emailAddressWithLink this }}{{/commaJoined }}</span>{{/if }}
@@ -13,11 +13,12 @@
         <div class="pull-right">
             {{#each labels}} <a class="badge mutedWithHover" href="#p/{{ this }}">{{ this }}</a>{{/each}}
             <div class="btn-group">
-                <button class="btn dropdown-toggle" data-toggle="dropdown">
+                <button class="btn btn-small dropdown-toggle" data-toggle="dropdown">
                     <i class="icon-wrench"></i>
-                    <span class="caret"></span>
+                    <!--<span class="caret"></span>-->
                 </button>
                 <ul class="dropdown-menu" style="float:right;right:0;left:auto;">
+                    <li><a href="#" name="deleteMessageForever" data-type="text">Delete message forever</a></li>
                     {{#if _multipleTypes }}
                     <li class="divider"></li>
                     <li><a href="#" name="showAsBodyType" data-type="text"><!--<i class="icon-ok"></i>-->Show as text</a></li>

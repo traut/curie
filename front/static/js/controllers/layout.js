@@ -9,7 +9,9 @@ Curie.Controllers.Layout = function () {
         //renderPackView : pack.renderPackView,
         createPackView : pack.createPackView,
         renderAsPack : pack.renderAsPack,
-        showMessage : _.partial(basic.showPopup, "message"),
+        showMessage : _.partial(basic.showPopup, Curie.Models.Message),
+        showThread : _.partial(basic.showPopup, Curie.Models.Thread),
+        showDraft : _.partial(basic.showPopup, Curie.Models.Draft),
 
         showSearchResults : function(query) {
             var results = curie.controllers.data.getSearchResults(query);

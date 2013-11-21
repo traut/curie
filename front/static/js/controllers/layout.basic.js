@@ -20,27 +20,49 @@ Curie.Controllers.Layout.Basic = function () {
 
     var showPopup = function(objType, objId) {
 
-        var objClass = null;
-        var viewClass = null;
 
-        if (objType == "message") {
-            objClass = Message;
-            viewClass = MessageView;
-        } else if (objType == "thread") {
-            objClass = Thread;
+        var obj;
+        if (objId && objId != '') {
+            obj = curie.cache.add(objType, { id : objId });
+        } else {
+            if (objType.prototype.newInstance) {
+                obj = objType.prototype.newInstance();
+            } else {
+                console.error("Can't create new instance for", objType.constructor.typeName);
+                return;
+            }
+        }
+
+        var viewClass;
+        var subview;
+
+        if (objType == Curie.Models.Message) {
+            //viewClass = MessageView;
             viewClass = ThreadView;
+            subview = new viewClass({ model : new Curie.Models.Thread().withMessages([obj])});
+        } else if (objType == Curie.Models.Thread) {
+            viewClass = ThreadView;
+        } else if (objType == Curie.Models.Draft) {
+            viewClass = DraftView;
         } else {
             console.error("Unknown obj type. Can't show a popup with", objType, objId);
             return;
         }
 
-        var obj = curie.cache.add(objClass, { id : objId });
-        var subview = new viewClass({ model : obj })
-        obj.fetch({
-            success : function() {
-                popupView.hide().render(subview);
-            }
-        });
+        subview = subview || new viewClass({ model : obj });
+        if (objId) {
+            //popupView.hide();
+            obj.fetch({
+                success : function() {
+                    //popupView.hide().render(subview);
+                    popupView.render(subview);
+                    popupView.$(".content").stop().css("opacity", 1);
+                }
+            });
+            popupView.$(".content").animate({opacity : 0.3});
+        } else {
+            popupView.hide().render(subview);
+        }
     }
 
     var updateTitle = function(pack, unread) {
@@ -75,6 +97,7 @@ Curie.Controllers.Layout.Basic = function () {
             _.each(packListViews, function(view) {
                 view.updateActive(pack);
             });
+            popupView.hide();
         },
         "change:selectedPack" : function(state, pack) {
             _.values(packListViews).each(function(view) {

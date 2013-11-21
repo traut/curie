@@ -132,7 +132,7 @@ button.close {
     vertical-align: middle; }
 
 .threadView .message {
-  margin: 10px 0px;
+  margin: 0px 0px 10px;
   padding: 10px;
   border-radius: 5px; }
   .threadView .message:nth-child(odd) {
@@ -142,7 +142,9 @@ button.close {
 
 .threadRow {
   border-top: thick double #dddddd;
-  border-left: thick double #dddddd; }
+  border-left: thick double #dddddd;
+  border-right: thin solid #dddddd;
+  border-bottom: thin solid #dddddd; }
   .threadRow .messageRow {
     border: 0px;
     margin: 0px; }
@@ -191,7 +193,7 @@ button.close {
     padding: 5px 0px; }
 
 .draftView .draftBody {
-  padding: 15px 15px 20px 0px; }
+  padding: 15px 15px 0px 0px; }
   .draftView .draftBody form {
     margin: 0px; }
     .draftView .draftBody form .control-group {
@@ -200,12 +202,11 @@ button.close {
         border: 1px solid #e6e6e6;
         width: 400px; }
         .draftView .draftBody form .control-group input[name=body], .draftView .draftBody form .control-group textarea[name=body] {
-          width: 100%;
-          height: 300px; }
-.draftView .draftFooter .created {
-  padding-top: 3px; }
+          width: 100%; }
+.draftView .draftFooter .modal-footer {
+  border-top: 0px; }
 .draftView .draftFooter .saved {
-  padding: 18px 0px 15px; }
+  padding-top: 3px; }
 
 .draftPopup {
   width: 600px;
@@ -255,7 +256,8 @@ button.close {
     */ }
   #packView .contentView .loadMore {
     margin: 10px auto;
-    width: 50%; }
+    width: 50%;
+    position: relative; }
   #packView .popupView {
     padding: 15px;
     margin: 5px;

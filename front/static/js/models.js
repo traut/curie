@@ -1,34 +1,8 @@
-var MessageLight = Backbone.Model.extend({
+Curie.Models.Message = Backbone.Model.extend({
     defaults: {
         id : null,
 
-        from : null,
-        to : null,
-        cc : null,
-        bcc : null,
-
-        subject : null,
-
-        received : null,
-        unread : null,
-        labels : [],
-        
-        thread : null,
-        messages : [],
-    },
-    getLatestMessage : function() {
-        if (this.get("thread")) {
-            var messages = this.get("messages");
-            return messages[0];
-        }
-    }
-}, { typeName : "MessageLight" });
-
-var Message = Backbone.Model.extend({
-    defaults: {
-        id : null,
-
-        from : null,
+        from : {},
         to : [],
         cc : [],
         bcc : [],
@@ -40,6 +14,7 @@ var Message = Backbone.Model.extend({
         received : null,
         unread : null,
         labels : [],
+        threads : [],
 
         body : [],
 
@@ -47,33 +22,65 @@ var Message = Backbone.Model.extend({
     },
     urlRoot: "/messages",
     initialize : function() {
-        this.on("destroy", this.unbind, this);
     },
-    unbind : function() {
-    }
 }, { typeName : "Message" });
 
 
-var Draft = Message.extend({
-    urlRoot: "/drafts",
-    initialize: function() {
+Curie.Models.Draft = Curie.Models.Message.extend({
+    urlRoot : "/drafts",
+
+    defaults: {
+        currentThread : null
+    },
+
+    initialize : function() {
         this.changedByUser = false;
+    },
+
+    newInstance : function(options) {
+        options = options || {};
+        _.extend(options, {
+            created : new Date(),
+            from : curie.state.account.get("primary"),
+        });
+        return new Curie.Models.Draft(options);
+    },
+
+    inReplyTo : function(message) {
+        this.set("to", [message.get("from")]);
+        this.set("in_reply_to_mid", message.get("id"));
+        this.set("subject", "Re: " + (message.get("subject") || ""));
     }
+
+
 }, { typeName : "Draft" });
 
 
+function parseMessage(message) {
+    if (message.thread) {
+        return curie.cache.add(Curie.Models.Thread, message);
+    } else if (message.draft) {
+        return curie.cache.add(Curie.Models.Draft, message);
+    } else {
+        return curie.cache.add(Curie.Models.Message, message);
+    }
+}
 
-var Messages = Backbone.Collection.extend({
-    model : MessageLight,
+Curie.Models.ThreadMessages = Backbone.Collection.extend({
+    comparator : function(message) {
+        return message.get("received"); // newest goes last
+    }
+}, { typeName : "ThreadMessages" });
+
+
+Curie.Models.Messages = Backbone.Collection.extend({
+    model : Curie.Models.Message,
     comparator : function(message) {
         return -message.get("received"); // newest goes first
     },
     parse : function(docs, options) {
-        var newMessages = docs.map(function(m) {
-            //FIXME: what if this is a thread?
-            return curie.cache.add(MessageLight, m);
-        });
-        if (options.extend) {
+        var newMessages = docs.map(parseMessage);
+        if (options && options.extend) {
             return _.union(this.models, newMessages);
         } else {
             return newMessages;
@@ -83,31 +90,43 @@ var Messages = Backbone.Collection.extend({
 }, { typeName : "Messages" });
 
 
-var Thread = Backbone.Model.extend({
+Curie.Models.Thread = Backbone.Model.extend({
+    urlRoot : "/threads",
     defaults: {
         id : null,
-
         received : null,
-        unreadCount : null,
-
+        unread : null,
+        last : null,
         labels : [],
-        messages : []
+        length : 0,
+        messages : null,
     },
-    urlRoot: "/threads",
-    parse : function(resp, options) {
-        var messages = resp.messages.map(function(m) {
-            return initEntity("Message", Message, m);
+    initialize : function() {
+        if (!this.get("messages")) {
+            this.set("messages", new Curie.Models.ThreadMessages());
+        }
+    },
+    withMessages : function(messagesArray) {
+        this.get("messages").add(messagesArray);
+        return this;
+    },
+    parse : function(response) {
+
+        this.get("messages").add(response.messages.map(parseMessage)).sort();
+
+        return _.extend(response, {
+            messages : this.get("messages"),
         });
-        resp.messages = messages;
-        return resp;
-    },
+    }
 }, { typeName : "Thread" });
+
+
 
 Curie.Models.PagedMessagesWrapper = Backbone.Model.extend({
     page : 0,
     total : 0,
     initialize : function() {
-        this.messages = new Messages();
+        this.messages = new Curie.Models.Messages();
     },
     fetchMessages : function() {
         return this.fetch({update : true});
@@ -123,10 +142,7 @@ Curie.Models.PagedMessagesWrapper = Backbone.Model.extend({
         return this.fetchMessages();
     },
     parseMessages : function(docs) {
-        return docs.map(function(m) {
-            //FIXME: what if this is a thread?
-            return curie.cache.add(MessageLight, m);
-        });
+        return Curie.Models.Messages.prototype.parse(docs);
     },
     parse : function(response) {
         console.error("Received", response);
@@ -171,22 +187,7 @@ var SearchResults = Curie.Models.PagedMessagesWrapper.extend({
     initialize: function() {
         Curie.Models.PagedMessagesWrapper.prototype.initialize.apply(this, arguments);
 
-        var SEARCH_FIELDS = ["subject", "from.name", "body"];
-
-        var query = this.get("query");
-        if (query == null) {
-            throw new Exception("No query provided");
-        };
-        if (query[0] == "+") {
-            query = query.substring(1);
-        } else {
-            var extendedQuery = _.map(SEARCH_FIELDS, function(f) {
-                return '' + f + ':"' + query + '"';
-            }).join(" OR ");
-            query = "+(" + extendedQuery + ")";
-        }
-
-        this.ctx = { query : query };
+        this.ctx = { query : this.get("query") };
         this.queryHash = utf8_to_b64(query);
         this.set("name", this.getName());
     },
@@ -207,14 +208,10 @@ var Packs = Backbone.Collection.extend({
     },
 });
 
-var Searches = Backbone.Collection.extend({
-    model: SearchResults,
-});
-
 Curie.Models.Account = Backbone.Model.extend({
     defaults: {
-        email : null,
-        name : null
+        primary : {},
+        mailboxes : {},
     },
     urlRoot: "/account",
 });
@@ -225,7 +222,6 @@ Curie.Models.State = Backbone.Model.extend({
         selectedPack : null,
     },
     account : new Curie.Models.Account(),
-    markedMessages : new Messages(),
 
     setPackByName : function(packName) {
         var activePack = (packName == null) ? null : curie.cache.getByProperty(Pack, "name", packName);

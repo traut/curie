@@ -1,6 +1,5 @@
 var util = require('util'),
     barista = require('barista'),
-    solrLib = require('solr'),
     winston = require('winston'),
     crypto = require('crypto'),
     fs = require('fs-ext'),
@@ -10,13 +9,12 @@ var util = require('util'),
     cookie_signature = require('cookie-signature'),
     async = require('async'),
     beanstalk = require('nodestalker'),
+    uuidLib = require('node-uuid'),
 
     users = require("./users.js"),
     settings = require('./settings.js');
 
 
-var solr = solrLib.createClient();
-var solrEscape = solrLib.valueEscape
 
 AccessDenied = function(accessedByAccount, contentType, contentId) {
 
@@ -31,17 +29,9 @@ AccessDenied = function(accessedByAccount, contentType, contentId) {
     return this;
 }
 
-
-function accessControlQueryPart(accountHash) {
-    return ' +account:' + solrEscape(accountHash) + ' ';
-}
-
-
 function createMessageId(internalId) {
     return util.format("<%s.%s@%s>", new Date().getTime(), internalId, settings.DOMAIN);
 }
-
-
 
 function flatToDict(flatMap) {
     var result = {};
@@ -77,6 +67,10 @@ function uniqueId() {
     var current_date = (new Date()).valueOf().toString();
     var random = Math.random().toString();
     return crypto.createHash('sha256').update(current_date + random).digest('hex');
+}
+
+function uuid() {
+    return uuidLib.v4();
 }
 
 function pad(n) {
@@ -181,7 +175,8 @@ function getLogger(name) {
     });
 }
 
-function mergeToThreads(messages) {
+function mergeIntoThreads(messages) {
+
     var threads = {};
     var combined = [];
 
@@ -203,29 +198,37 @@ function mergeToThreads(messages) {
         }
     });
 
-    combined.forEach(function(c) {
+    combined = combined.map(function(c) {
         if (c.thread) {
-            c.received = Math.max.apply(Math, c.messages.map(function(m) {
-                return m.received;
-            }));
 
-            c.unreadCount = c.messages.filter(function(m) {
+            var messages = c.messages;
+            delete c.messages;
+
+            messages.sort(function(m1, m2) {
+                return (m1.received - m2.received);
+            });
+
+            c.last = messages[messages.length - 1]; // in reality it's the last one in current selection
+            c.received = c.last.received;
+            c.unread = messages.filter(function(m) {
                 return m.unread;
-            }).length;
+            }).length > 0;
 
             c.labels = [];
-            c.messages.forEach(function(m) {
+            messages.forEach(function(m) {
                 m.labels.forEach(function(l) {
                     if (c.labels.indexOf(l) == -1) {
                         c.labels.push(l);
                     }
                 });
             });
-
-            c.messages.sort(function(a, b) {
-                return b.received - a.received;
-            });
+            console.info(c.id, c.received, c.last.subject);
+        } else {
+            if (c.labels.indexOf("draft") > -1) {
+                c.draft = true;
+            }
         }
+        return c;
     });
 
 
@@ -241,20 +244,17 @@ function pushToQueue(queue, message) {
             client.disconnect();
         });
     });
-
 }
 
  
 module.exports = {
-    solr : solr,
-    solrEscape : solrEscape,
     AccessDenied : AccessDenied,
 
-    accessControl : accessControlQueryPart,
     flatToDict : flatToDict,
-    mergeToThreads : mergeToThreads,
+    mergeIntoThreads : mergeIntoThreads,
 
     uniqueId : uniqueId,
+    uuid : uuid,
     createMessageId : createMessageId,
 
     writeToFile : writeToFile,

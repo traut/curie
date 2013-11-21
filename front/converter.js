@@ -1,6 +1,7 @@
 var util = require('util'),
     isodate = require("isodate"),
     JaySchema = require('jayschema'),
+    extend = require("xtend"),
     utils = require('./utils');
 
 var log = utils.getLogger("convert");
@@ -57,23 +58,13 @@ function solrToEmailPreview(doc) {
 }
 
 function parsedAndSolrToEmail(json, doc) {
-    return {
-        id : json.id,
-
-        from : json.fields.from,
-        to : json.fields.to,
-        cc : json.fields.cc,
-        bcc : json.fields.bcc,
-
-        subject : json.fields.subject,
+    var basic = solrToEmailPreview(doc);
+    return extend(basic, {
         body : json.fields.body,
+        attachments : json.fields.attachments,
 
-        received : isodate(json.received).getTime(),
-        unread : get_first(doc.unread),
-        labels : as_list(doc.labels),
-
-        attachments : json.fields.attachments
-    }
+        draft : (doc.labels.indexOf("draft") > -1)
+    });
 }
 
 function draftToParsed(draft) {
@@ -86,14 +77,12 @@ function draftToParsed(draft) {
         fields : {
             message_id : draft.__message_id,
 
-            from : draft.from,
+            from : [draft.from],
             to : draft.to,
-            cc : draft.cc,
-            bcc : draft.bcc,
+            cc : draft.cc || [],
+            bcc : draft.bcc || [],
 
-            'in-reply-to' : draft.in_reply_to,
-
-            references : draft.__references || [],
+            references : [],
 
             subject : draft.subject,
 
@@ -115,8 +104,6 @@ function draftToDoc(draft) {
         return list.map(function(a) { return a[field]; });
     }
 
-    var _from = draft.from[0];
-
     var doc = {
         id : draft.id,
 
@@ -125,9 +112,9 @@ function draftToDoc(draft) {
 
         message_id : draft.__message_id || "",
 
-        "from.email" : _from.email, //pluck(draft.from, 'email'),
-        "from.name" : _from.name, //pluck(draft.from, 'name'),
-        "from.json" : JSON.stringify(_from), //JSON.stringify(draft.from),
+        "from.email" : draft.from.email, //pluck(draft.from, 'email'),
+        "from.name" : draft.from.name, //pluck(draft.from, 'name'),
+        "from.json" : JSON.stringify(draft.from), //JSON.stringify(draft.from),
 
         "to.email" : pluck(draft.to, 'email'),
         "to.name" : pluck(draft.to, 'name'),
@@ -147,10 +134,12 @@ function draftToDoc(draft) {
         body : pluck(draft.body, 'value'),
 
         labels : draft.labels,
+        threads : draft.threads,
         unread : false,
 
         _version_ : 0, // We don't care if document exists or not. Overwrite it
     }
+    console.info(doc);
     return doc;
 }
 

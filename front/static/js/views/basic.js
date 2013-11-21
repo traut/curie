@@ -8,14 +8,13 @@ var PopupView = Backbone.View.extend({
     },
     render : function(subview) {
 
+        this.currentSubview && this.currentSubview.close();
         this.currentSubview = subview;
 
-        this.topOffset =  window.pageYOffset || 15;
-
+        this.topOffset =  window.pageYOffset || 35;
         this.$el.css("top", this.topOffset);
 
         subview.render();
-
         this.$(".content").html(subview.$el);
 
         this.$el.show();
@@ -66,8 +65,9 @@ var AppView = Backbone.View.extend({
     showMainBlock : function() {
         this.$(".mainBlock").show();
     },
-    showNewDraft : function() {
-        alert("show new draft");
+    showNewDraft : function(e) {
+        e && e.preventDefault();
+        curie.controllers.layout.showDraft();
     },
     escPressed : function(e) {
         if (e.keyCode == 27) {
@@ -79,8 +79,9 @@ var AppView = Backbone.View.extend({
         var query = this.$("#searchPopup form input[name=search]").val().trim();
         if (query && query.length > 0) {
             console.info('"' + query + '"');
-            window.curie.router.navigate(
-                window.curie.router.reverse("search", { encodedquery : utf8_to_b64(query) }),
+
+            curie.router.navigate(
+                curie.router.reverse("search", { encodedquery : curie.controllers.data.extendAndEncodeQuery(query) }),
                 {trigger : true}
             );
         }

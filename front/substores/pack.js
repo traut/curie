@@ -4,6 +4,7 @@ var isodate = require("isodate"),
 
     settings = require('../settings'),
     utils = require('../utils'),
+    solrUtils = require('../solrUtils'),
     converter = require('../converter');
 
 var log = utils.getLogger("store.pack");
@@ -18,6 +19,12 @@ PackStore = function() {
 
             log.info("Searching for pack=" + pack + ", page=" + page + ", hash=" + hash);
 
+            function getThreads(messages) {
+                return messages.filter(function(m) {
+                    return m.thread;
+                });
+            }
+
             queryForLabel(hash, pack, page, function(err, docs) {
                 if (err) {
                     callback(err, []);
@@ -26,9 +33,31 @@ PackStore = function() {
                 var msgs = [];
                 if (docs && docs.length > 0) {
                     msgs = docs.map(converter.solrToEmailPreview);
-                    msgs = utils.mergeToThreads(msgs);
+                    msgs = utils.mergeIntoThreads(msgs);
                 }
-                callback(null, msgs);
+
+                var threadIds = getThreads(msgs).map(function(m) {
+                    return m.id;
+                });
+
+                if (threadIds.length == 0) {
+                    callback(null, msgs);
+                    return;
+                };
+
+                var query = '+labels:*' + solrUtils.accessControl(hash);
+                solrUtils.query(query, {
+                    facet : true,
+                    'facet.query' : threadIds.map(function(id) { return "threads:" + id; }), 
+                    rows : 0,
+                }, function(err, results) {
+                    var counts = results.facet_counts.facet_queries;
+                    getThreads(msgs).forEach(function(t) {
+                        t.length = counts["threads:" + t.id];
+                    });
+                    callback(null, msgs);
+                });
+
             });
         },
         getPacks : function(handshake, options, callback) {
@@ -37,15 +66,15 @@ PackStore = function() {
 
             async.parallel({
                 packs : function(callback) {
-                    utils.solr.query(utils.accessControl(hash), {
+                    solrUtils.query(solrUtils.accessControl(hash), {
                         rows: 0,
                         facet: true,
                         'facet.field' : "labels"
                     }, callback);
                 },
                 unreadCounts : function(callback) {
-                    var query = "+unread:true " + utils.accessControl(hash);
-                    utils.solr.query(query, {
+                    var query = "+unread:true " + solrUtils.accessControl(hash);
+                    solrUtils.query(query, {
                         rows: 0,
                         facet: true,
                         'facet.field' : "labels"
@@ -58,8 +87,8 @@ PackStore = function() {
                     callback(err, null);
                     return;
                 }
-                var packsResult = JSON.parse(results.packs);
-                var unreadsResult = JSON.parse(results.unreadCounts);
+                var packsResult = results.packs;
+                var unreadsResult = results.unreadCounts;
 
                 var labelsMap = utils.flatToDict(packsResult.facet_counts.facet_fields.labels);
                 var unreadsMap = utils.flatToDict(unreadsResult.facet_counts.facet_fields.labels);
@@ -91,13 +120,13 @@ PackStore = function() {
 
             var groupByFieldRealName = groupFieldMapping[groupField];
 
-            var query = "+labels:" + packName + utils.accessControl(handshake.session.user.hash);
+            var query = "+labels:" + packName + solrUtils.accessControl(handshake.session.user.hash);
 
             var facetQuery = query + " +unread:true";
 
             async.parallel({
                 groups : function(callback) {
-                    utils.solr.query(query, {
+                    solrUtils.query(query, {
                         rows : settings.NUM_GROUPS, 
                         group : true,
                         'group.field' : groupByFieldRealName,
@@ -106,7 +135,7 @@ PackStore = function() {
                     }, callback);
                 },
                 unreadCounts : function(callback) {
-                    utils.solr.query(facetQuery, {
+                    solrUtils.query(facetQuery, {
                         rows : 0,
                         facet : true,
                         'facet.field' : groupByFieldRealName,
@@ -144,24 +173,23 @@ PackStore = function() {
 
 
 function queryForLabel(hash, label, page, callback){
-    var query = '+labels:' + label + utils.accessControl(hash);
+    var query = '+labels:' + label + solrUtils.accessControl(hash);
 
     var amount = settings.NUM_ROWS;
     var start = amount * page;
 
-    utils.solr.query(query, {
+    solrUtils.query(query, {
         sort : "received desc",
         start : start,
         rows : amount,
-    }, function(err, response) {
+    }, function(err, results) {
         if (err) {
             log.error("Error when querying query=" + query + ": %s", err, {});
             callback(err, null);
             return;
         }
-        var responseObj = JSON.parse(response);
-        log.info("query=" + query + ", start=" + start + ", amount=" + amount + ", results.length=" + responseObj.response.docs.length);
-        callback(null, responseObj.response.docs);
+        log.info("query=" + query + ", start=" + start + ", amount=" + amount + ", results.length=" + results.response.docs.length);
+        callback(null, results.response.docs);
     });
 }
 

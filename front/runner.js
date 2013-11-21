@@ -53,16 +53,27 @@ app.post('/auth', function (req, res) {
     var password = req.body.password;
 
     log.info("Signing in user=" + login);
+
     users.signIn(login, password, function(err, account) {
         if (account) {
             var channel = crypto.createHash('sha512').update(account.hash).digest('hex');
-            req.session.user = {
-                hash : account.hash,
-                channel : channel
-            };
-            req.session.save();
             res.cookie("curie.channel", channel, {httpOnly: false});
-            res.send({status : 'ok'});
+            users.getAccountDetails(account.hash, function(err, details) {
+                if (err) {
+                    log.error(err);
+                    res.send({status : 'error', message : "Account details are incomplete"});
+                    return;
+                }
+
+                req.session.user = {
+                    hash : account.hash,
+                    channel : channel,
+                    mailboxes : details
+                };
+                req.session.save();
+
+                res.send({status : 'ok'});
+            });
         } else {
             res.send({status : 'error', message : "No account found"});
         }

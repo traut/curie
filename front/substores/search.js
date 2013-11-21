@@ -5,6 +5,7 @@ var isodate = require("isodate"),
 
     settings = require('../settings'),
     utils = require('../utils');
+    solrUtils = require('../solrUtils');
     converter = require('../converter');
 
 var log = utils.getLogger("store.search");
@@ -18,33 +19,31 @@ SearchStore = function() {
             console.info(options);
 
             //FIXME: security hole, no searchQuery validation
-            var query = utils.accessControl(handshake.session.user.hash) + searchQuery; //solrLib.valueEscape(searchQuery);
+            var query = solrUtils.accessControl(handshake.session.user.hash) + searchQuery; //solrLib.valueEscape(searchQuery);
 
             log.info("Getting search for searchQuery=" + query + ", page=" + page);
-
 
             var amount = settings.NUM_ROWS;
             //var numRows = (format == 'light') ? 0 : settings.NUM_ROWS;
 
-            utils.solr.query(query, {
+            solrUtils.query(query, {
                 facet : true,
                 'facet.field' : 'unread',
                 sort : 'received desc',
 
                 start : amount * page,
                 rows : amount,
-            }, function(err, response) {
+            }, function(err, results) {
                 if (err) {
                     log.error("Error " + err);
                     callback(err, null);
                     return;
                 }
-                var responseObj = JSON.parse(response);
                 var messages = [];
                 var unreadCounts = {};
-                if (responseObj.response.docs && responseObj.response.docs.length > 0) {
-                    messages = responseObj.response.docs.map(converter.solrToEmailPreview);
-                    unreadCounts = utils.flatToDict(responseObj.facet_counts.facet_fields.unread);
+                if (results.response.docs && results.response.docs.length > 0) {
+                    messages = results.response.docs.map(converter.solrToEmailPreview);
+                    unreadCounts = utils.flatToDict(results.facet_counts.facet_fields.unread);
                 }
 
                 var response = {
@@ -53,10 +52,10 @@ SearchStore = function() {
                     unread : unreadCounts[true] || 0,
 
                     page : page,
-                    total : responseObj.response.numFound,
+                    total : results.response.numFound,
                     docs : messages,
                 }
-                log.info("Found " + responseObj.response.numFound + " docs, query=" + query);
+                log.info("Found " + results.response.numFound + " docs, query=" + query);
                 callback(null, response);
             });
         },

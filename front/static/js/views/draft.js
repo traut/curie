@@ -1,42 +1,49 @@
 var DraftView = Backbone.View.extend({
     template : Handlebars.templates.draft,
-    el : '#packView #popupView', //$('<div id="message-' + this.model.id + '" class="row messageView"></div>');
     events : {
         "input form input,textarea" : "fieldChanged",
         "click button.close" : "closeAndNavigate",
         "click button[name=send]" : "sendMessage",
         "click button[name=cancel]" : "closeAndNavigate",
         "click button[name=discard]" : "deleteDraft",
+
+        "click div[name=readonly]" : "showEditable"
     },
     initialize : function() {
-
-        stateModel.on("escPressed", this.closeAndNavigate, this);
-        stateModel.on("navigateToActivePack", this.cleanUp, this);
 
         this.model.on("change:received", this.updateSaved, this);
         this.model.on("changed", this.saveDraft, this);
 
         this.changedTimeout = null;
-        this.changedTimerDelay = 200;
+        this.changedTimerDelay = 1000;
 
     },
     render : function() {
+        var data = _.extend(this.model.toJSON(), {
+            embedded : this.options.embedded || false
+        });
 
-        var html = this.template(this.model.toJSON());
-        $(".content", this.$el).html($(html));
-
-        var topOffset = window.pageYOffset || 15;
-        this.$el.css("top", topOffset + 40);
-
-        //$("#packView").append(this.$el);
-        $("input[name=to]", this.$el).focus();
+        this.$el.html(this.template(data));
+        this.$("input[name=to]").focus();
 
         return this;
     },
+    closeAndNavigate : function() {
+        if (!this.options.embedded) {
+            Mousetrap.trigger("esc");
+        }
+    },
+    closeAndRemove : function() {
+        this.close();
+        this.$el.remove();
+        this.model.off(null, null, this);
+    },
     saveDraft : function() {
+        //FIXME: race condition
+        //http://stackoverflow.com/questions/5886748/backbone-js-problem-when-saving-a-model-before-previous-save-issues-postcreat
         this.model.save(null, {
             success : function() {
-                stateModel.trigger("fetch:pack:draft");
+                //FIXME: update related pack
             }
         });
     },
@@ -71,9 +78,15 @@ var DraftView = Backbone.View.extend({
         }, this.changedTimerDelay);
     },
     updateSaved : function(m, value) {
-        var savedBox = $(".savedValue", this.$el);
         //savedBox.text(Handlebars.helpers.date_ago(value));
-        savedBox.text(Handlebars.helpers.dateformat(value, 'HH:mm:SS, dddd, MMM Do'));
+        this.$(".saved span[name=value]").text(Handlebars.helpers.dateformat(value, 'HH:mm:SS, dddd, MMM Do'));
+        this.$(".saved span").show();
+
+        if (!this.options.embedded) {
+            var url = curie.router.reverse("showDraft", {draft : this.model.get("id")});
+            curie.router.navigate(url, {trigger: false});
+        }
+        curie.cache.addInstance(this.model);
     },
     sendMessage : function() {
         this.model.set({ sent : true });
@@ -84,26 +97,24 @@ var DraftView = Backbone.View.extend({
         if (confirm('Are you sure?')) {
             this.model.destroy({
                 success : function() {
-                    stateModel.trigger("fetch:pack:draft");
+                    //FIXME: update related pack
                 }
             });
             this.closeAndNavigate();
         }
     },
     updateMessage : function() {
-        stateModel.trigger("fetch:message:" + this.model.get("id"));
     },
-    closeAndNavigate : function() {
-        stateModel.trigger("navigateToActivePack");
+    showEditable : function() {
+        this.$("div[name=editable]").show();
+        this.$("div[name=editable] :input").first().focus();
+        this.$("div[name=readonly]").hide();
     },
-    cleanUp : function() {
+    beforeClose : function() {
         console.info("cleaning up " + this.model.get("id"));
 
-        this.close();
         this.undelegateEvents();
-
-        stateModel.off("escPressed", this.closeAndNavigate);
-        stateModel.off("navigateToActivePack", this.cleanUp);
+        this.model.off(null, null, this);
     }
 });
 
