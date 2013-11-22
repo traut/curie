@@ -222,7 +222,6 @@ function mergeIntoThreads(messages) {
                     }
                 });
             });
-            console.info(c.id, c.received, c.last.subject);
         } else {
             if (c.labels.indexOf("draft") > -1) {
                 c.draft = true;

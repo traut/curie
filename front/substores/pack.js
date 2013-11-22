@@ -81,7 +81,6 @@ PackStore = function() {
                     }, callback);
                 }
             }, function(err, results) {
-                log.info("results", results, {});
                 if (err) {
                     log.error("Error " + err);
                     callback(err, null);

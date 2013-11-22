@@ -32,13 +32,12 @@ var MessageRowView = Backbone.View.extend({
 
         this.hashUrl = this.options.rootUrl + "/" + this.model.id;
     },
-    render : function(a, b, c) {
+    render : function() {
+        //console.info("rendering messagerowview for " + this.model.get("id"));
         var data = this.model.toJSON();
         data.url = this.hashUrl;
-        console.info(data, this.model);
         var html = this.template(data);
         this.$el.html(html);
-        console.info("rendering messagerowview for " + this.model.get("id"), a, b, c);
         return this;
     },
     removeMessage : function(m, collection, options) {
@@ -128,7 +127,6 @@ var MessageView = Backbone.View.extend({
         e.preventDefault();
         e.stopImmediatePropagation();
         this.model.destroy();
-        Mousetrap.trigger("esc");
     },
     changeBodyTypeHotkey : function(value) {
         this.showBodyType(value);

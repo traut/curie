@@ -40,13 +40,14 @@ var PackListView = Backbone.View.extend({
         this.$("li[data-pack=" + name + "]").addClass(cls);
     },
     updateBadge : function(pack, value) {
-        var badge = $(".nav a[name=" + pack.cid + "].pack .counters");
+        var name = (pack == null) ? "" : slugifySelector(pack.get("name"));
+        var badge = $(".nav li[data-pack=" + name + "] .counters");
         if (value == 0) {
             badge.hide();
         } else {
             badge.html(value).show();
-            this.updateDocumentTitle(pack, value);
         }
+        curie.controllers.layout.updateTitle();
     },
 });
 

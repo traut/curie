@@ -7,12 +7,19 @@ Curie.Controllers.Data.Search = function () {
     var getResults = function(query64) {
         query = b64_to_utf8(query64);
 
-        if (lastModel && lastModel.get("query") == query) {
-            return lastModel;
+        if (lastModel) {
+            if (lastModel.get("query") == query) {
+                return lastModel;
+            } else {
+                lastModel.destroy();
+            }
         }
 
         console.info("getting results for '" + query + "'");
-        lastModel = new SearchResults({ query : query });
+        lastModel = curie.cache.add(Curie.Models.SearchResults, {
+            id : new jsSHA(query, "TEXT").getHash("SHA-512", "HEX"),
+            query : query
+        });
         return lastModel;
     }
 

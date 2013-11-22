@@ -6,7 +6,7 @@ Curie.Controllers.Layout.Pack = function () {
     var createView = function(model) {
 
         var _view = null;
-        if (model instanceof SearchResults) {
+        if (model instanceof Curie.Models.SearchResults) {
             _view = new Curie.Views.SearchResults({
                 model : model,
                 collection : model.messages,

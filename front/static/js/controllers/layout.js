@@ -9,6 +9,7 @@ Curie.Controllers.Layout = function () {
         //renderPackView : pack.renderPackView,
         createPackView : pack.createPackView,
         renderAsPack : pack.renderAsPack,
+
         showMessage : _.partial(basic.showPopup, Curie.Models.Message),
         showThread : _.partial(basic.showPopup, Curie.Models.Thread),
         showDraft : _.partial(basic.showPopup, Curie.Models.Draft),
@@ -21,6 +22,8 @@ Curie.Controllers.Layout = function () {
                     curie.state.set("activePack", results);
                 }
             });
-        }
+        },
+
+        updateTitle : basic.updateTitle
     });
 };

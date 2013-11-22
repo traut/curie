@@ -66,8 +66,28 @@ MessageStore = function() {
 //                });
             });
         },
-        deleteMessage : function(handshake, options, callback) {
-        }
+        deleteMessageForever : function(handshake, options, callback) {
+            var message = options.item;
+            var userHash = handshake.session.user.hash;
+
+            async.waterfall([
+                function(_callback) {
+                    log.info("Deleting " + message.id + ". Getting message");
+                    solrUtils.getMessage(userHash, message.id, _callback);
+                },
+                function(message, _callback) {
+                    log.info("Deleting " + message.id + ". Deleting from index");
+                    solrUtils.deleteMessage(message.id, _callback);
+                },
+                function(_callback) {
+                    log.info("Deleting " + message.id + ". Deleting from FS");
+                    utils.deleteFile(utils.messageParsedPath(message.id), _callback);
+                }
+            ], function(err) {
+                callback(err, null);
+            });
+
+        },
     }
 }
 

@@ -59,7 +59,7 @@ Curie.Models.Draft = Curie.Models.Message.extend({
 function parseMessage(message) {
     if (message.thread) {
         return curie.cache.add(Curie.Models.Thread, message);
-    } else if (message.draft) {
+    } else if (message.draft || message.labels.indexOf("draft") > -1) {
         return curie.cache.add(Curie.Models.Draft, message);
     } else {
         return curie.cache.add(Curie.Models.Message, message);
@@ -145,16 +145,17 @@ Curie.Models.PagedMessagesWrapper = Backbone.Model.extend({
         return Curie.Models.Messages.prototype.parse(docs);
     },
     parse : function(response) {
-        console.error("Received", response);
-        this.messages.add(this.parseMessages(response.docs));
-        this.page = response.page;
-        this.total = response.total;
+        if (response) {
+            this.messages.add(this.parseMessages(response.docs));
+            this.page = response.page;
+            this.total = response.total;
+        }
         return response;
     }
 });
 
 
-var Pack = Curie.Models.PagedMessagesWrapper.extend({
+Curie.Models.Pack = Curie.Models.PagedMessagesWrapper.extend({
     defaults : {
         id : null,
         name : null,
@@ -175,7 +176,7 @@ var Pack = Curie.Models.PagedMessagesWrapper.extend({
 }, { typeName : "Pack" });
 
 
-var SearchResults = Curie.Models.PagedMessagesWrapper.extend({
+Curie.Models.SearchResults = Curie.Models.PagedMessagesWrapper.extend({
     url : "/search",
     defaults : {
         id : null,
@@ -187,26 +188,34 @@ var SearchResults = Curie.Models.PagedMessagesWrapper.extend({
     initialize: function() {
         Curie.Models.PagedMessagesWrapper.prototype.initialize.apply(this, arguments);
 
-        this.ctx = { query : this.get("query") };
-        this.queryHash = utf8_to_b64(query);
-        this.set("name", this.getName());
+        if (this.get("query")) {
+            var query = this.get("query");
+            this.ctx = { query : query};
+            this.queryHash = utf8_to_b64(query);
+
+            this.setName(query);
+        }
     },
 
-    getName : function(query) {
-        return 'Search for "' + (query || this.get("query")) + '"';
+    setName : function(query) {
+        this.set("name", 'Search for "' + (query || this.get("query")) + '"');
+    },
+
+    destroy : function() {
+        this.trigger("destroy", this);
     },
 
 }, { typeName : "SearchResults" });
 
 
-var Packs = Backbone.Collection.extend({
-    model: Pack,
+Curie.Models.Packs = Backbone.Collection.extend({
+    model: Curie.Models.Pack,
     parse : function(resp, options) {
         return resp.map(function(m) {
-            return curie.cache.add(Pack, m);
+            return curie.cache.add(Curie.Models.Pack, m);
         });
     },
-});
+}, { typeName : "Packs" });
 
 Curie.Models.Account = Backbone.Model.extend({
     defaults: {
@@ -224,8 +233,7 @@ Curie.Models.State = Backbone.Model.extend({
     account : new Curie.Models.Account(),
 
     setPackByName : function(packName) {
-        var activePack = (packName == null) ? null : curie.cache.getByProperty(Pack, "name", packName);
+        var activePack = (packName == null) ? null : curie.cache.findWhere(Curie.Models.Pack, "name", packName);
         curie.state.set("activePack", activePack);
     }
-    
 });

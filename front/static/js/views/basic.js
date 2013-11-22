@@ -30,6 +30,9 @@ var PopupView = Backbone.View.extend({
     navigateAway : function() {
         this.hide();
         curie.state.trigger("navigate:activePack");
+    },
+    getSubview : function() {
+        return this.currentSubview;
     }
 });
 

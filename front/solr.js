@@ -71,7 +71,6 @@ Client.prototype.post = function(postPath, data, asJson, callback) {
         },
         data: data
     };
-    console.info(options);
     this.request(options, callback || noop);
 };
 

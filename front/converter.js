@@ -139,7 +139,6 @@ function draftToDoc(draft) {
 
         _version_ : 0, // We don't care if document exists or not. Overwrite it
     }
-    console.info(doc);
     return doc;
 }
 

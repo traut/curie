@@ -20,7 +20,6 @@ Curie.Controllers.Layout.Basic = function () {
 
     var showPopup = function(objType, objId) {
 
-
         var obj;
         if (objId && objId != '') {
             obj = curie.cache.add(objType, { id : objId });
@@ -65,13 +64,16 @@ Curie.Controllers.Layout.Basic = function () {
         }
     }
 
-    var updateTitle = function(pack, unread) {
-        if (pack) {
-            unread = unread || pack.get("unread");
-            document.title = pack.get("name") + ((unread && unread > 0) ? " (" + unread +")" : "") + " - Curie";
+    var updateTitle = function() {
+        var activePack = curie.state.get("activePack");
+        if (activePack) {
+            var unread = activePack.get("unread");
+            var name = activePack.get("name");
+            document.title = name + ((unread && unread > 0) ? " (" + unread +")" : "") + " - Curie";
         } else {
             document.title = "Curie";
         }
+
     }
 
     curie.state.on({
@@ -93,10 +95,11 @@ Curie.Controllers.Layout.Basic = function () {
 
         "change:activePack" : function(state, pack) {
             console.info("active pack is", pack);
-            updateTitle(pack);
+            updateTitle();
             _.each(packListViews, function(view) {
                 view.updateActive(pack);
             });
+            //FIXME: race condition when opening pack and message at the same time
             popupView.hide();
         },
         "change:selectedPack" : function(state, pack) {
@@ -104,6 +107,10 @@ Curie.Controllers.Layout.Basic = function () {
                 view.updateSelected(pack);
             });
         },
+        "message:show:type" : function(type) {
+            console.info(popupView.getSubview());
+            popupView && popupView.getSubview() && popupView.getSubview().showBodyType(type);
+        }
     });
 
     curie.state.account.on("change", sidebarView.updateAccountInfo);
@@ -125,5 +132,6 @@ Curie.Controllers.Layout.Basic = function () {
     _.extend(this, {
         showPopup : showPopup,
         renderPackListView : renderPackListView,
+        updateTitle : updateTitle
     });
 }

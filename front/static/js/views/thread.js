@@ -42,8 +42,7 @@ var ThreadView = Backbone.View.extend({
     },
 
     initialize : function() {
-        this.model.on("change sort", this.render, this);
-        this.model.get("messages").on("remove", this.render, this);
+        this.model.get("messages").on("change sort remove", this.render, this);
 
         console.info(this.model.get("messages"));
 
@@ -55,9 +54,14 @@ var ThreadView = Backbone.View.extend({
         return this.model.get("messages").last().get("draft");
     },
 
+    showBodyType : function(type) {
+        this.subViews.map(function(v) {
+            v.showBodyType && v.showBodyType(type);
+        });
+    },
+
     makePersistent : function(model, value) {
         this.model.set({ id : value }, {silent : true});
-        this.model.trigger("change");
 
         var url = curie.router.reverse("showThread", {pack : curie.state.get("activePack").get("name"), thread : value});
         curie.router.navigate(url, {trigger: false});
@@ -95,11 +99,12 @@ var ThreadView = Backbone.View.extend({
 
         var messages = this.model.get("messages");
 
-        console.info("Thread, rendering", messages);
+        if (messages.length == 0) {
+            console.warn("trying to render empty thread view");
+            Mousetrap.trigger("esc");
+        }
 
         this.subViews = messages.map(this.createViewForModel);
-
-        console.info("Subviews:", this.subViews);
 
         if (messages.length > 0 && !this.isDraftTheLastOne()) {
             this.addDraftView();
@@ -131,6 +136,11 @@ var ThreadView = Backbone.View.extend({
 
     },
 
+    fetchAndRender : function() {
+        console.info("'sent' event cached in thread. Fetching and rendering");
+        this.model.fetch();
+    },
+
     createDraftModel : function() {
 
         var model = Curie.Models.Draft.prototype.newInstance({});
@@ -148,6 +158,7 @@ var ThreadView = Backbone.View.extend({
             this.addDraftView();
         }, this);
         model.on("change:currentThread", this.makePersistent, this);
+        model.on("sent", this.fetchAndRender, this);
         return model;
 
     },

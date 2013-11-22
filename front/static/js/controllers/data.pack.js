@@ -1,14 +1,22 @@
 Curie.Controllers.Data.Packs = function () {
 
-    var draftPack = curie.cache.add(Pack, {name : "draft"});
+    var draftPack = curie.cache.add(Curie.Models.Pack, {id : "draft", name : "draft"});
 
     var packs = {
-        dynamic : new Packs([], { url : '/packs', }),
-        predefined : new Packs([ draftPack ], { urlRoot : '/packs'})
+        dynamic : new Curie.Models.Packs([], { url : '/packs', }),
+        predefined : new Curie.Models.Packs([ draftPack ], { urlRoot : '/packs'})
     }
 
+    _.forEach(packs, function(packList, key) {
+        curie.cache.addInstance(packList, key);
+    });
+
     packs.predefined.fetch = function(options) {
-        (options.success || dummy)();
+        if (options && options.success) {
+            options.success();
+        } else {
+            dummy();
+        }
     };
 
 

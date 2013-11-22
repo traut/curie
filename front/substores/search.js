@@ -47,7 +47,7 @@ SearchStore = function() {
                 }
 
                 var response = {
-                    id : crypto.createHash('md5').update(query).digest("hex"),
+                    id : crypto.createHash('sha512').update(searchQuery).digest("hex"),
                     query : searchQuery,
                     unread : unreadCounts[true] || 0,
 

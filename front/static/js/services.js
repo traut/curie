@@ -2,61 +2,95 @@
 Curie.Services.Cache = function() {
 
     var store = {};
+    var _this = this;
 
     var getClassName = function(modelClass) {
         return new modelClass().constructor.typeName;
+    };
+
+    var get = function(key){
+        store || reset();
+        return store[key];
+    };
+
+    var set = function(key, object){
+        store || reset();
+        store[key] = object;
+        object.on("destroy", deleteInstance, _this);
+        return object;
+    };
+
+    var deleteInstance = function(instance) {
+        var typeName = instance.constructor.typeName;
+        var key = makeKey(typeName, instance.id);
+
+        console.info("Deleting instance " + typeName + " id=" + instance.id);
+
+        if (!(key in store)) {
+            console.info("Deleting unsuccessful. key=" + key);
+            return false;
+        }
+        store[key].off(null, null, _this);
+        delete store[key];
+        console.info("Deleting successful");
+        return true;
     }
 
+    var reset = function(){
+        store = {};
+    };
+
+    var makeKey = function(typeName, id) {
+        if (!id) {
+            throw Error("Can't make a key with empty id. typeName=" + typeName);
+        }
+        return typeName + ":" + id;
+    };
+
+    var makeKeyForClass = function(modelClass, id) {
+        return makeKey(getClassName(modelClass), id);
+    };
+
+    var filterByType = function(modelClass) {
+        var type = getClassName(modelClass);
+        return _.filter(store, function(value, key) {
+            return key.indexOf(type + ":") > -1;
+        });
+    };
+
+    var filterWhere = function(modelClass, prop, value) {
+        return filterByType(modelClass).filter(function(instance) {
+            return instance.get(prop) == value;
+        });
+    };
+
+
     return {
-        get : function(key){
-            store || this.reset();
-            return store[key];
-        },
 
         getInstance : function(modelClass, objId) {
-            var typeName = getClassName(modelClass);
-            var key = typeName + ":" + objId;
-            return store[key];
+            return get(makeKeyForClass(modelClass, objId));
         },
 
-        set : function(key, object){
-            store || this.reset();
-            store[key] = object;
-            return object
+        filterByType : filterByType,
+
+        filterWhere : filterWhere,
+
+        findWhere : function(modelClass, prop, value) {
+            return filterWhere(modelClass, prop, value)[0] || null;
         },
 
-        reset : function(){
-            store = {};
-        },
-
-        peek : function() {
-            return store;
-        },
-
-        getByProperty : function(modelClass, prop, value) {
-            var type = getClassName(modelClass);
-            var keys = _.keys(store)
-                .filter(function(k) {
-                    return k.indexOf(type) > -1;
-                })
-                .filter(function(k) {
-                    return store[k].get(prop) == value;
-                });
-            if (keys.length == 0) {
-                return null;
-            }
-            return store[keys[0]];
-        },
-
-        addInstance : function(m) {
+        addInstance : function(m, withId) {
             var typeName = m.constructor.typeName;
-            var key = typeName + ":" + m.id;
+            var id = withId || m.id;
+            var key = makeKey(typeName, id);
             if (key in store) {
                 return;
             }
-            this.set(key, m);
+            set(key, m);
             return m;
         },
+
+        deleteInstance : deleteInstance,
 
         add : function(modelClass, attrs) {
 
@@ -67,17 +101,22 @@ Curie.Services.Cache = function() {
                 return;
             }
 
-            var key = typeName + ":" + attrs.id;
+            var key = makeKey(typeName, attrs.id);
 
-            var found = this.get(key);
+            var found = get(key);
             if (found) {
                 // updating model
                 found.set(attrs);
             } else {
-                found = this.set(key, new modelClass(attrs));
+                console.info("cache.add new key=" + key);
+                found = set(key, new modelClass(attrs));
             }
             return found;
-        }
+        },
+
+        _peek : function() {
+            return store;
+        },
     }
 }
 

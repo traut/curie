@@ -31,7 +31,7 @@ router.match('/threads/:threadId', 'GET').to('threadStore.getThread');
 
 router.match('/messages/:messageId', 'GET').to('messageStore.getMessage');
 router.match('/messages/:messageId', 'PATCH').to('messageStore.patchMessage');
-router.match('/messages/:messageId', 'DELETE').to('messageStore.deleteMessage');
+router.match('/messages/:messageId', 'DELETE').to('messageStore.deleteMessageForever');
 
 router.match('/search', 'GET').to('searchStore.getSearch');
 

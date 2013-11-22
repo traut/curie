@@ -3,6 +3,8 @@ Curie.Controllers.Data.Connection = function () {
     var RECONNECT_DELAY = 100;
     var RECONNECT_GIVE_UP_RETRIES = 10;
 
+    var SYNC_ALLOWED = true;
+
     var self = this;
 
 
@@ -86,6 +88,7 @@ Curie.Controllers.Data.Connection = function () {
 
     curie.state.on("login:success", function() {
         curie.state.account.fetch();
+        SYNC_ALLOWED && curie.controllers.data.startSync();
     });
 
 

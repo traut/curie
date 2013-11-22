@@ -3,12 +3,11 @@ Curie.Router = Backbone.Router.extend({
 
     routes : {
         "p/draft/new/:draft": "showDraft",
-
         "p/:pack/t/:thread": "showThread",
         "p/:pack/:message": "showMessage",
         "p/:pack": "showPack",
 
-
+        "search/:encodedquery/new/:message": "showSearchDraft",
         "search/:encodedquery/:message": "showSearchMessage",
         "search/:encodedquery/:thread": "showSearchThread",
         "search/:encodedquery": "search",
@@ -62,9 +61,9 @@ Curie.Router = Backbone.Router.extend({
 
     navigateToPack : function(instance) {
         var url = null;
-        if (instance instanceof Pack) {
+        if (instance instanceof Curie.Models.Pack) {
             url = this.reverse('showPack', {pack : instance.get("name")});
-        } else if (instance instanceof SearchResults) {
+        } else if (instance instanceof Curie.Models.SearchResults) {
             url = this.reverse('search', {encodedquery : instance.queryHash});
         } else {
             console.error("Can't navigate to pack", instance);
@@ -84,6 +83,7 @@ Curie.Router = Backbone.Router.extend({
     },
 
     showMessage : function(pack, message) {
+        console.info("showing message", pack, message);
         curie.state.setPackByName(pack);
         curie.controllers.layout.showMessage(message);
     },
@@ -110,7 +110,12 @@ Curie.Router = Backbone.Router.extend({
 
     showDraft : function(draft) {
         curie.state.setPackByName("draft");
-        console.info("showing draft", draft);
+        curie.controllers.layout.showDraft(draft);
+    },
+
+    showSearchDraft : function(encodedquery, draft) {
+        console.info("showing search draft", encodedquery, draft);
+        this.search(encodedquery);
         curie.controllers.layout.showDraft(draft);
     },
 

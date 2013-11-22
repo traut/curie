@@ -38,12 +38,16 @@ var DraftView = Backbone.View.extend({
         this.$el.remove();
         this.model.off(null, null, this);
     },
-    saveDraft : function() {
+    saveDraft : function(sending) {
         //FIXME: race condition
         //http://stackoverflow.com/questions/5886748/backbone-js-problem-when-saving-a-model-before-previous-save-issues-postcreat
         this.model.save(null, {
-            success : function() {
+            success : function(model) {
                 //FIXME: update related pack
+                if (sending) {
+                    console.info("Triggering 'sent' event");
+                    model.trigger("sent");
+                }
             }
         });
     },
@@ -90,7 +94,7 @@ var DraftView = Backbone.View.extend({
     },
     sendMessage : function() {
         this.model.set({ sent : true });
-        this.saveDraft();
+        this.saveDraft(true);
         this.closeAndNavigate();
     },
     deleteDraft : function() {

@@ -68,6 +68,7 @@ Backbone.sync = function (method, model, options) {
             }
             if (data.error) {
                 console.error("Error with sync.read", data.error);
+                options.success();
                 return;
             }
             options.success(data.response); // updates collection, model; fetch                      

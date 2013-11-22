@@ -82,11 +82,13 @@ DraftStore = function() {
             draft.cc = draft.cc || [];
             draft.bcc = draft.bcc || [];
             draft.unread = false;
-            draft.attachment = draft.attachment || [];
+            draft.attachments = draft.attachments || [];
             draft.threads = draft.threads || [];
             draft.currentThread = draft.currentThread || null;
             draft.received = new Date();
             draft.body = draft.body || [];
+
+            console.info(draft);
 
             if (draft.from) {
                 var correct = userEmails.all.filter(function(m) {

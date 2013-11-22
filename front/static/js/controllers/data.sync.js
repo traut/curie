@@ -1,9 +1,18 @@
 Curie.Controllers.Data.Sync = function () {
-    var SYNC_TIMEOUT = 5 * 1000; // 5 secs
+    var SYNC_INTERVAL = 10 * 1000; // 5 secs
 
+    var timer = null;
 
     function startPeriodicSync() {
-    }
+        console.info("Starting sync controller. interval=" + SYNC_INTERVAL / 1000 + "sec");
+        timer && clearInterval(timer);
+        setInterval(function() {
+            syncPackLists();
+            syncPacks();
+            syncActiveSearches();
+            updateFetchTime();
+        }, SYNC_INTERVAL);
+    };
 
 
     function syncPacks() {
@@ -17,7 +26,7 @@ Curie.Controllers.Data.Sync = function () {
     }
 
     function syncPackLists() {
-        var packLists = curie.cache.filterByType(Curie.Models.PackList);
+        var packLists = curie.cache.filterByType(Curie.Models.Packs);
 
         console.info("Syncing " + packLists.length + " packLists");
 
@@ -29,17 +38,16 @@ Curie.Controllers.Data.Sync = function () {
     function syncActiveSearches() {
         var searches = curie.cache.filterByType(Curie.Models.SearchResults);
 
-        console.info("Syncing " + packLists.length + " packLists");
+        console.info("Syncing " + searches.length + " searches");
 
-        packLists.forEach(function(p) {
-            p.fetch();
+        searches.forEach(function(s) {
+            s.fetch();
         });
     }
 
     function updateFetchTime() {
         curie.state.trigger("fetch:done");
     }
-
 
 
     this.start = startPeriodicSync;

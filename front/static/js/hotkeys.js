@@ -42,6 +42,7 @@ var hotkeys = {
         */
     },
     messageActions : {
+        /*
         'j' : {
             doc : 'Choose a message/group below',
             action : function() {
@@ -78,13 +79,15 @@ var hotkeys = {
                 curie.state.get("activeArrowsListener").trigger("move", "G");
             }
         },
+        */
         'm n' : {
             doc : 'Create a new message',
             action : function(e) {
                 e.preventDefault();
-                window.curie.controllers.layout.navigateToDraft();
+                curie.controllers.layout.showDraft();
             }
         },
+        /*
         'm u' : {
             doc : 'Mark a message as unread',
             action : dummy
@@ -93,6 +96,7 @@ var hotkeys = {
             doc : 'Add a label',
             action : dummy
         },
+        */
         'm h' : {
             doc : 'Show opened message as HTML',
             action : function(e) {
