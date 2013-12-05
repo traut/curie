@@ -1,4 +1,14 @@
+import os
 import re
+import json
+
+from jsonschema import validate
+
+import sqlite3
+
+usersDb = sqlite3.connect('/home/curie/curie/users.db')
+filtersDb = sqlite3.connect('/home/curie/curie/filters.db')
+
 
 # Solr/Lucene special characters: + - ! ( ) { } [ ] ^ " ~ * ? : \
 # There are also operators && and ||, but we're just going to escape
@@ -6,6 +16,7 @@ import re
 # Also, we're not going to escape backslashes!
 # http://lucene.apache.org/java/2_9_1/queryparsersyntax.html#Escaping+Special+Characters
 ESCAPE_CHARS_RE = re.compile(r'(?<!\\)(?P<char>[&|+\-!(){}[\]^"~*?:])')
+
 
 def solr_escape(value):
     r"""Escape un-escaped special characters and return escaped value.
@@ -18,3 +29,48 @@ def solr_escape(value):
     True
     """
     return ESCAPE_CHARS_RE.sub(r'\\\g<char>', value)
+
+
+def get_accounts_for_email(email):
+    cur = usersDb.cursor()
+    return [f[0] for f in cur.execute("select hash from accounts, emails where emails.account_id = accounts.id and emails.email = '%s'" % email).fetchall()]
+
+def get_filters(account_hash):
+    cur = filtersDb.cursor()
+    return cur.execute("select query, label, skip_inbox from filters where filters.hash = '%s'" % account_hash).fetchall()
+
+def get_filter(filter_id):
+    cur = filtersDb.cursor()
+    return cur.execute("select query, label, skip_inbox, hash from filters where filters.id = '%s'" % filter_id).fetchone()
+
+
+def get_schema():
+    SCHEMA_PATH = "schemas/message-parsed.json"
+    with open(SCHEMA_PATH, "r") as f:
+        return json.loads(f.read())
+
+def read_blob(filename):
+    json_filename = filename + ".parsed.json"
+    if not os.path.exists(json_filename):
+        raise Exception("File %s does not exists!" % json_filename)
+
+    with open(json_filename, "r") as f:
+        blob_str = f.read()
+        blob = json.loads(blob_str)
+        validate(blob, get_schema())
+        return blob
+
+
+def get_recepients(blob):
+    return \
+        [a["email"] for a in blob["fields"]["to"]] + \
+        [a["email"] for a in blob["fields"]["cc"]] + \
+        [a["email"] for a in blob["fields"]["bcc"]]
+
+def get_accounts_for_blob(blob):
+    hashes = []
+    for email in get_recepients(blob):
+        hashes.extend(get_accounts_for_email(email))
+    return hashes
+
+

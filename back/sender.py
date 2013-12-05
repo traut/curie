@@ -26,8 +26,6 @@ SCHEMA = get_schema()
 CHARSET = 'UTF-8'
 
 
-
-
 def get_path(hashed):
     return os.path.join(STORAGE_EMAILS, hashed[:2], hashed[2:4], hashed[4:6], hashed)
 
@@ -61,6 +59,21 @@ def assemble_email(blob):
     mtext = (_texts[0]["value"].encode(CHARSET), CHARSET) if _texts else None
     mhtml = (_htmls[0]["value"].encode(CHARSET), CHARSET) if _htmls else None
 
+    headers = [
+        ('User-Agent', 'curie'),
+        ('Message-Id', blob["fields"]["message_id"]),
+    ]
+
+
+    in_reply_to = blob["fields"].get("in-reply-to")
+    references = blob["fields"].get("references")
+
+    if in_reply_to:
+        headers.append(('In-Reply-To', in_reply_to))
+
+    if references:
+        headers.append(('References', ",".join(references)))
+
     #sender, recipients, subject, default_charset, text, html=None, attachments=[], embeddeds=[], cc=[], bcc=[], message_id_string=None, date=None, headers=[])
     payload, mail_from, rcpt_to, msg_id = pyzmail.compose_mail(
         (_from.get('name'), _from.get('email')),
@@ -75,10 +88,7 @@ def assemble_email(blob):
         cc = flat_addresses('cc'),
         bcc = flat_addresses('bcc'),
 
-        headers = [
-            ('User-Agent', 'curie'),
-            ('Message-Id', blob["fields"]["message_id"]),
-        ]
+        headers = headers,
     )
 
     return payload, mail_from, rcpt_to, msg_id

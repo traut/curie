@@ -4,47 +4,17 @@ import os
 import iso8601
 import json
 import solr
-import logging
 import uuid
 import itertools
 
-import sqlite3
+from utils import solr_escape, read_blob, get_accounts_for_blob
 
-from utils import solr_escape
 
-from jsonschema import validate
-
+import logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-sql = sqlite3.connect('/home/curie/curie/users.db')
-
 solrMessages = solr.Solr('http://localhost:8983/solr/messages')
-
-
-def get_schema():
-    SCHEMA_PATH = "schemas/message-parsed.json"
-    with open(SCHEMA_PATH, "r") as f:
-        return json.loads(f.read())
-
-SCHEMA = get_schema()
-
-
-def read_blob(filename):
-    json_filename = filename + ".parsed.json"
-    if not os.path.exists(json_filename):
-        raise Exception("File %s does not exists!" % json_filename)
-
-    with open(json_filename, "r") as f:
-        blob_str = f.read()
-        blob = json.loads(blob_str)
-        validate(blob, SCHEMA)
-        return blob
-
-def get_recepients(blob):
-    return [a["email"] for a in blob["fields"]["to"]] + [a["email"] for a in blob["fields"]["cc"]] + [a["email"] for a in blob["fields"]["bcc"]]
-
-
 
 def create_email_doc(account_hash, blob):
 
@@ -66,10 +36,8 @@ def create_email_doc(account_hash, blob):
 
         "received" : iso8601.parse_date(blob.get("received")),
 
-        "labels" : ["inbox"],
-
+        "labels" : [],
         "account" : account_hash,
-
         "message_id" : blob["fields"]["message_id"],
 
         "from.name" : _from.get("name"),
@@ -133,28 +101,19 @@ def get_relatives(account_hash, blob):
 
 def process(filename):
 
-
     message_blob = read_blob(filename)
 
-    mid = message_blob["id"]
+    accounts = get_accounts_for_blob(message_blob)
 
-    hashes = []
-
-    for email in get_recepients(message_blob):
-        cur = sql.cursor()
-        found = cur.execute("select hash from accounts, emails where emails.account_id = accounts.id and emails.email = '%s'" % email).fetchone()
-        if found:
-            hashes.append(found[0])
-
-    if not hashes:
-        logger.error("No hashes found for %s", filename)
+    if not accounts:
+        logger.error("No accounts found for %s", filename)
         return
 
-    for account in hashes:
+    for account in accounts:
         email_doc = create_email_doc(account, message_blob)
 
         relatives = get_relatives(account, message_blob)
-        logger.info("%s relatives found for mid=%s, account=%s", "No" if not relatives else len(relatives), mid, account)
+        logger.info("%s relatives found for mid=%s, account=%s", "No" if not relatives else len(relatives), message_blob["id"], account)
 
         threads = set()
         updated_relatives = []
