@@ -1,7 +1,7 @@
 var dummy = function() {};
 
 var hotkeys = {
-    packActions : {
+    "Global" : {
         't j' : {
             doc : 'Choose a pack below',
             action : function() {
@@ -12,6 +12,30 @@ var hotkeys = {
             doc : 'Choose a pack above',
             action : function() {
                 curie.state.trigger("hotkey:packList", "up");
+            }
+        },
+        '/' : {
+            doc : 'Activate search',
+            action : function(e) {
+                e.preventDefault();
+                curie.state.trigger("search:show");
+            }
+        },
+        '?' : {
+            doc : 'Show hotkeys description',
+            action : showHotkeysHelp
+        },
+        'esc' : {
+            doc : 'Go one level up',
+            action : function() {
+                curie.state.trigger("hotkey:esc");
+            }
+        },
+        'q q' : {
+            doc : 'Logout',
+            action : function(e) {
+                e.preventDefault();
+                curie.state.trigger("logout");
             }
         },
         /*
@@ -41,45 +65,45 @@ var hotkeys = {
         },
         */
     },
-    messageActions : {
-        /*
+    "List of messages" : {
         'j' : {
-            doc : 'Choose a message/group below',
+            doc : 'Select a message below',
             action : function() {
-                curie.state.get("activeArrowsListener").trigger("move", "j");
+                curie.state.get("localHotkeysKeyListener").trigger("move", "down");
             }
         },
         'k' : {
-            doc : 'Choose a message/group above',
+            doc : 'Select a message above',
             action : function() {
-                curie.state.get("activeArrowsListener").trigger("move", "k");
+                curie.state.get("localHotkeysKeyListener").trigger("move", "up");
             }
         },
-        'l' : {
-            doc : 'Show/hide selected message/group',
+        'o' : {
+            doc : 'Open message',
             action : function () {
-                curie.state.get("activeArrowsListener").trigger("move", "l");
+                curie.state.get("localHotkeysKeyListener").trigger("action", "open");
             }
         },
         'x' : {
-            doc : 'Mark/unmark a message/group as selected',
+            doc : 'Mark/unmark a message',
             action : function() {
-                curie.state.get("activeArrowsListener").trigger("action", "x");
+                curie.state.get("localHotkeysKeyListener").trigger("action", "mark");
             }
         },
         'g g' : {
-            doc : 'Choose the latest message',
+            doc : 'Select the latest message',
             action : function() {
-                curie.state.get("activeArrowsListener").trigger("move", "gg");
+                curie.state.get("localHotkeysKeyListener").trigger("move", "first");
             }
         },
         'G' : {
-            doc : 'Choose the earliest message',
+            doc : 'Select the earliest message',
             action : function() {
-                curie.state.get("activeArrowsListener").trigger("move", "G");
+                curie.state.get("localHotkeysKeyListener").trigger("move", "last");
             }
         },
-        */
+    },
+    "Message" : {
         'm n' : {
             doc : 'Create a new message',
             action : function(e) {
@@ -110,32 +134,6 @@ var hotkeys = {
             }
         },
     },
-    globalActions : {
-        '/' : {
-            doc : 'Activate search',
-            action : function(e) {
-                e.preventDefault();
-                curie.state.trigger("search:show");
-            }
-        },
-        '?' : {
-            doc : 'Show hotkeys description',
-            action : showHotkeysHelp
-        },
-        'q q' : {
-            doc : 'Logout',
-            action : function(e) {
-                e.preventDefault();
-                curie.state.trigger("logout");
-            }
-        },
-        'esc' : {
-            doc : 'Go one level up',
-            action : function() {
-                curie.state.trigger("hotkey:esc");
-            }
-        },
-    }
 };
 
 _.each(hotkeys, function(keys, actionType) {
@@ -159,9 +157,9 @@ function showHotkeysHelp() {
                 doc : value.doc,
             })
         });
-        tmplData.push(actionTypeData);
+        tmplData.push({ name : actionType, actions : actionTypeData});
     });
-    $("#hotkeysModal").html(tmpl({actionTypes : tmplData})).modal({
+    $("#hotkeysModal").html(tmpl({actionGroups : tmplData})).modal({
         keyboard : true
     });
 }

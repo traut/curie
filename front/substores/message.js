@@ -10,6 +10,43 @@ var isodate = require("isodate"),
 
 var log = utils.getLogger("store.message");
 
+var getFullMessages = function(account, solrMessages, callback) {
+    log.info("Getting " + solrMessages.length + " messages from filesystem");
+
+    var solrMessagesById = {};
+    solrMessages.forEach(function(m) {
+        solrMessagesById[m.id] = m;
+        return m.id;
+    });
+
+    var paths = solrMessages.map(function(message) {
+        if (message.labels.indexOf("draft") > -1) {
+            return utils.draftPath(account, message.id);
+        } else {
+            return utils.messageParsedPath(message.id);
+        }
+    });
+
+    function readAsync(file, callback) {
+        fs.readFile(file, 'utf8', callback);
+    }
+
+    async.map(paths, readAsync, function(err, results) {
+        if (err) {
+            callback(err, null);
+            return;
+        }
+        var fullMessages = results.map(function(parsedContent) {
+            var parsed = JSON.parse(parsedContent);
+            return converter.parsedAndSolrToEmail(
+                parsed,
+                solrMessagesById[parsed.id]
+            );
+        });
+        callback(null, fullMessages);
+    });
+}
+
 MessageStore = function() {
     return {
         getMessage : function(handshake, options, callback) {
@@ -93,5 +130,6 @@ MessageStore = function() {
 
 
 module.exports = {
+    getFullMessages : getFullMessages,
     MessageStore : MessageStore
 }

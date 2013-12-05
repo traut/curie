@@ -30,23 +30,28 @@ Curie.Controllers.Data.Search = function () {
         return "+(" + extendedQuery + ")";
     };
 
-    var extendAndEncodeQuery = function(query) {
+    var extendQuery = function(query) {
         if (query == null || query == '') {
             return '';
         };
 
         var _query;
-
         if (query[0] == "+") {
             _query = query.substring(1);
         } else {
             _query = createQueryFromTerm(query);
         }
-        return utf8_to_b64(_query);
+        return _query;
+    }
+
+
+    var extendAndEncodeQuery = function(query) {
+        return utf8_to_b64(extendQuery(query));
     }
 
     _.extend(this, {
         getResults : getResults,
+        extendQuery : extendQuery,
         extendAndEncodeQuery : extendAndEncodeQuery
     });
 }

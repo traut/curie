@@ -88,8 +88,6 @@ DraftStore = function() {
             draft.received = new Date();
             draft.body = draft.body || [];
 
-            console.info(draft);
-
             if (draft.from) {
                 var correct = userEmails.all.filter(function(m) {
                     return m.email == draft.from.email;
@@ -104,43 +102,56 @@ DraftStore = function() {
 
             draft.__message_id = (draft.sent) ? utils.createMessageId(draft.id) : ('dummy' + draft.id);
 
-            var parsed = converter.draftToParsed(draft);
-            if (parsed == null) {
-                log.error("Error with", draft);
-                callback("Can't save draft", null);
-                return;
-            }
+            async.waterfall([
+                function(_callback) { // updating in-reply-to and references
+                    if (draft.in_reply_to_mid) {
+                        solrUtils.getMessage(draft.account, draft.in_reply_to_mid, function(err, parentMessage) {
+                            draft.in_reply_to = parentMessage.message_id;
+                            draft.references = parentMessage.reference || [];
+                            draft.references.push(parentMessage.message_id);
 
-            async.parallel({
-                fs : function(callback) {
-                    var path = null;
-                    if (draft.sent) {
-                        path = utils.messageParsedPath(draft.id);
+                            _callback(null, converter.draftToParsed(draft));
+                        });
                     } else {
-                        path = utils.draftPath(userHash, draft.id);
+                        _callback(null, converter.draftToParsed(draft));
                     }
-                    utils.writeToFile(path, parsed, callback);
                 },
-                solr : function(callback) {
-                    indexDraft(draft, callback);
-                }
-            }, function(err, results) {
-                if (err) {
-                    callback(err, null);
-                    return;
-                }
-                var path = results.fs;
+                function(parsed, _callback) {
+                    if (parsed == null) {
+                        log.error("Error with", draft);
+                        callback("Can't save draft", null);
+                        return;
+                    }
 
-                if (draft.sent) {
-                    console.info("Sending draft as a message");
-                    utils.pushToQueue("sent", draft.id);
-                    callback(null, {status : 'ok', mid : draft.id});
-                } else {
-                    console.info("Sending back ", draft);
-                    callback(null, draft);
-                }
+                    async.parallel({
+                        fs : function(callback) {
+                            var path = null;
+                            if (draft.sent) {
+                                path = utils.messageParsedPath(draft.id);
+                            } else {
+                                path = utils.draftPath(userHash, draft.id);
+                            }
+                            utils.writeToFile(path, parsed, callback);
+                        },
+                        solr : function(callback) {
+                            indexDraft(draft, callback);
+                        }
+                    }, _callback);
+                }], function(err, results) {
+                    if (err) {
+                        callback(err, null);
+                        return;
+                    }
+                    var path = results.fs;
+                    if (draft.sent) {
+                        console.info("Sending draft as a message");
+                        utils.pushToQueue("sent", draft.id);
+                        callback(null, {status : 'ok', mid : draft.id});
+                    } else {
+                        console.info("Sending back ", draft);
+                        callback(null, draft);
+                    }
             });
-
         }
     }
 }

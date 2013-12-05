@@ -4,9 +4,10 @@
 </div>
 <div class="modal-body hotkeysHelp">
     <div class="row-fluid">
-        {{#each actionTypes }}
-        <div class="span6 actionTypeBlock">
-            {{#each this }}
+        {{#each actionGroups }}
+        <div class="span4 actionTypeBlock">
+            <h5>{{ name }}</h5>
+            {{#each actions }}
             <div class="row-fluid">
                 <div class="span2 keyVal">{{ hotkey }}</div>
                 <div class="span10 keyDoc">{{ doc }}</div>

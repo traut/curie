@@ -13,9 +13,9 @@ var log = utils.getLogger("store.pack");
 PackStore = function() {
     return {
         getMessagePreviews : function(handshake, options, callback) {
-            var pack = options.pack;
-            var hash = handshake.session.user.hash;
-            var page = options.ctx.page || 0;
+            var pack = options.pack,
+                hash = handshake.session.user.hash,
+                page = options.ctx.page || 0;
 
             log.info("Searching for pack=" + pack + ", page=" + page + ", hash=" + hash);
 
@@ -60,6 +60,24 @@ PackStore = function() {
 
             });
         },
+        getPack : function(handshake, options, callback) {
+            var hash = handshake.session.user.hash,
+                pack = options.pack;
+
+            solrUtils.query('+labels:"' + pack + '" ' + solrUtils.accessControl(hash), {
+                rows: 0,
+                facet: true,
+                'facet.field' : "unread"
+            }, function(err, results) {
+                console.info(results.facet_counts.facet_fields.unread);
+                var unreadsMap = utils.flatToDict(results.facet_counts.facet_fields.unread);
+                callback(null, {
+                    id : pack,
+                    name : pack,
+                    unread : unreadsMap["true"]
+                });
+            });
+        },
         getPacks : function(handshake, options, callback) {
             var hash = handshake.session.user.hash;
             log.info("Getting packs list for " + hash);
@@ -94,13 +112,12 @@ PackStore = function() {
 
                 var packs = [];
                 Object.keys(labelsMap).forEach(function(key) {
-                    if (key == "draft") { // skipping predefined
+                    if (["draft", "inbox"].indexOf(key) > -1) { // skipping predefined
                         return;
                     }
                     packs.push({
                         id : crypto.createHash('md5').update(key).digest("hex"),
                         name : key,
-                        size : labelsMap[key],
                         unread : unreadsMap[key]
                     });
                 });
@@ -111,7 +128,11 @@ PackStore = function() {
             var packName = options.pack,
                 groupField = options.groupField;
 
-            log.info("Getting groups for pack=" + packName + ", groupField=" + groupField + "; user=" + handshake.session.user.hash);
+            var query = "";
+            if (packName) {
+                log.info("Getting groups for pack=" + packName + ", groupField=" + groupField + "; user=" + handshake.session.user.hash);
+                query += "+labels:" + packName;
+            }
 
             var groupFieldMapping = {
                 from : 'from.email',
@@ -119,7 +140,7 @@ PackStore = function() {
 
             var groupByFieldRealName = groupFieldMapping[groupField];
 
-            var query = "+labels:" + packName + solrUtils.accessControl(handshake.session.user.hash);
+            query += solrUtils.accessControl(handshake.session.user.hash);
 
             var facetQuery = query + " +unread:true";
 
@@ -146,11 +167,11 @@ PackStore = function() {
                     callback(err, null);
                     return;
                 }
-                var groupsResult = JSON.parse(results.groups);
+                var groupsResult = results.groups;
                 if (groupsResult.grouped[groupByFieldRealName].matches == 0) {
                     callback(null, []);
                 }
-                var unreadResult = JSON.parse(results.unreadCounts);
+                var unreadResult = results.unreadCounts;
                 var unreadCounts = utils.flatToDict(unreadResult.facet_counts.facet_fields[groupByFieldRealName]);
 
                 var groups = groupsResult.grouped[groupByFieldRealName].groups.map(function(group) {
@@ -172,7 +193,7 @@ PackStore = function() {
 
 
 function queryForLabel(hash, label, page, callback){
-    var query = '+labels:' + label + solrUtils.accessControl(hash);
+    var query = '+labels:"' + label + '"' + solrUtils.accessControl(hash);
 
     var amount = settings.NUM_ROWS;
     var start = amount * page;

@@ -184,6 +184,8 @@ function getNextIndex(currentIndex, actionType, itemsLength) {
         case "last":
             nextIndex = itemsLength - 1;
             break;
+        default:
+            nextIndex = 0;
     }
     return nextIndex;
 }

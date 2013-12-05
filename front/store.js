@@ -22,10 +22,17 @@ threadStore = require('./substores/thread');
 var router = new barista.Router();
 
 router.match('/account', 'GET').to('accountStore.getAccountDetails');
+router.match('/filters/:id', 'DELETE').to('accountStore.deleteFilter');
+router.match('/filters/:id', 'POST').to('accountStore.rerunFilter');
+router.match('/filters', 'GET').to('accountStore.getFilters');
+router.match('/filters', 'PUT').to('accountStore.addFilter');
 
 router.match('/packs', 'GET').to('packStore.getPacks');
+router.match('/packs/:pack', 'GET').to('packStore.getPack');
 router.match('/packs/:pack/messages', 'GET').to('packStore.getMessagePreviews');
 router.match('/packs/:pack/groups/:groupField', 'GET').to('packStore.getGroups');
+
+router.match('/contacts/:groupField', 'GET').to('packStore.getGroups');
 
 router.match('/threads/:threadId', 'GET').to('threadStore.getThread');
 
@@ -34,6 +41,7 @@ router.match('/messages/:messageId', 'PATCH').to('messageStore.patchMessage');
 router.match('/messages/:messageId', 'DELETE').to('messageStore.deleteMessageForever');
 
 router.match('/search', 'GET').to('searchStore.getSearch');
+router.match('/search/top', 'GET').to('searchStore.getTopNResults');
 
 router.match('/drafts/:draftId', 'GET').to('draftStore.getDraft');
 router.match('/drafts/:draftId', 'POST').to('draftStore.updateDraft');

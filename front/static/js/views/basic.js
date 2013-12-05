@@ -40,7 +40,8 @@ var AppView = Backbone.View.extend({
     el : ".app",
     template : Handlebars.templates.base,
     events : {
-        "click #newMessageLi a" : "showNewDraft",
+        "click [name=new-message] a" : "showNewDraft",
+        "click [name=filters] a" : "showFilters",
 
         "blur #searchPopup form" : "hideSearch",
         "submit #searchPopup form" : "makeSearchEvent",
@@ -71,6 +72,10 @@ var AppView = Backbone.View.extend({
     showNewDraft : function(e) {
         e && e.preventDefault();
         curie.controllers.layout.showDraft();
+    },
+    showFilters : function(e) {
+        e && e.preventDefault();
+        curie.controllers.layout.showFilters();
     },
     escPressed : function(e) {
         if (e.keyCode == 27) {

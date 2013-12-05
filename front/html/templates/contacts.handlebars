@@ -1,0 +1,15 @@
+<div class="packGroups">
+    {{#each contacts }}
+    <div id="contact-{{ id }}" class="row packGroup asRow" onClick="javascript:window.curie.state.trigger('contact', '{{ value }}');">
+        <div class="pull-right counters"><span class="unread {{#unless unread }}hide{{/unless}}">{{ unread }}</span> <span class="{{#unless unread }}hide{{/unless}}"></span></div>
+        <span class="lead">{{ value }}</span>
+        {{#each messages }}
+        {{> messageRow }}
+        {{/each}}
+
+        {{#if thereIsMore }}
+        <p class="text-center">&hellip;</p>
+        {{/if}}
+    </div>
+    {{/each}}
+</div>

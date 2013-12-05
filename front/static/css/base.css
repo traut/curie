@@ -5,16 +5,42 @@ body {
 .container-fluid {
   padding-left: 0px; }
 
-.sidebarNav {
-  padding: 9px 0;
+.sidebar-nav-fixed.sidebarNav {
+  padding: 10px 0px;
   -webkit-overflow-scrolling: touch;
-  padding: 15px 0 30px 30px;
-  border-right: 1px solid #bbbbbb;
+  border-right: 1px solid #cccccc;
   box-shadow: 0 0 20px #cccccc;
   -webkit-box-shadow: 0 0 20px #cccccc;
   -moz-box-shadow: 0 0 20px #cccccc;
   height: 100%;
   z-index: 99; }
+  .sidebar-nav-fixed.sidebarNav .sidebarInfo {
+    padding: 0px 5px; }
+  .sidebar-nav-fixed.sidebarNav .packs {
+    margin-bottom: 15px;
+    border-right: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px; }
+    .sidebar-nav-fixed.sidebarNav .packs li {
+      /*
+      a.selected {
+          border-left: 2px solid #0088cc;
+      }
+      &.active a.selected {
+          border-left: 2px solid white;
+      }
+      */ }
+      .sidebar-nav-fixed.sidebarNav .packs li .loader {
+        float: right;
+        padding: 0px 10px; }
+        .sidebar-nav-fixed.sidebarNav .packs li .loader img {
+          display: inline;
+          vertical-align: middle; }
+      .sidebar-nav-fixed.sidebarNav .packs li > a {
+        padding-left: 20px;
+        padding-right: 20px; }
+      .sidebar-nav-fixed.sidebarNav .packs li.active .counters {
+        color: white; }
 
 .sidebar-nav-fixed {
   position: fixed;
@@ -46,29 +72,6 @@ button.close {
 
 #packBlocks {
   z-index: 99; }
-
-.packs {
-  margin-bottom: 15px;
-  border-right: 0px;
-  border-top-right-radius: 0px;
-  border-bottom-right-radius: 0px; }
-  .packs li {
-    /*
-    a.selected {
-        border-left: 2px solid #0088cc;
-    }
-    &.active a.selected {
-        border-left: 2px solid white;
-    }
-    */ }
-    .packs li .loader {
-      float: right;
-      padding: 0px 10px; }
-      .packs li .loader img {
-        display: inline;
-        vertical-align: middle; }
-    .packs li.active .counters {
-      color: white; }
 
 .unread {
   font-weight: 800;
@@ -131,42 +134,66 @@ button.close {
     min-height: 0px;
     vertical-align: middle; }
 
+.message .body-text {
+  overflow-x: auto; }
+.message .messageHeader .date {
+  margin-left: 10px; }
+.message .messageHeader span.headerRow {
+  filter: alpha(opacity=50);
+  opacity: .50; }
+.message .messageHeader a.email {
+  color: inherit; }
+.message a.showQuote {
+  cursor: pointer; }
+.message .quoted {
+  color: #999999;
+  margin-left: 10px;
+  padding-left: 10px;
+  border-left: 1px solid #aaaaaa; }
+
 .threadView .message {
   margin: 0px 0px 10px;
-  padding: 10px;
-  border-radius: 5px; }
+  padding: 10px; }
   .threadView .message:nth-child(odd) {
     background-color: #FCFAEE; }
   .threadView .message:nth-child(even) {
     background-color: #f9f9f9; }
+  .threadView .message.selected {
+    border-left: 1px solid #0088cc; }
 
 .threadRow {
   border-top: thick double #dddddd;
-  border-left: thick double #dddddd;
+  border-left: thin solid #dddddd;
   border-right: thin solid #dddddd;
   border-bottom: thin solid #dddddd; }
   .threadRow .messageRow {
     border: 0px;
     margin: 0px; }
+  .threadRow.selected {
+    border-left: 2px solid #0088cc; }
+  .threadRow.marked {
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+    border-top: thick double #fbeed5;
+    border-left: thin double #fbeed5; }
+    .threadRow.marked .messageRow {
+      background-color: #fcf8e3; }
+  .threadRow.marked.selected {
+    border-left: 2px double #0088cc;
+    border-top: thick double #fbeed5; }
 
 .packGroups {
-  padding-top: 9px; }
-  .packGroups [class*="span"] {
-    min-height: 0px;
-    vertical-align: middle; }
+  box-shadow: 0 0 20px #cccccc;
+  -webkit-box-shadow: 0 0 20px #cccccc;
+  -moz-box-shadow: 0 0 20px #cccccc; }
   .packGroups .packGroup {
     cursor: pointer;
     padding: 5px;
-    position: relative;
-    border: 1px solid white;
-    border-radius: 4px;
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    -moz-box-shadow: 0px 1px 5px #cccccc;
-    -webkit-box-shadow: 0px 1px 5px #cccccc;
-    box-shadow: 0px 1px 5px #cccccc; }
+    position: relative; }
     .packGroups .packGroup .counters {
       padding: 3px; }
+    .packGroups .packGroup .lead {
+      font-size: 15px;
+      line-height: 24px; }
     .packGroups .packGroup .sumCount {
       bottom: 5px;
       font-size: 18px;
@@ -183,17 +210,19 @@ button.close {
 .groupView {
   padding-top: 9px; }
 
-.hotkeysHelp .actionTypeBlock {
-  margin-left: 0px; }
-  .hotkeysHelp .actionTypeBlock .keyVal {
-    text-align: right;
-    font-weight: bold;
-    padding: 5px 0px; }
-  .hotkeysHelp .actionTypeBlock .keyDoc {
-    padding: 5px 0px; }
+.hotkeysHelp {
+  padding-top: 0px; }
+  .hotkeysHelp .actionTypeBlock {
+    margin-left: 0px; }
+    .hotkeysHelp .actionTypeBlock .keyVal {
+      text-align: right;
+      font-weight: bold;
+      padding: 5px 0px; }
+    .hotkeysHelp .actionTypeBlock .keyDoc {
+      padding: 5px 0px; }
 
 .draftView .draftBody {
-  padding: 15px 15px 0px 0px; }
+  padding: 15px 15px 0px 10px; }
   .draftView .draftBody form {
     margin: 0px; }
     .draftView .draftBody form .control-group {
@@ -204,9 +233,14 @@ button.close {
         .draftView .draftBody form .control-group input[name=body], .draftView .draftBody form .control-group textarea[name=body] {
           width: 100%; }
 .draftView .draftFooter .modal-footer {
-  border-top: 0px; }
+  border-top: 0px;
+  padding: 5px;
+  margin-left: 10px;
+  background-color: white; }
 .draftView .draftFooter .saved {
   padding-top: 3px; }
+.draftView.selected {
+  border-left: 1px solid #0088cc; }
 
 .draftPopup {
   width: 600px;
@@ -271,22 +305,6 @@ button.close {
     border-radius: 5px;
     border: 1px solid #bbbbbb;
     display: none; }
-    #packView .popupView .messageHeader .date {
-      margin-left: 10px; }
-    #packView .popupView .messageHeader span.headerRow {
-      filter: alpha(opacity=50);
-      opacity: .50; }
-    #packView .popupView .messageHeader a.email {
-      color: inherit; }
-    #packView .popupView a.showQuote {
-      cursor: pointer; }
-    #packView .popupView .body-text {
-      overflow-x: auto; }
-    #packView .popupView .quoted {
-      color: #999999;
-      margin-left: 10px;
-      padding-left: 10px;
-      border-left: 1px solid #aaaaaa; }
 
 #loginModal {
   width: 300px;
@@ -300,6 +318,15 @@ button.close {
   #loginModal .loader {
     margin-right: -16px; }
 
+.filters .query {
+  font-family: "Courier New" Courier monospace; }
+  .filters .query a {
+    text-decoration: none; }
+.filters form {
+  padding: 5px 15px; }
+  .filters form .control-group {
+    margin: 0px 0px 10px; }
+
 @media (max-width: 767px) {
   #loginModal.modal {
     left: 50%; } }
@@ -308,6 +335,11 @@ button.close {
   margin-left: -400px;
   margin-right: -400px; }
 
+@media (max-width: 767px) {
+  #hotkeysModal {
+    margin-left: auto;
+    margin-right: auto;
+    width: auto; } }
 /* Bootstrap improvements */
 .modal-backdrop {
   background-color: white;

@@ -237,9 +237,8 @@ function mergeIntoThreads(messages) {
 function pushToQueue(queue, message) {
     var client = beanstalk.Client();
     client.use(queue).onSuccess(function(data) {
-        console.info(data);
         client.put(message).onSuccess(function(data) {
-            console.log(data);
+            console.log("Message " + message +  " pushed to queue " + queue);
             client.disconnect();
         });
     });

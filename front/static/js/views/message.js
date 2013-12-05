@@ -11,10 +11,31 @@ var WrappedRowView = Backbone.View.extend({
         this.$el = null;
     },
     render : function() {
-        var val = this.wrappedView.render();
+        var val = this.wrappedView.render({
+            selected : this.selected,
+            marked : this.marked
+        });
         this.$el = val.$el;
         return val;
     },
+    isSelected : function() {
+        return this.wrappedView.isSelected();
+    },
+    select : function() {
+        return this.wrappedView.select();
+    },
+    unselect : function() {
+        return this.wrappedView.unselect();
+    },
+    actionOpen : function() {
+        window.location.hash = this.wrappedView.hashUrl;
+    },
+    actionMark : function() {
+        return this.wrappedView.toggleMark();
+    },
+    cleanMarkings : function() { 
+        this.unselect();
+    }
 });
 
 var MessageRowView = Backbone.View.extend({
@@ -23,19 +44,22 @@ var MessageRowView = Backbone.View.extend({
 
         this.template = this.options.template || this.template;
 
-        this.on("change:selected", this.updateSelected, this);
-        this.on("change:marked", this.updateMarked, this);
-
-        //this.model.on("change:unread", this.updateUnread, this);
-        this.model.on("change", this.render, this);
+        this.model.on("change:unread change:to change:from change:subject change:received", this.render, this);
         this.model.on("remove", this.removeMessage, this);
 
         this.hashUrl = this.options.rootUrl + "/" + this.model.id;
+
+        this.selected = false;
+        this.marked = false;
     },
     render : function() {
         //console.info("rendering messagerowview for " + this.model.get("id"));
         var data = this.model.toJSON();
-        data.url = this.hashUrl;
+        _.extend(data, {
+            url : this.hashUrl,
+            selected : this.selected,
+            marked : this.marked
+        });
         var html = this.template(data);
         this.$el.html(html);
         return this;
@@ -44,34 +68,25 @@ var MessageRowView = Backbone.View.extend({
         this.close();
     },
     updateUnread : function(m, value) {
-        updateElementClass(this.$el, value, "unread");
+        updateElementClass(this.$(".messageRow"), value, "unread");
     },
-    updateSelected : function(a, b) {
-        console.info("update selected", a, b);
-        return;
-        if (nextIndex != null) {
-            this.messages.where({selected : true}).forEach(function(m) {
-                m.set('selected', false);
-            });
-            this.messages.at(nextIndex).set('selected', true);
-        }
-        if (mid != this.model.id) {
-            updateElementClass(this.$el, false, "selected");
-            return;
-        }
-        updateElementClass(this.$el, true, "selected");
-        if (value && !elementInViewport(this.$el[0])) {
+    select : function() {
+        this.selected = true;
+        updateElementClass(this.$(".messageRow"), true, "selected");
+        if (!elementInViewport(this.$el[0])) {
             $('html, body').animate({scrollTop : this.$el.offset().top - 200}, 10);
         }
     },
-    updateMarked : function(m, coll) {
-        console.info("update marked", a, b);
-        //updateElementClass(this.$el, true, "marked");
-        if (markIndex != null) {
-            var model = this.messages.at(markIndex);
-            model.set('marked', !model.get("marked"));
-            console.info(this.messages.at(markIndex), model.get("marked"));
-        }
+    unselect : function() {
+        this.selected = false;
+        return updateElementClass(this.$(".messageRow"), false, "selected");
+    },
+    isSelected : function() {
+        return this.selected;
+    },
+    toggleMark : function() {
+        this.marked = !this.marked;
+        return this.$(".messageRow").toggleClass("marked");
     },
 });
 
@@ -90,6 +105,10 @@ var MessageView = Backbone.View.extend({
 
         var data = this.model.toJSON();
         prepareBodyBlocks(data, true);
+
+        _.extend(data, {
+            url : this.rootUrl + "/" + this.model.get("id")
+        });
 
         this.$el.html(this.template(data));
 
@@ -141,6 +160,13 @@ var MessageView = Backbone.View.extend({
     },
     beforeClose : function() {
         this.undelegateEvents();
+    },
+    select : function() {
+        this.$(".message").addClass("selected");
+    },
+    unselect : function() {
+        this.$(".message").removeClass("selected");
     }
+
 });
 

@@ -6,7 +6,8 @@ var isodate = require("isodate"),
     settings = require('../settings'),
     utils = require('../utils'),
     solrUtils = require('../solrUtils'),
-    converter = require('../converter');
+    converter = require('../converter'),
+    messagesStore = require('../substores/message.js');
 
 var log = utils.getLogger("store.thread");
 
@@ -24,46 +25,14 @@ ThreadStore = function() {
                     callback(err, []);
                     return;
                 }
-
-                var messagesMap = {};
-                var mids = messages.map(function(m) {
-                    messagesMap[m.id] = m;
-                    return m.id;
-                });
-
-                log.info("Getting " + mids.length + " messages from filesystem");
-
-                var paths = messages.map(function(message) {
-                    if (message.labels.indexOf("draft") > -1) {
-                        return utils.draftPath(account, message.id);
-                    } else {
-                        return utils.messageParsedPath(message.id);
-                    }
-                });
-
-                function readAsync(file, callback) {
-                    fs.readFile(file, 'utf8', callback);
-                }
-
-                async.map(paths, readAsync, function(err, results) {
-                    if (err) {
-                        callback(err, null);
-                        return;
-                    }
+                messagesStore.getFullMessages(account, messages, function(err, fullMessages) {
                     var thread = {
                         thread : tid,
-                        messages : results.map(function(parsedContent) {
-                            var parsed = JSON.parse(parsedContent);
-                            return converter.parsedAndSolrToEmail(
-                                parsed,
-                                messagesMap[parsed.id]
-                            );
-                        })
+                        messages : fullMessages,
                     }
                     callback(null, thread);
-                    log.info("Thread " + tid + " with " + mids.length + " messages has been sent");
+                    log.info("Thread " + tid + " with " + fullMessages.length + " messages has been sent");
                 });
-
             });
         }
     }

@@ -4,15 +4,16 @@ var PackListView = Backbone.View.extend({
 
     tagName : 'ul',
     attributes : {
-        'class' : 'nav nav-list well packs'
+        'class' : 'nav nav-list packs'
     },
 
     initialize : function() {
         this.collection.on("change:unread", this.updateBadge, this);
         this.collection.on("add reset remove", this.render, this);
+
+        this.predefined_order = ["inbox", "sent"];
     },
     render : function() {
-        console.info("rendering PackListView", this.collection.pluck("name"));
         if (this.collection.length == 0) {
             return;
         }
@@ -26,11 +27,15 @@ var PackListView = Backbone.View.extend({
         return this;
     },
     updateActive : function(pack) {
-        var name = (pack == null) ? "" : slugifySelector(pack.get("name"));
+        var name = (pack == null) ? null : slugifySelector(pack.get("name"));
 
         var cls = "active";
-        this.$("li:not([data-pack=" + name + "])").removeClass(cls);
-        this.$("li[data-pack=" + name + "]").addClass(cls);
+        if (name) {
+            this.$("li:not([data-pack=" + name + "])").removeClass(cls);
+            this.$("li[data-pack=" + name + "]").addClass(cls);
+        } else {
+            this.$("li").removeClass(cls);
+        }
     },
     updateSelected : function(pack) {
         var name = (pack == null) ? "" : slugifySelector(pack.get("name"));

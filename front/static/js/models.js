@@ -127,6 +127,7 @@ Curie.Models.PagedMessagesWrapper = Backbone.Model.extend({
     total : 0,
     initialize : function() {
         this.messages = new Curie.Models.Messages();
+        this.ctx = {};
     },
     fetchMessages : function() {
         return this.fetch({update : true});
@@ -146,7 +147,9 @@ Curie.Models.PagedMessagesWrapper = Backbone.Model.extend({
     },
     parse : function(response) {
         if (response) {
-            this.messages.add(this.parseMessages(response.docs));
+            if (response.docs) {
+                this.messages.add(this.parseMessages(response.docs));
+            }
             this.page = response.page;
             this.total = response.total;
         }
@@ -159,7 +162,6 @@ Curie.Models.Pack = Curie.Models.PagedMessagesWrapper.extend({
     defaults : {
         id : null,
         name : null,
-        size : null,
         unread : null,
     },
     initialize : function() {
@@ -167,11 +169,17 @@ Curie.Models.Pack = Curie.Models.PagedMessagesWrapper.extend({
         this.messages.url = '/packs/' + this.get("name") + '/messages';
         this.total = this.get("size");
     },
-    fetchMessages : function() {
+    fetchMessages : function(options) {
         this.messages.ctx = {
             page : this.page
         };
-        return this.messages.fetch({update : true, extend : true});
+
+        options = options || {};
+        _.extend(options, {
+            update : true,
+            extend : (this.page != 0)
+        });
+        return this.messages.fetch(options);
     },
 }, { typeName : "Pack" });
 
@@ -217,18 +225,53 @@ Curie.Models.Packs = Backbone.Collection.extend({
     },
 }, { typeName : "Packs" });
 
+Curie.Models.Contacts = Backbone.Collection.extend({
+    url : "/contacts/from",
+});
+
+Curie.Models.ChatHistory = Curie.Models.PagedMessagesWrapper.extend({
+    url : "/search/top",
+    defaults : {
+        query : null,
+        size : 0,
+        amount : 5,
+    },
+    initialize: function() {
+        Curie.Models.PagedMessagesWrapper.prototype.initialize.apply(this, arguments);
+
+        if (this.get("query")) {
+            var query = this.get("query");
+            this.ctx = {
+                query : query,
+                amount : this.get("amount")
+            };
+            this.queryHash = utf8_to_b64(query);
+        }
+    },
+
+    destroy : function() {
+        this.trigger("destroy", this);
+    },
+
+}, { typeName : "ChatHistory" });
+
 Curie.Models.Account = Backbone.Model.extend({
     defaults: {
         primary : {},
         mailboxes : {},
     },
-    urlRoot: "/account",
+    url: "/account",
 });
+
+Curie.Models.Filters = Backbone.Collection.extend({
+    url: "/filters",
+}, { typeName : "Filters" });
 
 Curie.Models.State = Backbone.Model.extend({
     defaults: {
         activePack : null,
         selectedPack : null,
+        localHotkeysKeyListener : new Backbone.Model(), //dummy
     },
     account : new Curie.Models.Account(),
 

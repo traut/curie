@@ -6,6 +6,7 @@ var DraftView = Backbone.View.extend({
         "click button[name=send]" : "sendMessage",
         "click button[name=cancel]" : "closeAndNavigate",
         "click button[name=discard]" : "deleteDraft",
+        "click textarea" : "showButtons",
 
         "click div[name=readonly]" : "showEditable"
     },
@@ -114,11 +115,20 @@ var DraftView = Backbone.View.extend({
         this.$("div[name=editable] :input").first().focus();
         this.$("div[name=readonly]").hide();
     },
+    showButtons : function() {
+        this.$(".draftFooter").show();
+    },
     beforeClose : function() {
         console.info("cleaning up " + this.model.get("id"));
 
         this.undelegateEvents();
         this.model.off(null, null, this);
+    },
+    select : function() {
+        this.$(".draftView").addClass("selected");
+    },
+    unselect : function() {
+        this.$(".draftView").removeClass("selected");
     }
 });
 

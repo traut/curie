@@ -35,11 +35,14 @@ Curie.Controllers.Layout.Pack = function () {
             console.info("pack view for the model is already active", model);
             return;
         }
-        renderViewAsPack(getView(model));
+        var view = getView(model);
+        renderViewAsPack(view);
+
+        curie.state.set("localHotkeysKeyListener", view);
     };
 
     var renderViewAsPack = function(view) {
-        currentView && currentView.$el.detach();
+        currentView && currentView.detach();
         cv = currentView = view;
         console.info("adding pack view to DOM", view);
         $("#packView #contentView").html(currentView.$el);
@@ -57,10 +60,21 @@ Curie.Controllers.Layout.Pack = function () {
                 renderPackView(value);
             } else {
                 hidePackView();
+                curie.state.set("localHotkeysKeyListener", null);
             }
         },
         "navigate:activePack" : function() {
             curie.router.navigateToPack(curie.state.get("activePack"));
+            curie.state.set("localHotkeysKeyListener", currentView);
+        },
+
+        "hotkey:packList" : function(movement) {
+            var activePack = curie.state.get("activePack");
+            var packModels = _.flatten(_.pluck(curie.controllers.data.getPacks(), "models"));
+            var currentIndex = (activePack) ? packModels.indexOf(activePack) : -1;
+            var nextIndex = getNextIndex(currentIndex, movement, packModels.length);
+
+            curie.router.navigateToPack(packModels[nextIndex], true);
         }
     });
 

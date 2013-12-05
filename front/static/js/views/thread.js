@@ -4,7 +4,7 @@ var ThreadRowView = Backbone.View.extend({
     initialize : function() {
         this.hashUrl = this.options.rootUrl + "/t/" + this.model.id;
         this.model.on("remove", this.remove, this);
-        this.model.get("messages").on("change", this.render, this);
+        this.model.get("messages").on("add remove sort", this.render, this);
 
     },
     render : function() {
@@ -25,11 +25,26 @@ var ThreadRowView = Backbone.View.extend({
             url : this.hashUrl,
         });
         var html = template(data);
-        this.$el = $(html);
+        this.$el.html(html);
         return this;
     },
     remove : function(m, collection, options) {
         this.close();
+    },
+    select : function() {
+        updateElementClass(this.$(".threadRow"), true, "selected");
+        if (!elementInViewport(this.$el[0])) {
+            $('html, body').animate({scrollTop : this.$el.offset().top - 200}, 10);
+        }
+    },
+    unselect : function() {
+        return updateElementClass(this.$(".threadRow"), false, "selected");
+    },
+    isSelected : function() {
+        return this.$(".threadRow").hasClass("selected");
+    },
+    toggleMark : function() {
+        return this.$(".threadRow").toggleClass("marked");
     },
 });
 
@@ -42,12 +57,18 @@ var ThreadView = Backbone.View.extend({
     },
 
     initialize : function() {
-        this.model.get("messages").on("change sort remove", this.render, this);
+
+        this.model.get("messages").on("sort add remove sent", this.render, this);
+
+        this.on("move", this.moveSelection, this);
+        this.on("action", this.performAction, this);
 
         console.info(this.model.get("messages"));
 
         this.subViews = [];
         this.draftView = null;
+
+        this.selectedIndex = 0;
     },
 
     isDraftTheLastOne : function() {
@@ -72,7 +93,7 @@ var ThreadView = Backbone.View.extend({
         if (message instanceof Curie.Models.Draft) {
             return new DraftView({ model : message, embedded : true });
         } else if (message instanceof Curie.Models.Message) {
-            return new MessageView({ model : message});
+            return new MessageView({ model : message });
         } else {
             console.error("Unknown message type", message);
             return null;
@@ -88,6 +109,9 @@ var ThreadView = Backbone.View.extend({
         this.draftView && this.draftView.close();
 
         this.$el.remove();
+
+        this.model.get("messages").off(null, null, this);
+        this.off(null, null, this);
     },
 
     render : function() {
@@ -104,7 +128,7 @@ var ThreadView = Backbone.View.extend({
             Mousetrap.trigger("esc");
         }
 
-        this.subViews = messages.map(this.createViewForModel);
+        this.subViews = messages.map(this.createViewForModel, this);
 
         if (messages.length > 0 && !this.isDraftTheLastOne()) {
             this.addDraftView();
@@ -163,4 +187,17 @@ var ThreadView = Backbone.View.extend({
 
     },
 
+    moveSelection : function(move) {
+        this.subViews[this.selectedIndex].unselect();
+        this.selectedIndex = getNextIndex(this.selectedIndex, move, this.subViews.length);
+        var view = this.subViews[this.selectedIndex];
+        this.subViews[this.selectedIndex].select();
+
+        if (!elementInViewport(view.$el[0])) {
+            $('html, body').animate({scrollTop : view.$el.offset().top - 200}, 10);
+        }
+
+    },
+    performAction : function(action) {
+    }
 });

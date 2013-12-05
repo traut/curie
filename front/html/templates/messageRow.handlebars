@@ -1,4 +1,4 @@
-    <div id="message-row-{{ id }}" class="row messageRow {{#if unread }}unread{{/if}}">
+    <div id="message-row-{{ id }}" class="row messageRow {{#if unread }}unread{{/if}} {{#if selected }}selected{{/if}} {{#if marked }}marked{{/if}}">
         {{#if url }}
         <a href="#{{ url }}">
         {{/if}}

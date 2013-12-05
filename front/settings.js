@@ -9,8 +9,8 @@ var settings = {
 
 
     NUM_ROWS : 30,
-    NUM_GROUPS : 10,
-    NUM_ROWS_IN_GROUP : 5,
+    NUM_GROUPS : 30,
+    NUM_ROWS_IN_GROUP : 0,
 
     INFINITY : 100,
 

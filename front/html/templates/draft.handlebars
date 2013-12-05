@@ -25,16 +25,16 @@
             </div>
         </form>
     </div>
-    <div class="draftFooter row-fluid">
+    <div class="draftFooter row-fluid {{#if embedded}}hide{{/if}}">
         <div class="modal-footer">
             <div class="pull-left saved">
                 <span class="muted {{#unless received}}hide{{/unless}}" name="title">Saved: </span><span name="value">{{#dateformat received 'HH:mm:SS, dddd, MMM Do'}}{{/dateformat}}</span>
             </div>
-            <button class="btn btn-danger" aria-hidden="true" name="discard"><i class="icon-trash icon-white"></i></button>
+            <button class="btn btn-small" aria-hidden="true" name="discard"><i class="icon-trash"></i></button>
             {{#unless embedded}}
-            <button class="btn" aria-hidden="true" name="cancel">Cancel</button>
+            <button class="btn btn-small" aria-hidden="true" name="cancel">Cancel</button>
             {{/unless }}
-            <button class="btn btn-primary" name="send">Send</button>
+            <button class="btn btn-small" name="send">Send</button>
         </div>
         <!--
         <div class="span4 {{#unless saved}}hide{{/unless}} saved muted">Saved <span class="savedValue">{{#date_ago saved }}{{/date_ago}}</span></div>

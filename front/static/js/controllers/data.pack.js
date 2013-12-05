@@ -1,10 +1,11 @@
 Curie.Controllers.Data.Packs = function () {
 
     var draftPack = curie.cache.add(Curie.Models.Pack, {id : "draft", name : "draft"});
+    var inboxPack = curie.cache.add(Curie.Models.Pack, {id : "inbox", name : "inbox"});
 
     var packs = {
         dynamic : new Curie.Models.Packs([], { url : '/packs', }),
-        predefined : new Curie.Models.Packs([ draftPack ], { urlRoot : '/packs'})
+        predefined : new Curie.Models.Packs([ inboxPack, draftPack ], { urlRoot : '/packs'})
     }
 
     _.forEach(packs, function(packList, key) {
@@ -12,6 +13,10 @@ Curie.Controllers.Data.Packs = function () {
     });
 
     packs.predefined.fetch = function(options) {
+        packs.predefined.map(function(p) {
+            p.urlRoot = '/packs';
+            p.fetch();
+        });
         if (options && options.success) {
             options.success();
         } else {
@@ -27,7 +32,7 @@ Curie.Controllers.Data.Packs = function () {
             curie.state.trigger("fetch:done");
         });
 
-        _.each(packs, function(packList) {
+        _.each([packs.predefined, packs.dynamic], function(packList) {
 
             // we want to render packList in order, so can't put it in "success" func
             render && curie.controllers.layout.renderPackListView(packList);
@@ -49,28 +54,6 @@ Curie.Controllers.Data.Packs = function () {
         });
     }
 
-    curie.state.on("hotkey:packList", function(movement) {
-
-        var activePack = curie.state.get("activePack");
-
-        var packModels = _.flatten(_.pluck(packs, "models"));
-
-        var currentIndex = (activePack) ? packModels.indexOf(activePack) : -1;
-
-        var nextIndex = null;
-        if (movement == "up") {
-            nextIndex = ((currentIndex > 0) ? currentIndex : packModels.length) - 1;
-        } else if (movement == "down") {
-            nextIndex = (currentIndex + 1) % packModels.length;
-        } else {
-            console.error("unknown hotkey type: " + movement);
-            return;
-        }
-
-        curie.router.navigateToPack(packModels[nextIndex]);
-
-    }, this);
-
 
     curie.state.once("connection:initial", function() {
         refetchPacks(function() {
@@ -82,5 +65,9 @@ Curie.Controllers.Data.Packs = function () {
     });
 
     curie.state.on("connection:established", refetchPacks);
+
+    this.getPacks = function() {
+        return packs;
+    }
 }
 

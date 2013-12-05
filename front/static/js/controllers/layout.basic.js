@@ -18,7 +18,7 @@ Curie.Controllers.Layout.Basic = function () {
         sidebarView.addPackListView(newView);
     }
 
-    var showPopup = function(objType, objId) {
+    var showPopup = function(objType, objId, draftEmailTo) {
 
         var obj;
         if (objId && objId != '') {
@@ -26,6 +26,9 @@ Curie.Controllers.Layout.Basic = function () {
         } else {
             if (objType.prototype.newInstance) {
                 obj = objType.prototype.newInstance();
+                if (draftEmailTo) {
+                    obj.set("to", [{email : draftEmailTo}]);
+                }
             } else {
                 console.error("Can't create new instance for", objType.constructor.typeName);
                 return;
@@ -38,7 +41,7 @@ Curie.Controllers.Layout.Basic = function () {
         if (objType == Curie.Models.Message) {
             //viewClass = MessageView;
             viewClass = ThreadView;
-            subview = new viewClass({ model : new Curie.Models.Thread().withMessages([obj])});
+            subview = new viewClass({ model : new Curie.Models.Thread().withMessages([obj]) });
         } else if (objType == Curie.Models.Thread) {
             viewClass = ThreadView;
         } else if (objType == Curie.Models.Draft) {
@@ -62,6 +65,8 @@ Curie.Controllers.Layout.Basic = function () {
         } else {
             popupView.hide().render(subview);
         }
+
+        curie.state.set("localHotkeysKeyListener", subview);
     }
 
     var updateTitle = function() {

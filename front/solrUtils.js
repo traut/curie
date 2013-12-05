@@ -95,5 +95,6 @@ module.exports = {
     getMessage : getMessage,
     indexMessage : indexMessage,
     updateMessage : updateMessage,
-    deleteMessage : deleteMessage
+    deleteMessage : deleteMessage,
+    escape : _escape
 }

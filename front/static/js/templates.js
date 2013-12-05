@@ -106,6 +106,73 @@ function program1(depth0,data) {
   buffer += "\n</div>\n<button class=\"btn\">Load more</button>\n\n";
   return buffer;
   });
+templates['contacts'] = template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); partials = this.merge(partials, Handlebars.partials); data = data || {};
+  var buffer = "", stack1, self=this, functionType="function", escapeExpression=this.escapeExpression;
+
+function program1(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "\n    <div id=\"contact-";
+  if (stack1 = helpers.id) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\" class=\"row packGroup asRow\" onClick=\"javascript:window.curie.state.trigger('contact', '";
+  if (stack1 = helpers.value) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.value; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "');\">\n        <div class=\"pull-right counters\"><span class=\"unread ";
+  stack1 = helpers.unless.call(depth0, depth0.unread, {hash:{},inverse:self.noop,fn:self.program(2, program2, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\">";
+  if (stack1 = helpers.unread) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.unread; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</span> <span class=\"";
+  stack1 = helpers.unless.call(depth0, depth0.unread, {hash:{},inverse:self.noop,fn:self.program(2, program2, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\"></span></div>\n        <span class=\"lead\">";
+  if (stack1 = helpers.value) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.value; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</span>\n        ";
+  stack1 = helpers.each.call(depth0, depth0.messages, {hash:{},inverse:self.noop,fn:self.program(4, program4, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n\n        ";
+  stack1 = helpers['if'].call(depth0, depth0.thereIsMore, {hash:{},inverse:self.noop,fn:self.program(6, program6, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n    </div>\n    ";
+  return buffer;
+  }
+function program2(depth0,data) {
+  
+  
+  return "hide";
+  }
+
+function program4(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "\n        ";
+  stack1 = self.invokePartial(partials.messageRow, 'messageRow', depth0, helpers, partials, data);
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n        ";
+  return buffer;
+  }
+
+function program6(depth0,data) {
+  
+  
+  return "\n        <p class=\"text-center\">&hellip;</p>\n        ";
+  }
+
+  buffer += "<div class=\"packGroups\">\n    ";
+  stack1 = helpers.each.call(depth0, depth0.contacts, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n</div>\n";
+  return buffer;
+  });
 templates['pack'] = template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
@@ -199,7 +266,7 @@ function program5(depth0,data) {
   return escapeExpression(stack1);
   }
 
-  buffer += "<a href=\"#new/";
+  buffer += "<a href=\"#p/draft/new/to/";
   if (stack1 = helpers.email) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.email; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
@@ -303,7 +370,98 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div id=\"packBlocks\">\n</div>\n<div class=\"packs\" style=\"padding:10px 0px;\">\n    <label class=\"nav-header\">predefined</label>\n    <ul class=\"nav nav-list\">\n        <li><a href=\"#search/K3JlY2VpdmVkOltOT1cvREFZIFRPIE5PVy9EQVkrMURBWV0%3D\">today</a></li>\n        <li><a href=\"#search/K3JlY2VpdmVkOltOT1cvREFZLTFEQVkgVE8gTk9XL0RBWV0%3D\">yesterday</a></li>\n        <li><a href=\"#search/K3VucmVhZDp0cnVl\">all unread</a></li>\n    </ul>\n</div>\n<ul class=\"nav nav-list packs\">\n    <li id=\"newMessageLi\"><a href=\"#\">new message</a></li>\n</ul>\n<!--\n<div class=\"text-center\">\n    <br/>\n    <div class=\"btn-group\">\n        <button class=\"btn\" name=\"showAs\" data-value=\"LIST\"><i class=\"icon-align-justify\"></i></button>\n        <button class=\"btn\" name=\"showAs\" data-value=\"COMBINED\"><i class=\"icon-th-list\"></i></button>\n        <button class=\"btn\" name=\"showAs\" data-value=\"TILES\"><i class=\"icon-th-large\"></i></button>\n    </div>\n</div>\n-->\n<div class=\"muted text-center alert alert-error hide sidebarInfo\" id=\"errorAlert\"></div>\n<br/>\n<div class=\"muted text-center sidebarInfo\" id=\"accountInfo\"></div>\n<div class=\"muted text-center sidebarInfo\" id=\"lastFetchTime\"></div>\n<div class=\"text-center muted\">Hotkeys help: \"?\"</div>\n";
+  return "<div id=\"packBlocks\">\n</div>\n<div class=\"packs\" style=\"padding:10px 0px;\">\n    <label class=\"nav-header\">predefined</label>\n    <ul class=\"nav nav-list\">\n        <li><a href=\"#search/K3JlY2VpdmVkOltOT1cvREFZIFRPIE5PVy9EQVkrMURBWV0%3D\">today</a></li>\n        <li><a href=\"#search/K3JlY2VpdmVkOltOT1cvREFZLTFEQVkgVE8gTk9XL0RBWV0%3D\">yesterday</a></li>\n        <li><a href=\"#search/K3VucmVhZDp0cnVl\">all unread</a></li>\n    </ul>\n</div>\n<ul class=\"nav nav-list packs\">\n    <li name=\"new-message\"><a href=\"#\">new message</a></li>\n    <li><a href=\"#filters\">filters</a></li>\n</ul>\n\n<!--\n<div class=\"text-center\">\n    <br/>\n    <div class=\"btn-group\">\n        <button class=\"btn\" name=\"showAs\" data-value=\"LIST\"><i class=\"icon-align-justify\"></i></button>\n        <button class=\"btn\" name=\"showAs\" data-value=\"COMBINED\"><i class=\"icon-th-list\"></i></button>\n        <button class=\"btn\" name=\"showAs\" data-value=\"TILES\"><i class=\"icon-th-large\"></i></button>\n    </div>\n</div>\n-->\n<div class=\"muted text-center alert alert-error hide sidebarInfo\" id=\"errorAlert\"></div>\n<br/>\n<div class=\"muted text-center sidebarInfo\" id=\"accountInfo\"></div>\n<div class=\"muted text-center sidebarInfo\" id=\"lastFetchTime\"></div>\n<div class=\"text-center muted\">Hotkeys help: \"?\"</div>\n";
+  });
+templates['filters'] = template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
+  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression, self=this;
+
+function program1(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "\n<h3 class=\"lead\">Filters</h3>\n    <table class=\"table table-striped\">\n        <tr>\n            <th>Label</th>\n            <th>Query</th>\n            <th>Skip inbox</th>\n            <th>&nbsp;</th>\n        </tr>\n        ";
+  stack1 = helpers.each.call(depth0, depth0.filters, {hash:{},inverse:self.noop,fn:self.program(2, program2, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n    </table>\n";
+  return buffer;
+  }
+function program2(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "\n            <tr>\n                <td><a class=\"badge\" href=\"#p/";
+  if (stack1 = helpers.label) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.label; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\">";
+  if (stack1 = helpers.label) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.label; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</a></td>\n                <td><a href=\"#search/";
+  if (stack1 = helpers.encoded_query) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.encoded_query; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\">";
+  if (stack1 = helpers.query) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.query; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</a></td>\n                <td>";
+  stack1 = helpers['if'].call(depth0, depth0.skip_inbox, {hash:{},inverse:self.program(5, program5, data),fn:self.program(3, program3, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "</td>\n                <td class=\"span2\">\n                    ";
+  stack1 = helpers['if'].call(depth0, depth0.rerun, {hash:{},inverse:self.program(9, program9, data),fn:self.program(7, program7, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n                    <button name=\"delete\" data-filter=\"";
+  if (stack1 = helpers.id) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\" class=\"btn btn-small\"><i class=\"icon-trash\"></i></button>\n                </td>\n            </tr>\n        ";
+  return buffer;
+  }
+function program3(depth0,data) {
+  
+  
+  return "yes";
+  }
+
+function program5(depth0,data) {
+  
+  
+  return "no";
+  }
+
+function program7(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "\n                    <button name=\"rerun\" data-filter=\"";
+  if (stack1 = helpers.id) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\" class=\"btn btn-small\" disabled=\"disabled\">Sent</button>\n                    ";
+  return buffer;
+  }
+
+function program9(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "\n                    <button name=\"rerun\" data-filter=\"";
+  if (stack1 = helpers.id) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\" class=\"btn btn-small\">Rerun</button>\n                    ";
+  return buffer;
+  }
+
+function program11(depth0,data) {
+  
+  
+  return "\n<h3 class=\"muted\">No filters defined</h3>\n";
+  }
+
+  stack1 = helpers['if'].call(depth0, depth0.filters, {hash:{},inverse:self.program(11, program11, data),fn:self.program(1, program1, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n\n<br/>\n<form name=\"newFilter\" class=\"well form-horizontal\">\n        <legend>Add a filter</legend>\n        <div class=\"control-group\">\n            <label class=\"control-label\" for=\"inputLabel\">Label name</label>\n            <div class=\"controls\">\n                <input type=\"text\" id=\"inputLabel\" placeholder=\"label\" name=\"label\">\n            </div>\n        </div>\n        <div class=\"control-group\">\n            <label class=\"control-label\" for=\"inputQuery\">Search query</label>\n            <div class=\"controls\">\n                <input type=\"text\" id=\"inputQuery\" placeholder=\"query\" name=\"query\" class=\"input-xlarge\">\n                <button class=\"btn\" name=\"tryQuery\">Try it</button>\n            </div>\n        </div>\n        <div class=\"control-group\">\n            <div class=\"controls\">\n                <label class=\"checkbox\"><input type=\"checkbox\" name=\"skip\"/> Skip inbox</label>\n            </div>\n        </div>\n        <div class=\"control-group\">\n            <div class=\"controls\">\n                <button type=\"submit\" class=\"btn\">Submit</button>\n            </div>\n        </div>\n</form>\n<div id=\"testResults\"></div>\n";
+  return buffer;
   });
 templates['hotkeysModal'] = template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
@@ -313,8 +471,12 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 function program1(depth0,data) {
   
   var buffer = "", stack1;
-  buffer += "\n        <div class=\"span6 actionTypeBlock\">\n            ";
-  stack1 = helpers.each.call(depth0, depth0, {hash:{},inverse:self.noop,fn:self.program(2, program2, data),data:data});
+  buffer += "\n        <div class=\"span4 actionTypeBlock\">\n            <h5>";
+  if (stack1 = helpers.name) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.name; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</h5>\n            ";
+  stack1 = helpers.each.call(depth0, depth0.actions, {hash:{},inverse:self.noop,fn:self.program(2, program2, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\n        </div>\n        ";
   return buffer;
@@ -335,7 +497,7 @@ function program2(depth0,data) {
   }
 
   buffer += "<div class=\"modal-header\">\n    <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">&#215</button>\n    <h3>Hotkeys</h3>\n</div>\n<div class=\"modal-body hotkeysHelp\">\n    <div class=\"row-fluid\">\n        ";
-  stack1 = helpers.each.call(depth0, depth0.actionTypes, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
+  stack1 = helpers.each.call(depth0, depth0.actionGroups, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\n    </div>\n    \n\n</div>\n";
   return buffer;
@@ -408,6 +570,18 @@ function program1(depth0,data) {
 
 function program3(depth0,data) {
   
+  
+  return "selected";
+  }
+
+function program5(depth0,data) {
+  
+  
+  return "marked";
+  }
+
+function program7(depth0,data) {
+  
   var buffer = "", stack1;
   buffer += "\n        <a href=\"#";
   if (stack1 = helpers.url) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
@@ -417,26 +591,26 @@ function program3(depth0,data) {
   return buffer;
   }
 
-function program5(depth0,data) {
+function program9(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\n            <div class=\"span4 emailField\">To:\n            ";
-  stack1 = helpers['if'].call(depth0, depth0.to, {hash:{},inverse:self.noop,fn:self.program(6, program6, data),data:data});
+  stack1 = helpers['if'].call(depth0, depth0.to, {hash:{},inverse:self.noop,fn:self.program(10, program10, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\n            </div>\n        ";
   return buffer;
   }
-function program6(depth0,data) {
+function program10(depth0,data) {
   
   var buffer = "", stack1, stack2, options;
   buffer += "\n                ";
-  options = {hash:{},inverse:self.noop,fn:self.program(7, program7, data),data:data};
+  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
   stack2 = ((stack1 = helpers.commaJoined || depth0.commaJoined),stack1 ? stack1.call(depth0, depth0.to, options) : helperMissing.call(depth0, "commaJoined", depth0.to, options));
   if(stack2 || stack2 === 0) { buffer += stack2; }
   buffer += "\n            ";
   return buffer;
   }
-function program7(depth0,data) {
+function program11(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\n                    ";
@@ -446,7 +620,7 @@ function program7(depth0,data) {
   return buffer;
   }
 
-function program9(depth0,data) {
+function program13(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\n            <div class=\"span4 emailField\">";
@@ -456,13 +630,13 @@ function program9(depth0,data) {
   return buffer;
   }
 
-function program11(depth0,data) {
+function program15(depth0,data) {
   
   var buffer = "";
   return buffer;
   }
 
-function program13(depth0,data) {
+function program17(depth0,data) {
   
   
   return "\n        </a>\n        ";
@@ -475,11 +649,17 @@ function program13(depth0,data) {
     + "\" class=\"row messageRow ";
   stack1 = helpers['if'].call(depth0, depth0.unread, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += " ";
+  stack1 = helpers['if'].call(depth0, depth0.selected, {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += " ";
+  stack1 = helpers['if'].call(depth0, depth0.marked, {hash:{},inverse:self.noop,fn:self.program(5, program5, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\">\n        ";
-  stack1 = helpers['if'].call(depth0, depth0.url, {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data});
+  stack1 = helpers['if'].call(depth0, depth0.url, {hash:{},inverse:self.noop,fn:self.program(7, program7, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\n\n        ";
-  options = {hash:{},inverse:self.program(9, program9, data),fn:self.program(5, program5, data),data:data};
+  options = {hash:{},inverse:self.program(13, program13, data),fn:self.program(9, program9, data),data:data};
   stack2 = ((stack1 = helpers.isOutcoming || depth0.isOutcoming),stack1 ? stack1.call(depth0, depth0, options) : helperMissing.call(depth0, "isOutcoming", depth0, options));
   if(stack2 || stack2 === 0) { buffer += stack2; }
   buffer += "\n\n        <div class=\"span5 subjectField\">";
@@ -487,11 +667,11 @@ function program13(depth0,data) {
   else { stack2 = depth0.subject; stack2 = typeof stack2 === functionType ? stack2.apply(depth0) : stack2; }
   buffer += escapeExpression(stack2)
     + "&nbsp;</div>\n        <div class=\"span3 dateField\">";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
+  options = {hash:{},inverse:self.noop,fn:self.program(15, program15, data),data:data};
   stack2 = ((stack1 = helpers.dateformat || depth0.dateformat),stack1 ? stack1.call(depth0, depth0.received, "HH:mm, dddd, MMM Do", options) : helperMissing.call(depth0, "dateformat", depth0.received, "HH:mm, dddd, MMM Do", options));
   if(stack2 || stack2 === 0) { buffer += stack2; }
   buffer += "</div>\n\n        ";
-  stack2 = helpers['if'].call(depth0, depth0.url, {hash:{},inverse:self.noop,fn:self.program(13, program13, data),data:data});
+  stack2 = helpers['if'].call(depth0, depth0.url, {hash:{},inverse:self.noop,fn:self.program(17, program17, data),data:data});
   if(stack2 || stack2 === 0) { buffer += stack2; }
   buffer += "\n    </div>\n";
   return buffer;
@@ -750,7 +930,7 @@ function program20(depth0,data) {
 function program22(depth0,data) {
   
   
-  return "\n            <button class=\"btn\" aria-hidden=\"true\" name=\"cancel\">Cancel</button>\n            ";
+  return "\n            <button class=\"btn btn-small\" aria-hidden=\"true\" name=\"cancel\">Cancel</button>\n            ";
   }
 
   buffer += "<div class=\"draftView\" >\n    <div class=\"draftBody\">\n        <form class=\"form-horizontal\">\n            <div name=\"editable\" ";
@@ -792,17 +972,20 @@ function program22(depth0,data) {
   buffer += " name=\"body\">";
   stack2 = helpers.each.call(depth0, depth0.body, {hash:{},inverse:self.noop,fn:self.program(18, program18, data),data:data});
   if(stack2 || stack2 === 0) { buffer += stack2; }
-  buffer += "</textarea>\n            </div>\n        </form>\n    </div>\n    <div class=\"draftFooter row-fluid\">\n        <div class=\"modal-footer\">\n            <div class=\"pull-left saved\">\n                <span class=\"muted ";
+  buffer += "</textarea>\n            </div>\n        </form>\n    </div>\n    <div class=\"draftFooter row-fluid ";
+  stack2 = helpers['if'].call(depth0, depth0.embedded, {hash:{},inverse:self.noop,fn:self.program(20, program20, data),data:data});
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\">\n        <div class=\"modal-footer\">\n            <div class=\"pull-left saved\">\n                <span class=\"muted ";
   stack2 = helpers.unless.call(depth0, depth0.received, {hash:{},inverse:self.noop,fn:self.program(20, program20, data),data:data});
   if(stack2 || stack2 === 0) { buffer += stack2; }
   buffer += "\" name=\"title\">Saved: </span><span name=\"value\">";
   options = {hash:{},inverse:self.noop,fn:self.program(5, program5, data),data:data};
   stack2 = ((stack1 = helpers.dateformat || depth0.dateformat),stack1 ? stack1.call(depth0, depth0.received, "HH:mm:SS, dddd, MMM Do", options) : helperMissing.call(depth0, "dateformat", depth0.received, "HH:mm:SS, dddd, MMM Do", options));
   if(stack2 || stack2 === 0) { buffer += stack2; }
-  buffer += "</span>\n            </div>\n            <button class=\"btn btn-danger\" aria-hidden=\"true\" name=\"discard\"><i class=\"icon-trash icon-white\"></i></button>\n            ";
+  buffer += "</span>\n            </div>\n            <button class=\"btn btn-small\" aria-hidden=\"true\" name=\"discard\"><i class=\"icon-trash\"></i></button>\n            ";
   stack2 = helpers.unless.call(depth0, depth0.embedded, {hash:{},inverse:self.noop,fn:self.program(22, program22, data),data:data});
   if(stack2 || stack2 === 0) { buffer += stack2; }
-  buffer += "\n            <button class=\"btn btn-primary\" name=\"send\">Send</button>\n        </div>\n        <!--\n        <div class=\"span4 ";
+  buffer += "\n            <button class=\"btn btn-small\" name=\"send\">Send</button>\n        </div>\n        <!--\n        <div class=\"span4 ";
   stack2 = helpers.unless.call(depth0, depth0.saved, {hash:{},inverse:self.noop,fn:self.program(20, program20, data),data:data});
   if(stack2 || stack2 === 0) { buffer += stack2; }
   buffer += " saved muted\">Saved <span class=\"savedValue\">";

@@ -62,8 +62,7 @@ function parsedAndSolrToEmail(json, doc) {
     return extend(basic, {
         body : json.fields.body,
         attachments : json.fields.attachments,
-
-        draft : (doc.labels.indexOf("draft") > -1)
+        draft : ((doc.labels || []).indexOf("draft") > -1)
     });
 }
 
@@ -81,8 +80,10 @@ function draftToParsed(draft) {
             to : draft.to,
             cc : draft.cc || [],
             bcc : draft.bcc || [],
+            
+            "in-reply-to" : draft.in_reply_to || "",
 
-            references : [],
+            references : draft.references || [],
 
             subject : draft.subject,
 

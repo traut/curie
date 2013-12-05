@@ -14,14 +14,25 @@ Curie.Views.CollectionGeneric = Backbone.View.extend({
         this.collection.on("add reset", this.render, this);
         this.collection.on("sort", this.reorganizeModelViews, this);
 
+        this.on("move", this.moveSelection, this);
+        this.on("action", this.performAction, this);
+
+    },
+
+    detach : function() {
+        this.$el.detach();
+        _.values(this.modelViews).forEach(function(v) {
+            v.cleanMarkings();
+        }, this);
     },
 
     beforeClose : function() {
-        //FIXME: keep up to date
+        //FIXME: keep'em up to date
         this.collection.off("add reset", this.render);
         this.collection.off("sort", this.reorganizeModelViews);
-    },
 
+        this.off(null, null, this);
+    },
 
     getModelsWithoutViews : function() {
         return this.collection.filter(function(model) {
@@ -109,6 +120,50 @@ Curie.Views.CollectionGeneric = Backbone.View.extend({
             this.$(".loadMore").show();
         } else {
             this.$(".loadMore").hide();
+        }
+    },
+    moveSelection : function(move) {
+        console.info("Move " + move + " catched");
+
+        if (["down", "up", "last", "first"].indexOf(move) == -1) {
+            console.info("unknown movement " + move);
+            return;
+        }
+
+        var selected = this.collection.find(function(m) {
+            return this.modelViews[m.id].isSelected();
+        }, this);
+
+        var selectedIndex = this.collection.indexOf(selected);
+
+        if (selected) {
+            this.modelViews[selected.id].unselect();
+        }
+
+        var nextIndex = getNextIndex(selectedIndex, move, this.collection.length);
+
+        var view = this.modelViews[this.collection.at(nextIndex).id];
+        view && view.select();
+    },
+    performAction : function(action) {
+        console.info("Action " + action + " catched");
+        if (["open", "mark"].indexOf(action) == -1) {
+            console.info("unknown action " + action);
+            return;
+        }
+        var selected = this.collection.find(function(m) {
+            return this.modelViews[m.id].isSelected();
+        }, this);
+
+        if (!selected) {
+            console.info("Nothing is selected, can't do '" + action + "'");
+            return;
+        }
+
+        if (action == 'open') {
+            this.modelViews[selected.id].actionOpen();
+        } else if (action == 'mark') {
+            this.modelViews[selected.id].actionMark();
         }
     }
 });

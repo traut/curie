@@ -2,6 +2,10 @@
 Curie.Router = Backbone.Router.extend({
 
     routes : {
+
+        "filters": "showFilters",
+
+        "p/draft/new/to/:email": "showDraftTo",
         "p/draft/new/:draft": "showDraft",
         "p/:pack/t/:thread": "showThread",
         "p/:pack/:message": "showMessage",
@@ -59,7 +63,7 @@ Curie.Router = Backbone.Router.extend({
         return this.navigate(url, navigateOptions);
     },
 
-    navigateToPack : function(instance) {
+    navigateToPack : function(instance, trigger) {
         var url = null;
         if (instance instanceof Curie.Models.Pack) {
             url = this.reverse('showPack', {pack : instance.get("name")});
@@ -69,7 +73,7 @@ Curie.Router = Backbone.Router.extend({
             console.error("Can't navigate to pack", instance);
             return;
         }
-        this.navigate(url, {trigger : true});
+        this.navigate(url, {trigger : trigger});
     },
 
     // views
@@ -103,14 +107,14 @@ Curie.Router = Backbone.Router.extend({
         curie.controllers.layout.showThread(thread);
     },
 
-    showDashboard : function() {
-        console.info("showing dashboard");
-        curie.state.setPackByName(null);
-    },
-
     showDraft : function(draft) {
         curie.state.setPackByName("draft");
         curie.controllers.layout.showDraft(draft);
+    },
+
+    showDraftTo : function(email) {
+        curie.state.setPackByName("draft");
+        curie.controllers.layout.showDraft(null, email);
     },
 
     showSearchDraft : function(encodedquery, draft) {
@@ -121,5 +125,15 @@ Curie.Router = Backbone.Router.extend({
 
     search : function(encodedquery) {
         curie.controllers.layout.showSearchResults(encodedquery);
-    }
+    },
+
+    showDashboard : function() {
+        console.info("showing dashboard");
+        curie.state.setPackByName(null);
+    },
+
+    showFilters : function() {
+        curie.controllers.layout.showFilters();
+    },
+
 });

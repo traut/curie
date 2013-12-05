@@ -1,0 +1,57 @@
+{{#if filters }}
+<h3 class="lead">Filters</h3>
+    <table class="table table-striped">
+        <tr>
+            <th>Label</th>
+            <th>Query</th>
+            <th>Skip inbox</th>
+            <th>&nbsp;</th>
+        </tr>
+        {{#each filters}}
+            <tr>
+                <td><a class="badge" href="#p/{{ label }}">{{ label }}</a></td>
+                <td><a href="#search/{{ encoded_query }}">{{ query }}</a></td>
+                <td>{{#if skip_inbox }}yes{{ else }}no{{/if}}</td>
+                <td class="span2">
+                    {{#if rerun }}
+                    <button name="rerun" data-filter="{{ id }}" class="btn btn-small" disabled="disabled">Sent</button>
+                    {{ else }}
+                    <button name="rerun" data-filter="{{ id }}" class="btn btn-small">Rerun</button>
+                    {{/if}}
+                    <button name="delete" data-filter="{{ id }}" class="btn btn-small"><i class="icon-trash"></i></button>
+                </td>
+            </tr>
+        {{/each}}
+    </table>
+{{ else }}
+<h3 class="muted">No filters defined</h3>
+{{/if }}
+
+<br/>
+<form name="newFilter" class="well form-horizontal">
+        <legend>Add a filter</legend>
+        <div class="control-group">
+            <label class="control-label" for="inputLabel">Label name</label>
+            <div class="controls">
+                <input type="text" id="inputLabel" placeholder="label" name="label">
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="inputQuery">Search query</label>
+            <div class="controls">
+                <input type="text" id="inputQuery" placeholder="query" name="query" class="input-xlarge">
+                <button class="btn" name="tryQuery">Try it</button>
+            </div>
+        </div>
+        <div class="control-group">
+            <div class="controls">
+                <label class="checkbox"><input type="checkbox" name="skip"/> Skip inbox</label>
+            </div>
+        </div>
+        <div class="control-group">
+            <div class="controls">
+                <button type="submit" class="btn">Submit</button>
+            </div>
+        </div>
+</form>
+<div id="testResults"></div>

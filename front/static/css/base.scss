@@ -8,6 +8,12 @@ body {
     filter:alpha(opacity=50); opacity:.50;
 }
 
+@mixin selected($width) {
+    &.selected {
+        border-left: $width solid #0088cc;
+    }
+}
+
 @mixin mutedWithHover {
     @include muted;
     &:hover {
@@ -19,16 +25,50 @@ body {
     padding-left: 0px;
 }
 
-.sidebarNav {
-    padding :  9px 0;
+.sidebar-nav-fixed.sidebarNav {
+    padding : 10px 0px;
     -webkit-overflow-scrolling: touch;
-    padding: 15px 0 30px 30px;
-    border-right: 1px solid #bbb;
+    border-right: 1px solid #ccc;
     box-shadow: 0 0 20px #ccc;
     -webkit-box-shadow: 0 0 20px #ccc;
     -moz-box-shadow: 0 0 20px #ccc;
     height: 100%;
     z-index: 99;
+    .sidebarInfo {
+        padding: 0px 5px;
+    }
+    .packs {
+        li {
+            .loader {
+                float: right;
+                padding: 0px 10px;
+                img {
+                    display: inline;
+                    vertical-align: middle;
+                }
+            }
+            &>a {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+            /*
+            a.selected {
+                border-left: 2px solid #0088cc;
+            }
+            &.active a.selected {
+                border-left: 2px solid white;
+            }
+            */
+            &.active .counters {
+                color: white;
+            }
+        }
+        margin-bottom: 15px;
+        border-right: 0px;
+        border-top-right-radius: 0px;
+        border-bottom-right-radius: 0px;
+    }
+
 }
 
 .sidebar-nav-fixed {
@@ -78,34 +118,6 @@ button.close {
     z-index: 99;
 }
 
-.packs {
-    li {
-        .loader {
-            float: right;
-            padding: 0px 10px;
-            img {
-                display: inline;
-                vertical-align: middle;
-            }
-        }
-        /*
-        a.selected {
-            border-left: 2px solid #0088cc;
-        }
-        &.active a.selected {
-            border-left: 2px solid white;
-        }
-        */
-        &.active .counters {
-            color: white;
-        }
-    }
-    margin-bottom: 15px;
-    border-right: 0px;
-    border-top-right-radius: 0px;
-    border-bottom-right-radius: 0px;
-}
-
 .unread {
     font-weight: 800;
     color: black;
@@ -138,9 +150,7 @@ button.close {
             font-weight: normal;
         }
     }
-    &.selected {
-        border-left: 2px solid #0088cc;
-    }
+    @include selected(2px);
     &.marked {
         text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
         background-color: #fcf8e3;
@@ -181,29 +191,69 @@ button.close {
     border-radius: 4px;
 }
 
+.message {
+    .body-text {
+        overflow-x: auto;
+    }
+    .messageHeader {
+        .date {
+            margin-left: 10px;
+        }
+        span.headerRow {
+            @include muted;
+        }
+        a.email {
+            color: inherit;
+        }
+    }
+
+    a.showQuote {
+        cursor: pointer;
+    }
+
+    .quoted {
+        color: #999999;
+        margin-left: 10px;
+        padding-left: 10px;
+        border-left: 1px solid #aaa;
+    }
+}
 
 .threadView {
     .message {
         margin: 0px 0px 10px;
         padding: 10px;
-        border-radius: 5px;
         &:nth-child(odd) {
             background-color: #FCFAEE;
         }
         &:nth-child(even) {
             background-color: #f9f9f9;
         }
+        @include selected(1px);
     }
 }
 
 .threadRow {
     border-top: thick double #ddd;
-    border-left: thick double #ddd;
+    border-left: thin solid #ddd;
     border-right: thin solid #ddd;
     border-bottom: thin solid #ddd;
     .messageRow {
         border: 0px;
         margin: 0px;
+    }
+    @include selected(2px);
+    &.marked {
+        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+        border-top: thick double #fbeed5;
+        border-left: thin double #fbeed5;
+        .messageRow {
+            background-color: #fcf8e3;
+        }
+    }
+    &.marked.selected {
+        border-left: 2px double #0088cc;
+        border-top: thick double #fbeed5;
     }
 }
 
@@ -219,15 +269,18 @@ button.close {
 }
 
 .packGroups {
-    padding-top: 9px;
-    [class*="span"] {
-        min-height: 0px;
-        vertical-align: middle;
-    }
+    box-shadow: 0 0 20px #cccccc;
+    -webkit-box-shadow: 0 0 20px #cccccc;
+    -moz-box-shadow: 0 0 20px #cccccc;
+
     .packGroup {
-        cursor : pointer;
+        cursor: pointer;
         .counters {
             padding: 3px;
+        }
+        .lead {
+            font-size: 15px;
+            line-height: 24px;
         }
         .sumCount {
             bottom: 5px;
@@ -235,8 +288,6 @@ button.close {
             position: absolute;
             right: 5px;
             padding-right: 5px;
-        }
-        .messageRow {
         }
         .rightBottom {
             padding: 10px 0px;
@@ -250,7 +301,6 @@ button.close {
         }
         padding: 5px;
         position: relative;
-        @include shadowed;
     }
 }
 .groupView {
@@ -258,6 +308,7 @@ button.close {
 }
 
 .hotkeysHelp {
+    padding-top: 0px;
     .actionTypeBlock {
         margin-left: 0px;
         .keyVal {
@@ -273,7 +324,7 @@ button.close {
 
 .draftView {
     .draftBody {
-        padding: 15px 15px 0px 0px;
+        padding: 15px 15px 0px 10px;
         form {
             margin: 0px;
             .control-group {
@@ -296,11 +347,15 @@ button.close {
     .draftFooter {
         .modal-footer {
             border-top: 0px;
+            padding: 5px;
+            margin-left: 10px;
+            background-color: white;
         }
         .saved {
             padding-top: 3px;
         }
     }
+    @include selected(1px);
 }
 
 .draftPopup {
@@ -380,32 +435,6 @@ button.close {
 
         display:none;
 
-        .messageHeader {
-            .date {
-                margin-left: 10px;
-            }
-            span.headerRow {
-                @include muted;
-            }
-            a.email {
-                color: inherit;
-            }
-        }
-
-        a.showQuote {
-            cursor: pointer;
-        }
-
-        .body-text {
-            overflow-x: auto;
-        }
-
-        .quoted {
-            color: #999999;
-            margin-left: 10px;
-            padding-left: 10px;
-            border-left: 1px solid #aaa;
-        }
     }
 }
 
@@ -425,6 +454,23 @@ button.close {
     }
 }
 
+
+.filters {
+    .query {
+        font-family: "Courier New" Courier monospace;
+        a {
+            text-decoration: none;
+        }
+    }
+    form {
+        padding: 5px 15px;
+        .control-group {
+            margin: 0px 0px 10px;
+        }
+    }
+}
+
+
 @media (max-width: 767px) {
     #loginModal.modal {
         left: 50%;
@@ -435,6 +481,13 @@ button.close {
     width: 800px;
     margin-left: -400px;
     margin-right: -400px;
+}
+@media (max-width: 767px) {
+    #hotkeysModal {
+        margin-left: auto;
+        margin-right: auto;
+        width: auto;
+    }
 }
 
 
