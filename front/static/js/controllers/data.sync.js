@@ -21,7 +21,7 @@ Curie.Controllers.Data.Sync = function () {
         console.info("Syncing " + packs.length + " packs");
 
         packs.forEach(function(p) {
-            p.fetchMessages({ update: true });
+            p.fetchMessages();
         });
     }
 

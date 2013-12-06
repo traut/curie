@@ -21,6 +21,9 @@ var WrappedRowView = Backbone.View.extend({
     isSelected : function() {
         return this.wrappedView.isSelected();
     },
+    isMarked : function() {
+        return this.wrappedView.isMarked();
+    },
     select : function() {
         return this.wrappedView.select();
     },
@@ -84,6 +87,9 @@ var MessageRowView = Backbone.View.extend({
     isSelected : function() {
         return this.selected;
     },
+    isMarked : function() {
+        return this.marked;
+    },
     toggleMark : function() {
         this.marked = !this.marked;
         return this.$(".messageRow").toggleClass("marked");
@@ -101,8 +107,6 @@ var MessageView = Backbone.View.extend({
         //this.model.on("change", this.render, this);
     },
     render : function() {
-        console.info("rendering message " + this.model.id);
-
         var data = this.model.toJSON();
         prepareBodyBlocks(data, true);
 
@@ -130,16 +134,19 @@ var MessageView = Backbone.View.extend({
         });
     },
     showBodyType : function(type) {
-        _.each($("div.body", this.$el), function(b) {
+        _.each(this.$(".body"), function(b) {
             var body = $(b);
             if (body.data("type") == type) {
                 body.show();
+                if (type == 'html') {
+                    loadAndShowHTML(body, this.$("pre"));
+                }
             } else {
                 body.hide();
             }
         });
-        if ($("div.body", this.$el).length == 1) {
-            $("div.body", this.$el).show();
+        if (this.$(".body").length == 1) {
+            this.$(".body").show();
         }
     },
     deleteMessageForever : function(e) {

@@ -5,7 +5,7 @@ Curie.Controllers.Data.Packs = function () {
 
     var packs = {
         dynamic : new Curie.Models.Packs([], { url : '/packs', }),
-        predefined : new Curie.Models.Packs([ inboxPack, draftPack ], { urlRoot : '/packs'})
+        predefined : new Curie.Models.Packs([ inboxPack, draftPack ])
     }
 
     _.forEach(packs, function(packList, key) {
@@ -14,8 +14,6 @@ Curie.Controllers.Data.Packs = function () {
 
     packs.predefined.fetch = function(options) {
         packs.predefined.map(function(p) {
-            p.urlRoot = '/packs';
-            p.fetch();
         });
         if (options && options.success) {
             options.success();
@@ -42,7 +40,7 @@ Curie.Controllers.Data.Packs = function () {
 
                     packList.each(function(pack) {
                         curie.controllers.layout.createPackView(pack);
-                        pack.fetchMessages({ update: true });
+                        pack.fetchMessages();
                     });
 
                     fetchingDone();
@@ -67,7 +65,7 @@ Curie.Controllers.Data.Packs = function () {
     curie.state.on("connection:established", refetchPacks);
 
     this.getPacks = function() {
-        return packs;
+        return [packs.predefined, packs.dynamic];
     }
 }
 

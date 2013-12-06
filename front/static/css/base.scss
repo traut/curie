@@ -130,6 +130,7 @@ button.close {
     &:after {
         content: ">";
     }
+    font-weight: normal;
 }
 
 .muted {
@@ -174,8 +175,8 @@ button.close {
         }
     }
     .subjectField {
-        overflow: hidden;
-        white-space: pre-wrap;
+        overflow-x: hidden;
+        white-space: nowrap;
     }
     [class*="span"] {
         min-height: 0px;
@@ -191,20 +192,26 @@ button.close {
     border-radius: 4px;
 }
 
+.messageHeader {
+    .date {
+        margin-left: 10px;
+    }
+    span.headerRow {
+        @include muted;
+    }
+    a.email {
+        color: inherit;
+    }
+}
+
 .message {
+    iframe.body {
+        border: 0px;
+        width: 100%;
+
+    }
     .body-text {
         overflow-x: auto;
-    }
-    .messageHeader {
-        .date {
-            margin-left: 10px;
-        }
-        span.headerRow {
-            @include muted;
-        }
-        a.email {
-            color: inherit;
-        }
     }
 
     a.showQuote {

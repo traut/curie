@@ -86,7 +86,6 @@ Curie.Models.Messages = Backbone.Collection.extend({
             return newMessages;
         }
     },
-    
 }, { typeName : "Messages" });
 
 
@@ -123,14 +122,10 @@ Curie.Models.Thread = Backbone.Model.extend({
 
 
 Curie.Models.PagedMessagesWrapper = Backbone.Model.extend({
-    page : 0,
-    total : 0,
     initialize : function() {
-        this.messages = new Curie.Models.Messages();
         this.ctx = {};
-    },
-    fetchMessages : function() {
-        return this.fetch({update : true});
+        this.page = 0;
+        this.accumulator = {};
     },
     fetch : function(options) {
         _.extend(this.ctx, {
@@ -146,40 +141,52 @@ Curie.Models.PagedMessagesWrapper = Backbone.Model.extend({
         return Curie.Models.Messages.prototype.parse(docs);
     },
     parse : function(response) {
-        if (response) {
-            if (response.docs) {
-                this.messages.add(this.parseMessages(response.docs));
-            }
-            this.page = response.page;
-            this.total = response.total;
+        if (!response) {
+            return;
         }
+
+        this.page = response.page;
+
+        var messages = (response && response.docs) ? this.parseMessages(response.docs) : [];
+        this.get("messages").add(messages).sort();
+        response.messages = this.get("messages");
+
+        this.accumulator[this.page] = response.size;
+
         return response;
+    },
+    getLoadedSize : function() {
+        return _.values(this.accumulator).reduce(function(a, b) {
+            return a + b;
+        }, 0);
     }
 });
 
 
 Curie.Models.Pack = Curie.Models.PagedMessagesWrapper.extend({
+    urlRoot : "/packs",
     defaults : {
         id : null,
         name : null,
         unread : null,
+        total : 0,
+        size : 0,
+        messages : null,
     },
     initialize : function() {
         Curie.Models.PagedMessagesWrapper.prototype.initialize.apply(this, arguments);
-        this.messages.url = '/packs/' + this.get("name") + '/messages';
-        this.total = this.get("size");
+        this.set("messages", new Curie.Models.Messages());
+        this.ctx.light = true;
+
     },
     fetchMessages : function(options) {
-        this.messages.ctx = {
-            page : this.page
-        };
-
+        this.ctx.light = false;
         options = options || {};
         _.extend(options, {
             update : true,
             extend : (this.page != 0)
         });
-        return this.messages.fetch(options);
+        return this.fetch(options);
     },
 }, { typeName : "Pack" });
 
@@ -189,12 +196,14 @@ Curie.Models.SearchResults = Curie.Models.PagedMessagesWrapper.extend({
     defaults : {
         id : null,
         query : null,
-        size : 0,
         unread : null,
         name : "search",
+        total : 0,
+        messages : null
     },
     initialize: function() {
         Curie.Models.PagedMessagesWrapper.prototype.initialize.apply(this, arguments);
+        this.set("messages", new Curie.Models.Messages());
 
         if (this.get("query")) {
             var query = this.get("query");

@@ -31,7 +31,7 @@ def run_filters(account_hash, message_id, query_label_pairs):
 
     for query, label, _skip_inbox in query_label_pairs:
 
-        caged_query = "+id:%s +(%s) +account:%s -labels:%s" % (message_id, query, account_hash, solr_escape(label))
+        caged_query = '+id:%s +(%s) +account:%s -labels:"%s"' % (message_id, query, account_hash, solr_escape(label))
 
         results = solrMessages.select(caged_query, fields="id", score=False, rows=ROWS).results
 

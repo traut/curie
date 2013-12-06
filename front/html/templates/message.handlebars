@@ -29,9 +29,18 @@
         </div>
 
 
-
         {{#each _body }}
-            <div class="body body-{{ type }} {{#if hidden }}hide{{/if }}" data-type="{{ type }}">{{{ value }}}</div>
+            {{#if isHtml }}
+                <pre class="hide" id="pre-{{ id }}">{{ value }}</pre>
+                <iframe data-type="{{ type }}" id="body-{{ id }}" class="body body-{{ type }} {{#if hidden }}hide{{/if }}"></iframe>
+                <script>
+                    {{#unless hidden }}
+                    loadAndShowHTML($("#body-{{ id }}"), $("pre#pre-{{ id }}"));
+                    {{/unless }}
+                </script>
+            {{ else }}
+                <div class="body body-{{ type }} {{#if hidden }}hide{{/if }}" data-type="{{ type }}">{{{ value }}}</div>
+            {{/if}}
         {{/each }}
 
         {{ attachment }}

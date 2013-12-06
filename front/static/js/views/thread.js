@@ -6,6 +6,9 @@ var ThreadRowView = Backbone.View.extend({
         this.model.on("remove", this.remove, this);
         this.model.get("messages").on("add remove sort", this.render, this);
 
+        this.selected = false;
+        this.marked = false;
+
     },
     render : function() {
 
@@ -32,16 +35,21 @@ var ThreadRowView = Backbone.View.extend({
         this.close();
     },
     select : function() {
+        this.selected = true;
         updateElementClass(this.$(".threadRow"), true, "selected");
         if (!elementInViewport(this.$el[0])) {
             $('html, body').animate({scrollTop : this.$el.offset().top - 200}, 10);
         }
     },
     unselect : function() {
+        this.selected = false;
         return updateElementClass(this.$(".threadRow"), false, "selected");
     },
     isSelected : function() {
-        return this.$(".threadRow").hasClass("selected");
+        return this.selected;
+    },
+    isMarked : function() {
+        return this.marked;
     },
     toggleMark : function() {
         return this.$(".threadRow").toggleClass("marked");

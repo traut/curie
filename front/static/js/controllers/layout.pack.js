@@ -9,12 +9,12 @@ Curie.Controllers.Layout.Pack = function () {
         if (model instanceof Curie.Models.SearchResults) {
             _view = new Curie.Views.SearchResults({
                 model : model,
-                collection : model.messages,
+                collection : model.get("messages"),
             });
         } else {
             _view = views[model.cid] = new Curie.Views.Pack({
                 model : model,
-                collection : model.messages,
+                collection : model.get("messages")
             });
         };
         console.info("Pack view for '" + model.get("name") + "' created");

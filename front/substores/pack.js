@@ -9,73 +9,94 @@ var isodate = require("isodate"),
 
 var log = utils.getLogger("store.pack");
 
+var getMessagePreviews = function(accountHash, pack, page, callback) {
+
+    log.info("Searching for pack=" + pack + ", page=" + page + ", hash=" + accountHash);
+
+    function getThreads(messages) {
+        return messages.filter(function(m) {
+            return m.thread;
+        });
+    }
+
+    queryForLabel(accountHash, pack, page, function(err, docs, found) {
+        if (err) {
+            callback(err, []);
+            return;
+        }
+        var msgs = [];
+        var batchSize = 0;
+        if (docs && docs.length > 0) {
+            msgs = docs.map(converter.solrToEmailPreview);
+            msgs = utils.mergeIntoThreads(msgs);
+
+            batchSize = docs.length;
+        }
+
+
+        var threadIds = getThreads(msgs).map(function(m) {
+            return m.id;
+        });
+
+        if (threadIds.length == 0) {
+            callback(null, msgs, found, batchSize);
+            return;
+        };
+
+        var query = '+labels:* ' + solrUtils.accessControl(accountHash);
+        solrUtils.query(query, {
+            facet : true,
+            'facet.query' : threadIds.map(function(id) { return "threads:" + id; }), 
+            rows : 0,
+        }, function(err, results) {
+            var counts = results.facet_counts.facet_queries;
+            getThreads(msgs).forEach(function(t) {
+                t.length = counts["threads:" + t.id];
+            });
+            callback(null, msgs, found, batchSize);
+        });
+    });
+}
 
 PackStore = function() {
     return {
-        getMessagePreviews : function(handshake, options, callback) {
-            var pack = options.pack,
-                hash = handshake.session.user.hash,
-                page = options.ctx.page || 0;
-
-            log.info("Searching for pack=" + pack + ", page=" + page + ", hash=" + hash);
-
-            function getThreads(messages) {
-                return messages.filter(function(m) {
-                    return m.thread;
-                });
-            }
-
-            queryForLabel(hash, pack, page, function(err, docs) {
-                if (err) {
-                    callback(err, []);
-                    return;
-                }
-                var msgs = [];
-                if (docs && docs.length > 0) {
-                    msgs = docs.map(converter.solrToEmailPreview);
-                    msgs = utils.mergeIntoThreads(msgs);
-                }
-
-                var threadIds = getThreads(msgs).map(function(m) {
-                    return m.id;
-                });
-
-                if (threadIds.length == 0) {
-                    callback(null, msgs);
-                    return;
-                };
-
-                var query = '+labels:*' + solrUtils.accessControl(hash);
-                solrUtils.query(query, {
-                    facet : true,
-                    'facet.query' : threadIds.map(function(id) { return "threads:" + id; }), 
-                    rows : 0,
-                }, function(err, results) {
-                    var counts = results.facet_counts.facet_queries;
-                    getThreads(msgs).forEach(function(t) {
-                        t.length = counts["threads:" + t.id];
-                    });
-                    callback(null, msgs);
-                });
-
-            });
-        },
         getPack : function(handshake, options, callback) {
             var hash = handshake.session.user.hash,
-                pack = options.pack;
+                pack = options.pack,
+                light = options.ctx.light,
+                page = options.ctx.page || 0;
 
             solrUtils.query('+labels:"' + pack + '" ' + solrUtils.accessControl(hash), {
                 rows: 0,
                 facet: true,
                 'facet.field' : "unread"
             }, function(err, results) {
-                console.info(results.facet_counts.facet_fields.unread);
                 var unreadsMap = utils.flatToDict(results.facet_counts.facet_fields.unread);
-                callback(null, {
+                var packObj = {
                     id : pack,
                     name : pack,
+                    page : page,
+                    size : 0,
                     unread : unreadsMap["true"]
-                });
+                };
+                if (light) {
+                    callback(null, packObj);
+                    return;
+                } else {
+                    log.info("Getting messages for pack=" + pack + ", account=" + hash + ", page=" + page);
+                    getMessagePreviews(hash, pack, page, function(err, msgs, total, batchSize) {
+                        if (err) {
+                            log.error("Error while getting messages " + err);
+                            callback(err, null);
+                            return;
+                        }
+                        packObj.docs = msgs;
+                        packObj.total = total;
+                        packObj.size = batchSize;
+                        callback(null, packObj);
+                    });
+                }
+
             });
         },
         getPacks : function(handshake, options, callback) {
@@ -116,7 +137,7 @@ PackStore = function() {
                         return;
                     }
                     packs.push({
-                        id : crypto.createHash('md5').update(key).digest("hex"),
+                        id : key,
                         name : key,
                         unread : unreadsMap[key]
                     });
@@ -209,7 +230,7 @@ function queryForLabel(hash, label, page, callback){
             return;
         }
         log.info("query=" + query + ", start=" + start + ", amount=" + amount + ", results.length=" + results.response.docs.length);
-        callback(null, results.response.docs);
+        callback(null, results.response.docs, results.response.numFound);
     });
 }
 

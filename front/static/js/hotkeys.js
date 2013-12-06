@@ -90,6 +90,12 @@ var hotkeys = {
                 curie.state.get("localHotkeysKeyListener").trigger("action", "mark");
             }
         },
+        'D D' : {
+            doc : 'Delete marked messages forever',
+            action : function() {
+                curie.state.get("localHotkeysKeyListener").trigger("action", "delete forever");
+            }
+        },
         'g g' : {
             doc : 'Select the latest message',
             action : function() {

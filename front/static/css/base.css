@@ -77,10 +77,12 @@ button.close {
   font-weight: 800;
   color: black; }
 
-.emailWithBraces:before {
-  content: "<"; }
-.emailWithBraces:after {
-  content: ">"; }
+.emailWithBraces {
+  font-weight: normal; }
+  .emailWithBraces:before {
+    content: "<"; }
+  .emailWithBraces:after {
+    content: ">"; }
 
 .muted {
   font-weight: normal;
@@ -128,21 +130,25 @@ button.close {
       filter: alpha(opacity=50);
       opacity: .50; }
   .messageRow .subjectField {
-    overflow: hidden;
-    white-space: pre-wrap; }
+    overflow-x: hidden;
+    white-space: nowrap; }
   .messageRow [class*="span"] {
     min-height: 0px;
     vertical-align: middle; }
 
-.message .body-text {
-  overflow-x: auto; }
-.message .messageHeader .date {
+.messageHeader .date {
   margin-left: 10px; }
-.message .messageHeader span.headerRow {
+.messageHeader span.headerRow {
   filter: alpha(opacity=50);
   opacity: .50; }
-.message .messageHeader a.email {
+.messageHeader a.email {
   color: inherit; }
+
+.message iframe.body {
+  border: 0px;
+  width: 100%; }
+.message .body-text {
+  overflow-x: auto; }
 .message a.showQuote {
   cursor: pointer; }
 .message .quoted {

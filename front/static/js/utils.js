@@ -84,7 +84,7 @@ function removeTags(html) {
 
 var QUOTE_BLOCK = function() {
     var random = Math.floor(Math.random() * 100000);
-    var label = "[Quoted block]";
+    var label = "- quote -";
     return "<p><a onClick='javascript:$(\"#quote" + random + "\").toggle()' class='showQuote'>" + label + "</a><span id='quote" + random + "' class='hide'>$1</span></p>"
 }
 
@@ -97,8 +97,12 @@ function prepareBodyBlocks(message, preferText) {
         var value = null;
         if (b.type == 'text') {
             value = removeTags(b.value)
-                //.replace(/(^\s*\>+\s*\>*[\s\S]*$)(?=(^[^\>]+$))/mgi, QUOTE_BLOCK());
-                .replace(/(^\s*\>+\s*\>*[\s\S]*$)/mgi, QUOTE_BLOCK())
+                .replace(/(^\s*\>+\s*\>*[\s\S]*$)(?=(^[^\>]+$))/mgi, QUOTE_BLOCK());
+            if (value.indexOf("- quote -") == -1) {
+                value = value
+                    .replace(/(^\s*\>+\s*\>*[\s\S]*$)/mgi, QUOTE_BLOCK())
+            }
+            value = value
                 //.replace(/((\r\n|\n)\s*){3,}/mg, "<br/>")
                 //.replace(/(\r\n|\n)\s*/g, "<br/>");
                 .replace(/(\r\n|\n)\s*/g, "<br/>");
@@ -110,7 +114,8 @@ function prepareBodyBlocks(message, preferText) {
         return {
             type : b.type,
             value : value,
-            hidden : (preferText && b.type != 'text')
+            hidden : (preferText && b.type != 'text'),
+            isHtml : (b.type == 'html')
         }
     });
 
@@ -188,6 +193,13 @@ function getNextIndex(currentIndex, actionType, itemsLength) {
             nextIndex = 0;
     }
     return nextIndex;
+}
+
+function loadAndShowHTML(frame, pre) {
+    frame = frame[0];
+    frame.contentWindow.document.write(pre.text());
+    var newHeight = frame.contentWindow.document.body.scrollHeight;
+    frame.height = newHeight + "px";
 }
 
 function isEmail(email) {

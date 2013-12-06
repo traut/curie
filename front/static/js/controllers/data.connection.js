@@ -71,6 +71,10 @@ Curie.Controllers.Data.Connection = function () {
             }
         });
 
+        socket.on("no-session", function(reason) {
+            curie.state.trigger("logout");
+        });
+
         socket.on("disconnect", function(reason) {
             curie.state.trigger("connection:error", "Disconnect", reason);
         });

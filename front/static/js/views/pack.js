@@ -14,6 +14,8 @@ Curie.Views.CollectionGeneric = Backbone.View.extend({
         this.collection.on("add reset", this.render, this);
         this.collection.on("sort", this.reorganizeModelViews, this);
 
+        this.model.on("change:total", this.updateMoreAvailable, this);
+
         this.on("move", this.moveSelection, this);
         this.on("action", this.performAction, this);
 
@@ -28,8 +30,10 @@ Curie.Views.CollectionGeneric = Backbone.View.extend({
 
     beforeClose : function() {
         //FIXME: keep'em up to date
-        this.collection.off("add reset", this.render);
-        this.collection.off("sort", this.reorganizeModelViews);
+        this.collection.off("add reset", this.render, this);
+        this.collection.off("sort", this.reorganizeModelViews, this);
+
+        this.model.off(null, null, this)
 
         this.off(null, null, this);
     },
@@ -101,7 +105,7 @@ Curie.Views.CollectionGeneric = Backbone.View.extend({
 
             _.extend(renderOptions, {
                 // FIXME: should be dynamically rendered
-                size : this.model.total
+                size : this.model.get("total")
             });
 
             var renderedPack = $(this.options.template(renderOptions));
@@ -115,7 +119,7 @@ Curie.Views.CollectionGeneric = Backbone.View.extend({
     },
 
     updateMoreAvailable : function() {
-        var moreAvailable = (this.collection.length > 0) && (this.model.total > this.collection.length);
+        var moreAvailable = (this.model.get("total") > this.model.getLoadedSize());
         if (moreAvailable) {
             this.$(".loadMore").show();
         } else {
@@ -123,10 +127,9 @@ Curie.Views.CollectionGeneric = Backbone.View.extend({
         }
     },
     moveSelection : function(move) {
-        console.info("Move " + move + " catched");
 
         if (["down", "up", "last", "first"].indexOf(move) == -1) {
-            console.info("unknown movement " + move);
+            console.error("unknown movement " + move);
             return;
         }
 
@@ -147,23 +150,36 @@ Curie.Views.CollectionGeneric = Backbone.View.extend({
     },
     performAction : function(action) {
         console.info("Action " + action + " catched");
-        if (["open", "mark"].indexOf(action) == -1) {
-            console.info("unknown action " + action);
-            return;
-        }
-        var selected = this.collection.find(function(m) {
-            return this.modelViews[m.id].isSelected();
-        }, this);
-
-        if (!selected) {
-            console.info("Nothing is selected, can't do '" + action + "'");
+        if (["open", "mark", "delete forever"].indexOf(action) == -1) {
+            console.error("unknown action " + action);
             return;
         }
 
-        if (action == 'open') {
-            this.modelViews[selected.id].actionOpen();
-        } else if (action == 'mark') {
-            this.modelViews[selected.id].actionMark();
+        if (action == "delete forever") {
+            var toDelete = this.collection.filter(function(m) {
+                return this.modelViews[m.id].isMarked();
+            }, this);
+            if (confirm('Do you really want to delete forever ' + toDelete.length + ' messages?')) {
+                toDelete.map(function(m) {
+                    m.destroy();
+                });
+            }
+
+        } else {
+            var selected = this.collection.find(function(m) {
+                return this.modelViews[m.id].isSelected();
+            }, this);
+
+            if (!selected) {
+                console.info("Nothing is selected, can't do '" + action + "'");
+                return;
+            }
+
+            if (action == 'open') {
+                this.modelViews[selected.id].actionOpen();
+            } else if (action == 'mark') {
+                this.modelViews[selected.id].actionMark();
+            }
         }
     }
 });
@@ -184,7 +200,6 @@ Curie.Views.Pack = Curie.Views.CollectionGeneric.extend({
         Curie.Views.CollectionGeneric.prototype.initialize.apply(this, [options]);
     },
     loadNextPage : function() {
-        console.info("Loading next page");
         this.model.nextPage();
     }
 });
