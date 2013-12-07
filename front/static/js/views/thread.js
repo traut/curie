@@ -4,7 +4,7 @@ var ThreadRowView = Backbone.View.extend({
     initialize : function() {
         this.hashUrl = this.options.rootUrl + "/t/" + this.model.id;
         this.model.on("remove", this.remove, this);
-        this.model.get("messages").on("add remove sort", this.render, this);
+        this.model.on("change:last", this.render, this);
 
         this.selected = false;
         this.marked = false;
@@ -23,7 +23,6 @@ var ThreadRowView = Backbone.View.extend({
             template = Handlebars.templates.threadRow;
             modelData = this.model.toJSON();
         }
-
         var data = _.extend(modelData, {
             url : this.hashUrl,
         });
@@ -36,14 +35,14 @@ var ThreadRowView = Backbone.View.extend({
     },
     select : function() {
         this.selected = true;
-        updateElementClass(this.$(".threadRow"), true, "selected");
+        updateElementClass(this.$(">.messageRow"), true, "selected");
         if (!elementInViewport(this.$el[0])) {
             $('html, body').animate({scrollTop : this.$el.offset().top - 200}, 10);
         }
     },
     unselect : function() {
         this.selected = false;
-        return updateElementClass(this.$(".threadRow"), false, "selected");
+        return updateElementClass(this.$(">.messageRow"), false, "selected");
     },
     isSelected : function() {
         return this.selected;
@@ -52,7 +51,7 @@ var ThreadRowView = Backbone.View.extend({
         return this.marked;
     },
     toggleMark : function() {
-        return this.$(".threadRow").toggleClass("marked");
+        return this.$(">.messageRow").toggleClass("marked");
     },
 });
 
@@ -71,9 +70,7 @@ var ThreadView = Backbone.View.extend({
         this.on("move", this.moveSelection, this);
         this.on("action", this.performAction, this);
 
-        console.info(this.model.get("messages"));
-
-        this.subViews = [];
+        this.subViews = {};
         this.draftView = null;
 
         this.selectedIndex = 0;
@@ -84,7 +81,7 @@ var ThreadView = Backbone.View.extend({
     },
 
     showBodyType : function(type) {
-        this.subViews.map(function(v) {
+        _.values(this.subViews, function(v) {
             v.showBodyType && v.showBodyType(type);
         });
     },
@@ -109,12 +106,10 @@ var ThreadView = Backbone.View.extend({
     },
 
     beforeClose : function() {
-        _.each(this.subViews, function(v) {
+        _.values(this.subViews, function(v) {
             v.$el.remove();
             v.close();
         });
-
-        this.draftView && this.draftView.close();
 
         this.$el.remove();
 
@@ -124,28 +119,35 @@ var ThreadView = Backbone.View.extend({
 
     render : function() {
 
-        _.each(this.subViews, function(v) {
-            v.$el.remove();
-            v.close();
-        });
-
         var messages = this.model.get("messages");
+
+        console.info(messages);
+
+        _.forEach(this.subViews, function(v, key) {
+            if (key == null || !messages.contains(v.model)) {
+                v.$el.remove();
+                v.close();
+            }
+        });
 
         if (messages.length == 0) {
             console.warn("trying to render empty thread view");
             Mousetrap.trigger("esc");
         }
 
-        this.subViews = messages.map(this.createViewForModel, this);
+        messages.forEach(function(m) {
+            if (!this.subViews[m.cid]) {
+                var v = this.createViewForModel(m);
+                this.subViews[m.cid] = v;
+
+                v.render();
+                this.$el.append(v.$el);
+            }
+        }, this);
 
         if (messages.length > 0 && !this.isDraftTheLastOne()) {
             this.addDraftView();
         }
-
-        _.each(this.subViews, function(v) {
-            v.render();
-            this.$el.append(v.$el);
-        }, this);
 
         return this;
     },
@@ -157,11 +159,11 @@ var ThreadView = Backbone.View.extend({
             this.draftView.closeAndRemove();
         }
 
-        this.subViews = _.without(this.subViews, this.draftView);
+        this.subViews = _.omit(this.subViews, [null]);
 
         this.draftView = this.createViewForModel(this.createDraftModel());
 
-        this.subViews.push(this.draftView);
+        this.subViews[null] = this.draftView;
 
         this.draftView.render();
         this.$el.append(this.draftView.$el);
@@ -196,11 +198,19 @@ var ThreadView = Backbone.View.extend({
     },
 
     moveSelection : function(move) {
-        this.subViews[this.selectedIndex].unselect();
-        this.selectedIndex = getNextIndex(this.selectedIndex, move, this.subViews.length);
-        var view = this.subViews[this.selectedIndex];
-        this.subViews[this.selectedIndex].select();
+        var messages = this.model.get("messages");
 
+        var views = messages.map(function(m) {
+            return this.subViews[m.cid];
+        }, this);
+        views.push(this.subViews[null]);
+
+        views[this.selectedIndex].unselect();
+
+        this.selectedIndex = getNextIndex(this.selectedIndex, move, views.length);
+
+        var view = views[this.selectedIndex];
+        view.select();
         if (!elementInViewport(view.$el[0])) {
             $('html, body').animate({scrollTop : view.$el.offset().top - 200}, 10);
         }

@@ -207,14 +207,23 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 function program1(depth0,data) {
   
   var buffer = "", stack1;
+  buffer += "<span title=\"";
   if (stack1 = helpers.name) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.name; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + " <span class=\"emailWithBraces\">";
+    + " &lt;";
   if (stack1 = helpers.email) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.email; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "</span>";
+    + "&gt;\">";
+  if (stack1 = helpers.name) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.name; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</span><!--<span class=\"emailWithBraces\">";
+  if (stack1 = helpers.email) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.email; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</span>-->";
   return buffer;
   }
 
@@ -389,7 +398,7 @@ function program1(depth0,data) {
 function program2(depth0,data) {
   
   var buffer = "", stack1;
-  buffer += "\n            <tr>\n                <td><a class=\"badge\" href=\"#p/";
+  buffer += "\n            <tr>\n                <td><a class=\"label\" href=\"#p/";
   if (stack1 = helpers.label) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.label; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
@@ -543,7 +552,7 @@ function program5(depth0,data) {
   buffer += "\n\n    ";
   stack1 = self.invokePartial(partials.messageRow, 'messageRow', depth0.last, helpers, partials, data);
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "\n\n\n    ";
+  buffer += "\n\n    ";
   stack1 = helpers['if'].call(depth0, depth0.url, {hash:{},inverse:self.noop,fn:self.program(5, program5, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\n</div>\n";
@@ -594,7 +603,7 @@ function program7(depth0,data) {
 function program9(depth0,data) {
   
   var buffer = "", stack1;
-  buffer += "\n            <div class=\"span4 emailField\">To:\n            ";
+  buffer += "\n            <div class=\"span3 emailField\">To:\n            ";
   stack1 = helpers['if'].call(depth0, depth0.to, {hash:{},inverse:self.noop,fn:self.program(10, program10, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\n            </div>\n        ";
@@ -623,7 +632,7 @@ function program11(depth0,data) {
 function program13(depth0,data) {
   
   var buffer = "", stack1;
-  buffer += "\n            <div class=\"span4 emailField\">";
+  buffer += "\n            <div class=\"span3 emailField\">";
   stack1 = self.invokePartial(partials.emailAddress, 'emailAddress', depth0.from, helpers, partials, data);
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "</div>\n        ";
@@ -662,7 +671,7 @@ function program17(depth0,data) {
   options = {hash:{},inverse:self.program(13, program13, data),fn:self.program(9, program9, data),data:data};
   stack2 = ((stack1 = helpers.isOutcoming || depth0.isOutcoming),stack1 ? stack1.call(depth0, depth0, options) : helperMissing.call(depth0, "isOutcoming", depth0, options));
   if(stack2 || stack2 === 0) { buffer += stack2; }
-  buffer += "\n\n        <div class=\"span5 subjectField\">";
+  buffer += "\n\n        <div class=\"span6 subjectField\">";
   if (stack2 = helpers.subject) { stack2 = stack2.call(depth0, {hash:{},data:data}); }
   else { stack2 = depth0.subject; stack2 = typeof stack2 === functionType ? stack2.apply(depth0) : stack2; }
   buffer += escapeExpression(stack2)
@@ -731,7 +740,7 @@ function program8(depth0,data) {
 function program10(depth0,data) {
   
   var buffer = "";
-  buffer += " <a class=\"badge mutedWithHover\" href=\"#p/"
+  buffer += " <a class=\"label mutedWithHover\" href=\"#p/"
     + escapeExpression((typeof depth0 === functionType ? depth0.apply(depth0) : depth0))
     + "\">"
     + escapeExpression((typeof depth0 === functionType ? depth0.apply(depth0) : depth0))

@@ -9,18 +9,22 @@ body {
   padding: 10px 0px;
   -webkit-overflow-scrolling: touch;
   border-right: 1px solid #cccccc;
-  box-shadow: 0 0 20px #cccccc;
-  -webkit-box-shadow: 0 0 20px #cccccc;
-  -moz-box-shadow: 0 0 20px #cccccc;
+  /*
+  box-shadow: 0 0 20px #ccc;
+  -webkit-box-shadow: 0 0 20px #ccc;
+  -moz-box-shadow: 0 0 20px #ccc;
+  */
   height: 100%;
   z-index: 99; }
   .sidebar-nav-fixed.sidebarNav .sidebarInfo {
-    padding: 0px 5px; }
+    padding: 5px; }
   .sidebar-nav-fixed.sidebarNav .packs {
     margin-bottom: 15px;
     border-right: 0px;
     border-top-right-radius: 0px;
     border-bottom-right-radius: 0px; }
+    .sidebar-nav-fixed.sidebarNav .packs .nav-header {
+      font-weight: normal; }
     .sidebar-nav-fixed.sidebarNav .packs li {
       /*
       a.selected {
@@ -61,7 +65,8 @@ button.close {
   .header h1 {
     display: inline;
     vertical-align: middle;
-    line-height: 50px; }
+    line-height: 50px;
+    font-weight: 300; }
   .header .logo {
     width: 50px;
     margin-right: 10px;
@@ -74,7 +79,7 @@ button.close {
   z-index: 99; }
 
 .unread {
-  font-weight: 800;
+  font-weight: 600;
   color: black; }
 
 .emailWithBraces {
@@ -86,49 +91,40 @@ button.close {
 
 .muted {
   font-weight: normal;
-  filter: alpha(opacity=50);
-  opacity: .50; }
-
-.mutedWithHover {
-  filter: alpha(opacity=50);
-  opacity: .50; }
-  .mutedWithHover:hover {
-    filter: alpha(opacity=1);
-    opacity: 1; }
+  color: #bbb;
+  font-weight: 300; }
 
 .messageRow {
-  margin: 5px 0px;
+  margin: 10px 0px;
   padding: 0px 5px;
   line-height: 30px;
-  background-color: rgba(243, 243, 243, 0.85);
-  border: 1px solid white;
+  border: 1px solid #f2f2f2;
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px; }
   .messageRow a {
     color: black; }
-  .messageRow.unread .dateField {
-    font-weight: normal; }
+  .messageRow.unread {
+    border: 1px solid silver; }
   .messageRow.selected {
-    border-left: 2px solid #0088cc; }
+    border-left: 1px solid #0088cc; }
   .messageRow.marked {
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
     background-color: #fcf8e3;
     border: 1px solid #fbeed5; }
-  .messageRow.marked.selected {
-    border-left: 2px solid #0088cc; }
+  .messageRow.marked.selected.selected {
+    border-left: 1px solid #0088cc; }
   .messageRow .dateField {
-    font-weight: normal;
     white-space: nowrap; }
   .messageRow .emailField {
     overflow: hidden;
     white-space: nowrap; }
     .messageRow .emailField .email {
-      filter: alpha(opacity=50);
-      opacity: .50; }
+      color: #bbb;
+      font-weight: 300; }
     .messageRow .emailField .emailWithBraces {
-      filter: alpha(opacity=50);
-      opacity: .50; }
+      color: #bbb;
+      font-weight: 300; }
   .messageRow .subjectField {
     overflow-x: hidden;
     white-space: nowrap; }
@@ -139,10 +135,19 @@ button.close {
 .messageHeader .date {
   margin-left: 10px; }
 .messageHeader span.headerRow {
-  filter: alpha(opacity=50);
-  opacity: .50; }
+  color: #bbb;
+  font-weight: 300; }
 .messageHeader a.email {
   color: inherit; }
+
+a.label {
+  background-color: white;
+  border: 1px solid #f2f2f2;
+  color: inherit;
+  text-shadow: none;
+  font-weight: 400; }
+  a.label:hover {
+    color: black; }
 
 .message iframe.body {
   border: 0px;
@@ -158,34 +163,39 @@ button.close {
   border-left: 1px solid #aaaaaa; }
 
 .threadView .message {
-  margin: 0px 0px 10px;
-  padding: 10px; }
-  .threadView .message:nth-child(odd) {
-    background-color: #FCFAEE; }
-  .threadView .message:nth-child(even) {
-    background-color: #f9f9f9; }
+  margin: 0px 0px 20px;
+  padding: 10px;
+  background-color: #FCFAEE;
+  border-radius: 5px;
+  /*
+  &:nth-child(odd) {
+  }
+  &:nth-child(even) {
+  background-color: #f9f9f9;
+  }
+  */ }
   .threadView .message.selected {
     border-left: 1px solid #0088cc; }
 
 .threadRow {
-  border-top: thick double #dddddd;
-  border-left: thin solid #dddddd;
+  border-top: 3px double #dddddd;
+  border-left: 3px double #dddddd;
   border-right: thin solid #dddddd;
   border-bottom: thin solid #dddddd; }
   .threadRow .messageRow {
     border: 0px;
     margin: 0px; }
   .threadRow.selected {
-    border-left: 2px solid #0088cc; }
+    border-left: 3px double #0088cc; }
   .threadRow.marked {
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
-    border-top: thick double #fbeed5;
-    border-left: thin double #fbeed5; }
+    border-left: 3px double #fbeed5;
+    border-top: 3px double #fbeed5; }
     .threadRow.marked .messageRow {
       background-color: #fcf8e3; }
   .threadRow.marked.selected {
-    border-left: 2px double #0088cc;
-    border-top: thick double #fbeed5; }
+    border-left: 3px double #0088cc !important;
+    border-top: 3px double #fbeed5; }
 
 .packGroups {
   box-shadow: 0 0 20px #cccccc;
@@ -197,9 +207,6 @@ button.close {
     position: relative; }
     .packGroups .packGroup .counters {
       padding: 3px; }
-    .packGroups .packGroup .lead {
-      font-size: 15px;
-      line-height: 24px; }
     .packGroups .packGroup .sumCount {
       bottom: 5px;
       font-size: 18px;
@@ -267,7 +274,7 @@ button.close {
   background-color: rgba(82, 168, 236, 0.2);
   position: fixed;
   bottom: 10px;
-  right: 30px;
+  right: 10px;
   padding: 10px;
   border-radius: 6px; }
   .searchPopup form {
@@ -303,7 +310,6 @@ button.close {
     margin: 5px;
     width: 95%;
     background-color: white;
-    z-index: 9999;
     position: absolute;
     top: 0;
     left: 2%;
@@ -351,5 +357,8 @@ button.close {
   background-color: white;
   /*background: url(http://polzunov.com/background.gif);*/
   opacity: 0.8; }
+
+.lead {
+  font-weight: 400; }
 
 /* --- Bootstrap improvements */

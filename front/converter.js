@@ -102,7 +102,7 @@ function draftToParsed(draft) {
 function draftToDoc(draft) {
 
     function pluck(list, field) {
-        return list.map(function(a) { return a[field]; });
+        return list.map(function(a) { return a[field] || null; });
     }
 
     var doc = {
@@ -129,7 +129,7 @@ function draftToDoc(draft) {
         "bcc.name" : pluck(draft.bcc, 'name'),
         "bcc.json" : JSON.stringify(draft.bcc),
 
-        attachment : draft.attachments,
+        attachment : draft.attachments || [],
 
         subject : draft.subject,
         body : pluck(draft.body, 'value'),

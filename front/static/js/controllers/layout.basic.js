@@ -52,6 +52,7 @@ Curie.Controllers.Layout.Basic = function () {
         }
 
         subview = subview || new viewClass({ model : obj });
+        subview.render();
         if (objId) {
             //popupView.hide();
             obj.fetch({

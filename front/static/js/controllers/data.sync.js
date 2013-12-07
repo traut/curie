@@ -1,5 +1,5 @@
 Curie.Controllers.Data.Sync = function () {
-    var SYNC_INTERVAL = 10000 * 1000; // 10 secs
+    var SYNC_INTERVAL = 1000 * 1000; // 10 secs
 
     var timer = null;
 

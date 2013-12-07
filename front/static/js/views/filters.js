@@ -85,7 +85,7 @@ Curie.Views.FiltersView = Backbone.View.extend({
                 update: true,
                 success : function() {
                     console.info(results);
-                    var view = new Curie.Views.SearchResults({ collection : results.messages, model : results});
+                    var view = new Curie.Views.SearchResults({ collection : results.get("messages"), model : results});
                     view.render();
                     self.$("#testResults").html(view.$el);
                 }

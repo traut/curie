@@ -111,6 +111,8 @@ Curie.Models.Thread = Backbone.Model.extend({
     },
     parse : function(response) {
 
+        console.info(response.id, response.last);
+
         this.get("messages").add(response.messages.map(parseMessage)).sort();
 
         return _.extend(response, {
@@ -132,6 +134,9 @@ Curie.Models.PagedMessagesWrapper = Backbone.Model.extend({
             page : this.page
         });
         return Backbone.Model.prototype.fetch.call(this, options);
+    },
+    fetchMessages : function() {
+        return this.fetch();
     },
     nextPage : function() {
         this.page += 1;
@@ -247,6 +252,8 @@ Curie.Models.ChatHistory = Curie.Models.PagedMessagesWrapper.extend({
     },
     initialize: function() {
         Curie.Models.PagedMessagesWrapper.prototype.initialize.apply(this, arguments);
+
+        this.set("messages", new Curie.Models.Messages());
 
         if (this.get("query")) {
             var query = this.get("query");

@@ -29,7 +29,7 @@ ThreadStore = function() {
                     var thread = {
                         thread : tid,
                         messages : fullMessages,
-                        last : fullMessages[fullMessages.length - 1]
+                        last : converter.solrToEmailPreview(messages[messages.length - 1])
                     }
                     callback(null, thread);
                     log.info("Thread " + tid + " with " + fullMessages.length + " messages has been sent");

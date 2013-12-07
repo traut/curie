@@ -12,9 +12,10 @@ var PopupView = Backbone.View.extend({
         this.currentSubview = subview;
 
         this.topOffset =  window.pageYOffset || 35;
-        this.$el.css("top", this.topOffset);
+        var parentOffset = this.$el.parent().offset().top;
+        this.$el.css("top", this.topOffset - parentOffset);
 
-        subview.render();
+        //subview.render();
         this.$(".content").html(subview.$el);
 
         this.$el.show();

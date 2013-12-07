@@ -4,7 +4,7 @@
         {{/if}}
 
         {{#isOutcoming this }}
-            <div class="span4 emailField">To:
+            <div class="span3 emailField">To:
             {{# if to }}
                 {{#commaJoined to}}
                     {{> emailAddress }}
@@ -12,10 +12,10 @@
             {{/if}}
             </div>
         {{ else }}
-            <div class="span4 emailField">{{> emailAddress from }}</div>
+            <div class="span3 emailField">{{> emailAddress from }}</div>
         {{/isOutcoming }}
 
-        <div class="span5 subjectField">{{ subject }}&nbsp;</div>
+        <div class="span6 subjectField">{{ subject }}&nbsp;</div>
         <div class="span3 dateField">{{#dateformat received 'HH:mm, dddd, MMM Do'}}{{/dateformat}}</div>
 
         {{#if url }}

@@ -45,6 +45,7 @@ SearchStore = function() {
                     var response = {
                         page : page,
                         total : results.response.numFound,
+                        size : fullMessages.length,
                         docs : fullMessages,
                     }
                     log.info("Found " + results.response.numFound + " docs, query=" + query);
@@ -91,6 +92,7 @@ SearchStore = function() {
                     query : searchQuery,
                     unread : unreadCounts[true] || 0,
 
+                    size : results.response.docs.length,
                     page : page,
                     total : results.response.numFound,
                     docs : messages,

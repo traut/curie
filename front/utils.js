@@ -207,6 +207,9 @@ function mergeIntoThreads(messages) {
             messages.sort(function(m1, m2) {
                 return (m1.received - m2.received);
             });
+            messages.map(function(m) {
+                console.info(m.id, m.received, m.subject);
+            });
 
             c.last = messages[messages.length - 1]; // in reality it's the last one in current selection
             c.received = c.last.received;

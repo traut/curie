@@ -5,7 +5,9 @@ body {
 }
 
 @mixin muted {
-    filter:alpha(opacity=50); opacity:.50;
+    //filter:alpha(opacity=50); opacity:.50;
+    color: #bbb;
+    font-weight: 300;
 }
 
 @mixin selected($width) {
@@ -17,7 +19,8 @@ body {
 @mixin mutedWithHover {
     @include muted;
     &:hover {
-        filter:alpha(opacity=1); opacity:1;
+        //filter:alpha(opacity=1); opacity:1;
+        color: #555;
     }
 }
 
@@ -29,15 +32,26 @@ body {
     padding : 10px 0px;
     -webkit-overflow-scrolling: touch;
     border-right: 1px solid #ccc;
+    /*
     box-shadow: 0 0 20px #ccc;
     -webkit-box-shadow: 0 0 20px #ccc;
     -moz-box-shadow: 0 0 20px #ccc;
+    */
     height: 100%;
     z-index: 99;
     .sidebarInfo {
-        padding: 0px 5px;
+        padding: 5px;
     }
     .packs {
+
+        margin-bottom: 15px;
+        border-right: 0px;
+        border-top-right-radius: 0px;
+        border-bottom-right-radius: 0px;
+
+        .nav-header {
+            font-weight: normal;
+        }
         li {
             .loader {
                 float: right;
@@ -63,10 +77,6 @@ body {
                 color: white;
             }
         }
-        margin-bottom: 15px;
-        border-right: 0px;
-        border-top-right-radius: 0px;
-        border-bottom-right-radius: 0px;
     }
 
 }
@@ -102,6 +112,7 @@ button.close {
         display: inline;
         vertical-align: middle;
         line-height: 50px;
+        font-weight: 300;
     }
     .logo {
         width : 50px;
@@ -119,7 +130,7 @@ button.close {
 }
 
 .unread {
-    font-weight: 800;
+    font-weight: 600;
     color: black;
 }
 
@@ -138,30 +149,34 @@ button.close {
     @include muted;
 }
 
-.mutedWithHover {
-    @include mutedWithHover;
-}
-
 .messageRow {
+    margin: 10px 0px;
+    padding: 0px 5px;
+    line-height: 30px;
+    //background-color: rgba(243,243,243,.85);
+    //background-color: #F7F7F7;
+    //border: 1px solid #fff;
+    border: 1px solid #F2F2F2;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
     a {
         color: black;
     }
     &.unread {
-        .dateField {
-            font-weight: normal;
-        }
+        border: 1px solid #c0c0c0;
     }
-    @include selected(2px);
+    @include selected(1px);
     &.marked {
         text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
         background-color: #fcf8e3;
         border: 1px solid #fbeed5;
     }
+
     &.marked.selected {
-        border-left: 2px solid #0088cc;
+        @include selected(1px);
     }
     .dateField {
-        font-weight: normal;
         white-space: nowrap;
     }
     .emailField {
@@ -182,14 +197,6 @@ button.close {
         min-height: 0px;
         vertical-align: middle;
     }
-    margin: 5px 0px;
-    padding: 0px 5px;
-    line-height: 30px;
-    background-color: rgba(243,243,243,.85);
-    border: 1px solid #fff;
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    border-radius: 4px;
 }
 
 .messageHeader {
@@ -204,11 +211,21 @@ button.close {
     }
 }
 
+a.label {
+    background-color: white;
+    border: 1px solid #f2f2f2;
+    color: inherit;
+    text-shadow: none;
+    font-weight: 400;
+    &:hover {
+        color: black;
+    }
+}
+
 .message {
     iframe.body {
         border: 0px;
         width: 100%;
-
     }
     .body-text {
         overflow-x: auto;
@@ -228,39 +245,44 @@ button.close {
 
 .threadView {
     .message {
-        margin: 0px 0px 10px;
+        margin: 0px 0px 20px;
         padding: 10px;
+        background-color: #FCFAEE;
+        border-radius: 5px;
+        /*
         &:nth-child(odd) {
-            background-color: #FCFAEE;
         }
         &:nth-child(even) {
-            background-color: #f9f9f9;
+        background-color: #f9f9f9;
         }
+        */
         @include selected(1px);
     }
 }
 
 .threadRow {
-    border-top: thick double #ddd;
-    border-left: thin solid #ddd;
+    border-top: 3px double #ddd;
+    border-left: 3px double #ddd;
     border-right: thin solid #ddd;
     border-bottom: thin solid #ddd;
     .messageRow {
         border: 0px;
         margin: 0px;
     }
-    @include selected(2px);
+    &.selected {
+        border-left: 3px double #0088cc;
+    }
     &.marked {
         text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
-        border-top: thick double #fbeed5;
-        border-left: thin double #fbeed5;
+        border-left: 3px double #fbeed5;
+        border-top: 3px double #fbeed5;
         .messageRow {
             background-color: #fcf8e3;
         }
     }
     &.marked.selected {
-        border-left: 2px double #0088cc;
-        border-top: thick double #fbeed5;
+        border-left: 3px double #0088cc !important;
+        border-top: 3px double #fbeed5;
     }
 }
 
@@ -284,10 +306,6 @@ button.close {
         cursor: pointer;
         .counters {
             padding: 3px;
-        }
-        .lead {
-            font-size: 15px;
-            line-height: 24px;
         }
         .sumCount {
             bottom: 5px;
@@ -368,7 +386,8 @@ button.close {
 .draftPopup {
     width: 600px;
     height: 100%;
-    background-color: rgba(255, 255, 255, 1);
+    //background-color: rgba(255, 255, 255, 1);
+    background-color: white;
     position: absolute;
     left: auto;
     right: -622px;
@@ -386,7 +405,7 @@ button.close {
     background-color: rgba(82, 168, 236, 0.2);
     position: fixed;
     bottom: 10px;
-    right: 30px;
+    right: 10px;
     padding: 10px;
     border-radius: 6px;
     form {
@@ -432,7 +451,6 @@ button.close {
         margin: 5px;
         width: 95%;
         background-color: rgba(255, 255, 255, 1);
-        z-index: 9999;
         position: absolute;
         top: 0;
         left: 2%;
@@ -503,6 +521,10 @@ button.close {
     background-color: white;
     /*background: url(http://polzunov.com/background.gif);*/
     opacity: 0.8;
+}
+
+.lead {
+    font-weight: 400;
 }
 
 /* --- Bootstrap improvements */

@@ -104,11 +104,13 @@ var MessageView = Backbone.View.extend({
         "click a[name=deleteMessageForever]" : "deleteMessageForever",
     },
     initialize : function() {
-        //this.model.on("change", this.render, this);
+        this.model.on("change:body", this.render, this);
     },
     render : function() {
         var data = this.model.toJSON();
         prepareBodyBlocks(data, true);
+
+        console.info(data);
 
         _.extend(data, {
             url : this.rootUrl + "/" + this.model.get("id")
