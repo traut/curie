@@ -146,11 +146,10 @@ DraftStore = function() {
                     if (draft.sent) {
                         console.info("Sending draft as a message");
                         utils.pushToQueue("sent", draft.id);
-                        callback(null, {status : 'ok', mid : draft.id});
-                    } else {
-                        console.info("Sending back ", draft);
-                        callback(null, draft);
+                        draft.draft = null;
                     }
+                    console.info("Sending back ", draft);
+                    callback(null, draft);
             });
         }
     }

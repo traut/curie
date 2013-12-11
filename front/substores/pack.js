@@ -108,6 +108,7 @@ PackStore = function() {
                     solrUtils.query(solrUtils.accessControl(hash), {
                         rows: 0,
                         facet: true,
+                        'facet.mincount' : 1,
                         'facet.field' : "labels"
                     }, callback);
                 },
