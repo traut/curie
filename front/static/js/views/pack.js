@@ -104,7 +104,7 @@ Curie.Views.CollectionGeneric = Backbone.View.extend({
             var renderOptions = this.options.renderOptions || {};
 
             _.extend(renderOptions, {
-                // FIXME: should be dynamically rendered
+                // FIXME: should be dynamically rendered because it's 0 if rendered before fetch
                 size : this.model.get("total")
             });
 

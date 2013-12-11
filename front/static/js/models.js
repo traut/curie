@@ -237,7 +237,19 @@ Curie.Models.Packs = Backbone.Collection.extend({
             return curie.cache.add(Curie.Models.Pack, m);
         });
     },
+    comparator : function(p) {
+        return p.get("name");
+    }
 }, { typeName : "Packs" });
+
+Curie.Models.UnsortedPacks = Backbone.Collection.extend({
+    model: Curie.Models.Pack,
+    parse : function(resp, options) {
+        return resp.map(function(m) {
+            return curie.cache.add(Curie.Models.Pack, m);
+        });
+    },
+}, { typeName : "UnsortedPacks" });
 
 Curie.Models.Contacts = Backbone.Collection.extend({
     url : "/contacts/from",

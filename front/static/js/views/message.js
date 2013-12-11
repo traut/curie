@@ -105,6 +105,9 @@ var MessageView = Backbone.View.extend({
     },
     initialize : function() {
         this.model.on("change:body", this.render, this);
+
+        this.selected = false;
+        this.marked = false;
     },
     render : function() {
         var data = this.model.toJSON();
@@ -171,10 +174,22 @@ var MessageView = Backbone.View.extend({
         this.undelegateEvents();
     },
     select : function() {
+        this.selected = true;
         this.$(".message").addClass("selected");
     },
     unselect : function() {
+        this.selected = false;
         this.$(".message").removeClass("selected");
+    },
+    actionMark : function() {
+        this.marked = !this.marked;
+        this.$(".message").toggleClass("marked");
+    },
+    isSelected : function() {
+        return this.selected;
+    },
+    isMarked : function() {
+        return this.marked;
     }
 
 });

@@ -12,7 +12,7 @@ body {
 
 @mixin selected($width) {
     &.selected {
-        border-left: $width solid #0088cc;
+        border-left: $width solid #0088cc !important;
     }
 }
 
@@ -168,11 +168,9 @@ button.close {
     }
     @include selected(1px);
     &.marked {
-        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
         background-color: #fcf8e3;
         border: 1px solid #fbeed5;
     }
-
     &.marked.selected {
         @include selected(1px);
     }
@@ -233,7 +231,18 @@ a.label {
 
     a.showQuote {
         cursor: pointer;
+        @include muted;
     }
+    @include selected(1px);
+    &.marked {
+        background-color: #fcf8e3 !important;
+        border: 1px solid #fbeed5;
+    }
+    &.marked.selected {
+        @include selected(1px);
+    }
+
+    border: 1px solid white;
 
     .quoted {
         color: #999999;
@@ -247,16 +256,17 @@ a.label {
     .message {
         margin: 0px 0px 20px;
         padding: 10px;
-        background-color: #FCFAEE;
         border-radius: 5px;
+        background-color: #f8f8f8;
+        border: 1px solid #ddd;
         /*
+        background-color: #FCFAEE;
         &:nth-child(odd) {
         }
         &:nth-child(even) {
         background-color: #f9f9f9;
         }
         */
-        @include selected(1px);
     }
 }
 
@@ -270,7 +280,7 @@ a.label {
         margin: 0px;
     }
     &.selected {
-        border-left: 3px double #0088cc;
+        border-left: 3px double #0088cc !important;
     }
     &.marked {
         text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
@@ -425,6 +435,7 @@ a.label {
     }
 
     .contentView {
+        position: relative;
         .content {
             margin-top: 10px;
             /*
@@ -457,6 +468,7 @@ a.label {
         box-shadow: 0px 0px 10px #ccc;
         border-radius: 5px;
         border: 1px solid #bbb;
+        z-index:999;
 
         display:none;
 

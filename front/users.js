@@ -17,10 +17,10 @@ function hashPassword(password) {
     return crypto.createHash('sha512', crypto.randomBytes(256)).update(password).digest('hex');
 }
 
-function addAccount(login, password, emails) {
+function addAccount(login, password, emailsWithNames) {
     var hash = crypto.createHash('sha1', crypto.randomBytes(256)).update(login).digest('hex');
 
-    db.run("insert into accounts (hash, login, password) values (?, ?, ?)", [hash, login, hashPassword(password)], function(err) {
+    db.run("INSERT into ACCOUNTS (hash, login, password) VALUES (?, ?, ?)", [hash, login, hashPassword(password)], function(err) {
         if (err != null) {
             log.error(util.format("Can't create an account %s: %s", login, err));
             return;
@@ -28,13 +28,13 @@ function addAccount(login, password, emails) {
 
         var id = this.lastID;
 
-        var stmt = db.prepare("INSERT INTO emails (account_id, email) VALUES (?, ?)");
-        emails.map(function(email) {
-            stmt.run(id, email);
+        var stmt = db.prepare("INSERT INTO emails (account_id, email, fullname) VALUES (?, ?, ?)");
+        emailsWithNames.map(function(email) {
+            stmt.run(id, email.email, email.fullname);
         });
         stmt.finalize();
 
-        log.info("Account %s created with %s email addresses", id, emails.length);
+        log.info("Account %s created with %s email addresses", id, emailsWithNames.length);
     });
 }
 
@@ -44,7 +44,7 @@ function signIn(login, password, callback) {
 }
 
 function getAccountEmails(hash, callback) {
-    db.all("SELECT email FROM emails, accounts WHERE emails.account_id = accounts.id AND accounts.hash = ?", [hash], callback);
+    db.all("SELECT email, fullname, main FROM emails, accounts WHERE emails.account_id = accounts.id AND accounts.hash = ?", [hash], callback);
 }
 
 function getAccountDetails(hash, callback) {
@@ -57,15 +57,29 @@ function getAccountDetails(hash, callback) {
             callback("No emails for hash " + hash);
             return;
         }
-        var primary = {
-            email : emails[0].email,
-            name : "John Smith"
-        };
+        var markedAsMain = emails.filter(function(e) {
+            return e.main == 1;
+        });
+
+        var primary;
+        if (markedAsMain.length > 0) {
+            var firstone = markedAsMain[0];
+            primary = {
+                email : firstone.email,
+                name : firstone.fullname,
+            };
+        } else {
+            var firstone = emails[0];
+            primary = {
+                email : firstone.email,
+                name : firstone.fullname,
+            };
+        }
         callback(null, {
             primary : primary,
             all : emails.map(function(e) {
                 return {
-                    name : null,
+                    name : e.fullname,
                     email : e.email
                 };
             })

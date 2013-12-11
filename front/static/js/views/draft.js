@@ -1,4 +1,4 @@
-var DraftView = Backbone.View.extend({
+Curie.Views.DraftView = Backbone.View.extend({
     template : Handlebars.templates.draft,
     events : {
         "input form input,textarea" : "fieldChanged",
@@ -46,8 +46,7 @@ var DraftView = Backbone.View.extend({
             success : function(model) {
                 //FIXME: update related pack
                 if (sending) {
-                    console.info("Triggering 'sent' event");
-                    model.trigger("sent");
+                    model.trigger("sent", model);
                 }
             }
         });

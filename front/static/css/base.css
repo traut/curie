@@ -107,13 +107,12 @@ button.close {
   .messageRow.unread {
     border: 1px solid silver; }
   .messageRow.selected {
-    border-left: 1px solid #0088cc; }
+    border-left: 1px solid #0088cc !important; }
   .messageRow.marked {
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
     background-color: #fcf8e3;
     border: 1px solid #fbeed5; }
   .messageRow.marked.selected.selected {
-    border-left: 1px solid #0088cc; }
+    border-left: 1px solid #0088cc !important; }
   .messageRow .dateField {
     white-space: nowrap; }
   .messageRow .emailField {
@@ -149,33 +148,44 @@ a.label {
   a.label:hover {
     color: black; }
 
-.message iframe.body {
-  border: 0px;
-  width: 100%; }
-.message .body-text {
-  overflow-x: auto; }
-.message a.showQuote {
-  cursor: pointer; }
-.message .quoted {
-  color: #999999;
-  margin-left: 10px;
-  padding-left: 10px;
-  border-left: 1px solid #aaaaaa; }
+.message {
+  border: 1px solid white; }
+  .message iframe.body {
+    border: 0px;
+    width: 100%; }
+  .message .body-text {
+    overflow-x: auto; }
+  .message a.showQuote {
+    cursor: pointer;
+    color: #bbb;
+    font-weight: 300; }
+  .message.selected {
+    border-left: 1px solid #0088cc !important; }
+  .message.marked {
+    background-color: #fcf8e3 !important;
+    border: 1px solid #fbeed5; }
+  .message.marked.selected.selected {
+    border-left: 1px solid #0088cc !important; }
+  .message .quoted {
+    color: #999999;
+    margin-left: 10px;
+    padding-left: 10px;
+    border-left: 1px solid #aaaaaa; }
 
 .threadView .message {
   margin: 0px 0px 20px;
   padding: 10px;
-  background-color: #FCFAEE;
   border-radius: 5px;
+  background-color: #f8f8f8;
+  border: 1px solid #dddddd;
   /*
+  background-color: #FCFAEE;
   &:nth-child(odd) {
   }
   &:nth-child(even) {
   background-color: #f9f9f9;
   }
   */ }
-  .threadView .message.selected {
-    border-left: 1px solid #0088cc; }
 
 .threadRow {
   border-top: 3px double #dddddd;
@@ -186,7 +196,7 @@ a.label {
     border: 0px;
     margin: 0px; }
   .threadRow.selected {
-    border-left: 3px double #0088cc; }
+    border-left: 3px double #0088cc !important; }
   .threadRow.marked {
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
     border-left: 3px double #fbeed5;
@@ -253,7 +263,7 @@ a.label {
 .draftView .draftFooter .saved {
   padding-top: 3px; }
 .draftView.selected {
-  border-left: 1px solid #0088cc; }
+  border-left: 1px solid #0088cc !important; }
 
 .draftPopup {
   width: 600px;
@@ -288,23 +298,25 @@ a.label {
   margin-left: 0px; }
   #packView .title {
     margin: 10px 0px; }
-  #packView .contentView .content {
-    margin-top: 10px;
-    /*
-    &.disabled {
-        -webkit-filter: blur(10px);
-        -moz-filter: blur(10px);
-        -o-filter: blur(10px);
-        -ms-filter: blur(10px);
-        filter: blur(10px);
-        pointer-events: none;
-        overflow-y: hidden;
-    }
-    */ }
-  #packView .contentView .loadMore {
-    margin: 10px auto;
-    width: 50%;
+  #packView .contentView {
     position: relative; }
+    #packView .contentView .content {
+      margin-top: 10px;
+      /*
+      &.disabled {
+          -webkit-filter: blur(10px);
+          -moz-filter: blur(10px);
+          -o-filter: blur(10px);
+          -ms-filter: blur(10px);
+          filter: blur(10px);
+          pointer-events: none;
+          overflow-y: hidden;
+      }
+      */ }
+    #packView .contentView .loadMore {
+      margin: 10px auto;
+      width: 50%;
+      position: relative; }
   #packView .popupView {
     padding: 15px;
     margin: 5px;
@@ -316,6 +328,7 @@ a.label {
     box-shadow: 0px 0px 10px #cccccc;
     border-radius: 5px;
     border: 1px solid #bbbbbb;
+    z-index: 999;
     display: none; }
 
 #loginModal {

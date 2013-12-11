@@ -5,7 +5,7 @@ Curie.Controllers.Data.Packs = function () {
 
     var packs = {
         dynamic : new Curie.Models.Packs([], { url : '/packs', }),
-        predefined : new Curie.Models.Packs([ inboxPack, draftPack ])
+        predefined : new Curie.Models.UnsortedPacks([ inboxPack, draftPack ])
     }
 
     _.forEach(packs, function(packList, key) {

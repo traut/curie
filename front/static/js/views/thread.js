@@ -59,19 +59,27 @@ var ThreadRowView = Backbone.View.extend({
 var ThreadView = Backbone.View.extend({
 
     tagName : 'div',
+
     attributes : {
         'class' : 'threadView'
     },
 
     initialize : function() {
 
-        this.model.get("messages").on("sort add remove sent", this.render, this);
+        this.model.get("messages").on("sort add remove", this.render, this);
+        this.model.get("messages").on("sent", this.rerenderDraft, this);
 
         this.on("move", this.moveSelection, this);
         this.on("action", this.performAction, this);
 
         this.subViews = {};
         this.draftView = null;
+
+        this.$messages = $("<div></div>");
+        this.$draft = $("<div></div>");
+
+        this.$el.append(this.$messages);
+        this.$el.append(this.$draft);
 
         this.selectedIndex = 0;
     },
@@ -81,7 +89,7 @@ var ThreadView = Backbone.View.extend({
     },
 
     showBodyType : function(type) {
-        _.values(this.subViews, function(v) {
+        _.values(this.subViews).forEach(function(v) {
             v.showBodyType && v.showBodyType(type);
         });
     },
@@ -95,8 +103,8 @@ var ThreadView = Backbone.View.extend({
     },
 
     createViewForModel : function(message) {
-        if (message instanceof Curie.Models.Draft) {
-            return new DraftView({ model : message, embedded : true });
+        if (message instanceof Curie.Models.Draft && !message.get("sent")) {
+            return new Curie.Views.DraftView({ model : message, embedded : true });
         } else if (message instanceof Curie.Models.Message) {
             return new MessageView({ model : message });
         } else {
@@ -121,58 +129,76 @@ var ThreadView = Backbone.View.extend({
 
         var messages = this.model.get("messages");
 
-        console.info(messages);
-
-        _.forEach(this.subViews, function(v, key) {
-            if (key == null || !messages.contains(v.model)) {
-                v.$el.remove();
-                v.close();
-            }
-        });
-
         if (messages.length == 0) {
             console.warn("trying to render empty thread view");
             Mousetrap.trigger("esc");
+            return;
         }
 
-        messages.forEach(function(m) {
-            if (!this.subViews[m.cid]) {
-                var v = this.createViewForModel(m);
-                this.subViews[m.cid] = v;
-
-                v.render();
-                this.$el.append(v.$el);
+        _.forEach(this.subViews, function(v, key) {
+            if (!messages.contains(v.model)) {
+                console.info("Removing view for " + key, v, v.model);
+                v.$el.remove();
+                v.close();
+                delete this.subViews[key];
             }
         }, this);
 
-        if (messages.length > 0 && !this.isDraftTheLastOne()) {
-            this.addDraftView();
+        messages.forEach(function(m) {
+            if (!this.subViews[m.id] && !m.get("draft")) {
+                this.renderViewForMessage(m);
+            } else if (m.get("draft") && !this.draftView) {
+                this.renderDraftView(m);
+            }
+        }, this);
+
+        if (this.draftView == null && !this.isDraftTheLastOne()) {
+            this.renderDraftView();
         }
 
         return this;
     },
 
-    addDraftView : function() {
+    renderViewForMessage : function(m) {
+        var v = this.createViewForModel(m);
+        this.subViews[m.id] = v;
 
+        v.render();
+        this.$messages.append(v.$el);
+    },
+
+    closeDraftView : function() {
         if (this.draftView) {
             this.draftView.model.off(null, null, this);
             this.draftView.closeAndRemove();
+            this.draftView = null;
         }
-
-        this.subViews = _.omit(this.subViews, [null]);
-
-        this.draftView = this.createViewForModel(this.createDraftModel());
-
-        this.subViews[null] = this.draftView;
-
-        this.draftView.render();
-        this.$el.append(this.draftView.$el);
-
     },
 
-    fetchAndRender : function() {
-        console.info("'sent' event cached in thread. Fetching and rendering");
-        this.model.fetch();
+    renderDraftView : function(model) {
+
+        this.closeDraftView();
+
+        var model = model || this.createDraftModel();
+
+        this.draftView = this.createViewForModel(model);
+        this.draftView.render();
+
+        this.$draft.html(this.draftView.$el);
+    },
+
+    rerenderDraft : function(model) {
+        console.info("'sent' event cached in thread. Rerendering draft " + model.id);
+
+        var messages = this.model.get("messages");
+
+        if (!messages.contains(model)) {
+            this.model.fetch();
+        } else {
+            this.renderViewForMessage(model);
+        }
+
+        this.renderDraftView();
     },
 
     createDraftModel : function() {
@@ -192,7 +218,7 @@ var ThreadView = Backbone.View.extend({
             this.addDraftView();
         }, this);
         model.on("change:currentThread", this.makePersistent, this);
-        model.on("sent", this.fetchAndRender, this);
+        model.on("sent", this.rerenderDraft, this);
         return model;
 
     },
@@ -201,9 +227,12 @@ var ThreadView = Backbone.View.extend({
         var messages = this.model.get("messages");
 
         var views = messages.map(function(m) {
-            return this.subViews[m.cid];
+            return this.subViews[m.id];
         }, this);
-        views.push(this.subViews[null]);
+
+        if (this.selectedIndex >= views.length) {
+            this.selectedIndex = views.length - 1;
+        }
 
         views[this.selectedIndex].unselect();
 
@@ -217,5 +246,32 @@ var ThreadView = Backbone.View.extend({
 
     },
     performAction : function(action) {
+
+        var messages = this.model.get("messages");
+
+        if (action == "delete forever") {
+            var toDelete = messages.filter(function(m) {
+                console.info("isMarked ", m, m.id, this.subViews);
+                return this.subViews[m.id].isMarked();
+            }, this);
+
+            if (confirm('Do you really want to delete forever ' + toDelete.length + ' messages?')) {
+                toDelete.map(function(m) {
+                    m.destroy();
+                });
+            }
+        } else {
+            var selected = messages.find(function(m) {
+                return this.subViews[m.id].isSelected();
+            }, this);
+
+            if (!selected) {
+                console.info("Nothing is selected, can't do '" + action + "'");
+                return;
+            }
+            if (action == 'mark') {
+                this.subViews[selected.id].actionMark();
+            }
+        }
     }
 });

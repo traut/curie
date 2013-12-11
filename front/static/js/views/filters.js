@@ -20,6 +20,7 @@ Curie.Views.FiltersView = Backbone.View.extend({
     },
 
     render : function() {
+        console.info("rerendering filters");
         var filters = this.collection.toJSON();
         filters.forEach(function(f) {
             f.encoded_query = utf8_to_b64(f.query);
@@ -36,9 +37,10 @@ Curie.Views.FiltersView = Backbone.View.extend({
 
     deleteFilter : function(e) {
         console.info("delete filter", e);
-        var filter = $(e.target).data("filter");
+        var filter = $(e.currentTarget).data("filter");
         if (filter) {
             this.collection.get(filter).destroy();
+            console.info("deleted");
         }
     },
 

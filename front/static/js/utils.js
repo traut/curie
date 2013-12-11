@@ -85,7 +85,7 @@ function removeTags(html) {
 var QUOTE_BLOCK = function() {
     var random = Math.floor(Math.random() * 100000);
     var label = "- quote -";
-    return "<p><a onClick='javascript:$(\"#quote" + random + "\").toggle()' class='showQuote'>" + label + "</a><span id='quote" + random + "' class='hide'>$1</span></p>"
+    return "<p><a onClick='javascript:$(\"#quote" + random + "\").toggle()' class='showQuote'>" + label + "</a><br/><span id='quote" + random + "' class='hide'>$1</span></p>"
 }
 
 function prepareBodyBlocks(message, preferText) {

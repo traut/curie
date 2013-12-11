@@ -45,7 +45,7 @@ Curie.Controllers.Layout.Basic = function () {
         } else if (objType == Curie.Models.Thread) {
             viewClass = ThreadView;
         } else if (objType == Curie.Models.Draft) {
-            viewClass = DraftView;
+            viewClass = Curie.Views.DraftView;
         } else {
             console.error("Unknown obj type. Can't show a popup with", objType, objId);
             return;
