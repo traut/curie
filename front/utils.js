@@ -11,7 +11,6 @@ var util = require('util'),
     beanstalk = require('nodestalker'),
     uuidLib = require('node-uuid'),
 
-    users = require("./users.js"),
     settings = require('./settings.js');
 
 

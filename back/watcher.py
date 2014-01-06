@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import stat
 import sys
 import time
 import beanstalkc
@@ -30,8 +31,16 @@ def move_file(filename, destdir):
     except OSError:
         pass
 
+    os.chmod(subdir, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC | \
+                     stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | \
+                     stat.S_IROTH | stat.S_IXOTH)
+
     dest = os.path.join(subdir, hashed)
     shutil.move(filename, dest)
+
+    fd = os.open(dest, os.O_RDONLY)
+    os.fchmod(fd, stat.S_IREAD | stat.S_IWRITE | stat.S_IRGRP | stat.S_IROTH)
+    os.close(fd)
 
     log.info(filename + " –> " + dest)
 

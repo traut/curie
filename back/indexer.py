@@ -107,6 +107,7 @@ def process(filename):
 
     if not accounts:
         logger.error("No accounts found for %s", filename)
+        sys.exit(1)
         return
 
     for account in accounts:

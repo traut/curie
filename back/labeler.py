@@ -87,7 +87,12 @@ def push_updates(updates):
 def process(filename):
     message_blob = read_blob(filename)
 
+
     accounts = get_accounts_for_blob(message_blob)
+
+    if not accounts:
+        logger.error("No accounts found for " + filename)
+        sys.exit(1)
 
     for account in accounts:
         run_filters(account, message_blob["id"], get_filters(account))
