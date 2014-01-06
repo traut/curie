@@ -88,6 +88,9 @@ MessageStore = function() {
                 if ("unread" in changed) {
                     patch["unread"] = {set : changed.unread};
                 }
+                if ("labels" in changed) {
+                    patch["labels"] = {set : changed.labels};
+                }
                 solrUtils.updateMessage(doc.id, patch, function(err) {
                     log.info("patching for " + doc.id  + " is done");
                     callback(err);
