@@ -51,6 +51,7 @@ var ThreadRowView = Backbone.View.extend({
         return this.marked;
     },
     toggleMark : function() {
+        this.marked = !this.marked;
         return this.$(">.messageRow").toggleClass("marked");
     },
 });

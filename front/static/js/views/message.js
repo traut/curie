@@ -47,7 +47,7 @@ var MessageRowView = Backbone.View.extend({
 
         this.template = this.options.template || this.template;
 
-        this.model.on("change:unread change:to change:from change:subject change:received", this.render, this);
+        this.model.on("change:labels change:unread change:to change:from change:subject change:received", this.render, this);
         this.model.on("remove", this.removeMessage, this);
 
         this.hashUrl = this.options.rootUrl + "/" + this.model.id;

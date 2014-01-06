@@ -20,7 +20,7 @@ function hashPassword(password) {
 function addAccount(login, password, emailsWithNames) {
     var hash = crypto.createHash('sha1', crypto.randomBytes(256)).update(login).digest('hex');
 
-    db.run("INSERT into ACCOUNTS (hash, login, password) VALUES (?, ?, ?)", [hash, login, hashPassword(password)], function(err) {
+    db.run("INSERT INTO accounts (hash, login, password) VALUES (?, ?, ?)", [hash, login, hashPassword(password)], function(err) {
         if (err != null) {
             log.error(util.format("Can't create an account %s: %s", login, err));
             return;

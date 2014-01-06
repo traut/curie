@@ -7,6 +7,8 @@ Curie.Controllers.Data = function () {
 
     _.extend(this, {
         getPacks : packs.getPacks,
+        archiveMessages : packs.archiveMessages,
+
         reconnect : connection.reconnect,
         auth : connection.auth,
         getSocket : connection.getSocket,

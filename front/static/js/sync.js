@@ -5,6 +5,11 @@ Backbone.sync = function (method, model, options) {
 
     console.info("Backbone.sync", method, model);
 
+    if (!model) {
+        console.warn("No model to sync", method, model, options);
+        return;
+    }
+
     model.syncRequests = model.syncRequests || {};
 
     //console.info(method, model.syncRequests[method]);
@@ -103,7 +108,8 @@ Backbone.sync = function (method, model, options) {
         socket.emit('patch', {'cast' : cast, 'changed' : options.attrs});
         socket.once(e, function (data) { 
             console.log("patch response", data);
-        });                           
+            options.success(data);
+        });
     };  
      
     // Delete a model on the server.

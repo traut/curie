@@ -11,7 +11,7 @@ Curie.Views.CollectionGeneric = Backbone.View.extend({
 
         this.$list = $("<div></div>");
 
-        this.collection.on("add reset", this.render, this);
+        this.collection.on("add remove reset", this.render, this);
         this.collection.on("sort", this.reorganizeModelViews, this);
 
         this.model.on("change:total", this.updateMoreAvailable, this);
@@ -149,8 +149,10 @@ Curie.Views.CollectionGeneric = Backbone.View.extend({
         view && view.select();
     },
     performAction : function(action) {
+
         console.info("Action " + action + " catched");
-        if (["open", "mark", "delete forever"].indexOf(action) == -1) {
+
+        if (["open", "mark", "delete forever", "archive"].indexOf(action) == -1) {
             console.error("unknown action " + action);
             return;
         }
@@ -160,12 +162,12 @@ Curie.Views.CollectionGeneric = Backbone.View.extend({
                 return this.modelViews[m.id].isMarked();
             }, this);
             if (confirm('Do you really want to delete forever ' + toDelete.length + ' messages?')) {
-                toDelete.map(function(m) {
+                toDelete.forEach(function(m) {
                     m.destroy();
                 });
             }
 
-        } else {
+        } else if (action == "open" || action == "mark") {
             var selected = this.collection.find(function(m) {
                 return this.modelViews[m.id].isSelected();
             }, this);
@@ -180,6 +182,15 @@ Curie.Views.CollectionGeneric = Backbone.View.extend({
             } else if (action == 'mark') {
                 this.modelViews[selected.id].actionMark();
             }
+        } else if (action == "archive" ){
+            var marked = this.collection.filter(function(m) {
+                return this.modelViews[m.id].isMarked();
+            }, this);
+
+            console.info("archiving " + marked.length + " messages");
+
+            curie.controllers.data.archiveMessages(marked);
+
         }
     }
 });

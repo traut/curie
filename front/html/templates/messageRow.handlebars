@@ -15,8 +15,20 @@
             <div class="span3 emailField">{{> emailAddress from }}</div>
         {{/isOutcoming }}
 
-        <div class="span6 subjectField">{{ subject }}&nbsp;</div>
-        <div class="span3 dateField">{{#dateformat received 'HH:mm, dddd, MMM Do'}}{{/dateformat}}</div>
+        <div class="span7 subjectField">
+            {{ subject }}&nbsp;
+        </div>
+        <!--<div class="span3 dateField">{{#dateformat received 'HH:mm, dddd, MMM Do'}}{{/dateformat}}</div>-->
+        <div class="span2 dateField">
+            {{#if labels }}
+                <span class="pull-left">
+                {{#each labels}}
+                    <span class="bull" style="color: {{#colorForLabel this}}{{/colorForLabel}}">&diams;</span>
+                {{/each }}
+                </span>
+            {{/if}}
+        {{#date_ago received }}{{/date_ago}}
+        </div>
 
         {{#if url }}
         </a>

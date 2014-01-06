@@ -17,7 +17,7 @@ var hotkeys = {
         '/' : {
             doc : 'Activate search',
             action : function(e) {
-                e.preventDefault();
+                e && e.preventDefault();
                 curie.state.trigger("search:show");
             }
         },
@@ -34,7 +34,7 @@ var hotkeys = {
         'q q' : {
             doc : 'Logout',
             action : function(e) {
-                e.preventDefault();
+                e && e.preventDefault();
                 curie.state.trigger("logout");
             }
         },
@@ -78,22 +78,22 @@ var hotkeys = {
                 curie.state.get("localHotkeysKeyListener").trigger("move", "up");
             }
         },
-        'o' : {
+        'l' : {
             doc : 'Open message',
             action : function () {
                 curie.state.get("localHotkeysKeyListener").trigger("action", "open");
+            }
+        },
+        'h' : {
+            doc : 'Navigate to upper level',
+            action : function () {
+                Mousetrap.trigger("esc");
             }
         },
         'x' : {
             doc : 'Mark/unmark a message',
             action : function() {
                 curie.state.get("localHotkeysKeyListener").trigger("action", "mark");
-            }
-        },
-        'D D' : {
-            doc : 'Delete marked messages forever',
-            action : function() {
-                curie.state.get("localHotkeysKeyListener").trigger("action", "delete forever");
             }
         },
         'g g' : {
@@ -108,12 +108,30 @@ var hotkeys = {
                 curie.state.get("localHotkeysKeyListener").trigger("move", "last");
             }
         },
+        'a a' : {
+            doc : 'Archive marked messages',
+            action : function() {
+                curie.state.get("localHotkeysKeyListener").trigger("action", "archive");
+            }
+        },
+        'a l' : {
+            doc : 'Add label(s) and archive marked messages',
+            action : function() {
+                curie.state.get("localHotkeysKeyListener").trigger("action", "add-labels-archive");
+            }
+        },
+        'D D' : {
+            doc : 'Delete marked messages forever',
+            action : function() {
+                curie.state.get("localHotkeysKeyListener").trigger("action", "delete forever");
+            }
+        },
     },
     "Message" : {
         'm n' : {
             doc : 'Create a new message',
             action : function(e) {
-                e.preventDefault();
+                e && e.preventDefault();
                 curie.controllers.layout.showDraft();
             }
         },

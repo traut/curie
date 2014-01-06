@@ -1,3 +1,4 @@
+
 Curie.Controllers.Data.Packs = function () {
 
     var draftPack = curie.cache.add(Curie.Models.Pack, {id : "draft", name : "draft"});
@@ -64,8 +65,35 @@ Curie.Controllers.Data.Packs = function () {
 
     curie.state.on("connection:established", refetchPacks);
 
-    this.getPacks = function() {
-        return [packs.predefined, packs.dynamic];
+    var archiveMessages = function(messages, callback) {
+
+        var errorCallback = function(e) {
+            console.error("Can't archive messages", e);
+        }
+
+        messages.forEach(function(m) {
+            if (m.get("thread")) {
+                console.error("Can't archive thread for now");
+                return;
+            }
+            var newLabels = _.without(m.get("labels"), "inbox");
+            m.save({
+                labels : newLabels,
+            }, {
+                patch : true,
+                success : function() {
+                    console.info("patch success");
+                    m.trigger("refetch");
+                },
+                error : errorCallback
+            });
+        });
+
     }
+
+    _.extend(this, {
+        getPacks : function() { return [packs.predefined, packs.dynamic]; },
+        archiveMessages : archiveMessages,
+    });
 }
 

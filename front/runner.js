@@ -213,7 +213,7 @@ function bindSocketCalls(socket) {
     });
     socket.on("disconnect", function() {
         log.info("Disconnect received for session=" + sessionId);
-        sessionStore.destroy(sessionId);
+        //sessionStore.destroy(sessionId);
     });
 }
 

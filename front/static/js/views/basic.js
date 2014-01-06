@@ -1,6 +1,8 @@
 var PopupView = Backbone.View.extend({
     events : {
         "click button.close" : "navigateAway",
+        "click button[name=back]" : "navigateAway",
+        "click button[name=delete]" : "deleteActive",
     },
     initialize : function(options) {
         _.bindAll(this);
@@ -11,16 +13,18 @@ var PopupView = Backbone.View.extend({
         this.currentSubview && this.currentSubview.close();
         this.currentSubview = subview;
 
-        this.topOffset =  window.pageYOffset || 35;
-        var parentOffset = this.$el.parent().offset().top;
-        this.$el.css("top", this.topOffset - parentOffset);
+//        this.topOffset =  window.pageYOffset || 35;
+//        var parentOffset = this.$el.parent().offset().top;
+//        this.$el.css("top", this.topOffset - parentOffset);
 
         //subview.render();
         this.$(".content").html(subview.$el);
 
+        $("#contentView").css({ "height" : "100px", "overflow" : "hidden" });
         this.$el.show();
     },
     hide : function() {
+        $("#contentView").css({ "height" : "auto", "overflow" : "auto" });
         this.$el.hide();
         this.$(".content").empty();
 
@@ -32,6 +36,10 @@ var PopupView = Backbone.View.extend({
         this.hide();
         curie.state.trigger("navigate:activePack");
     },
+    deleteActive : function() {
+        console.error("Not implemented yet");
+        alert("Sorry, not implemented yet");
+    },
     getSubview : function() {
         return this.currentSubview;
     }
@@ -42,6 +50,7 @@ var AppView = Backbone.View.extend({
     template : Handlebars.templates.base,
     events : {
         "click [name=new-message] a" : "showNewDraft",
+        "click [name=search] a" : "showSearchLink",
         "click [name=filters] a" : "showFilters",
 
         "blur #searchPopup form" : "hideSearch",
@@ -73,6 +82,10 @@ var AppView = Backbone.View.extend({
     showNewDraft : function(e) {
         e && e.preventDefault();
         curie.controllers.layout.showDraft();
+    },
+    showSearchLink : function(e) {
+        e && e.preventDefault();
+        this.showSearch();
     },
     showFilters : function(e) {
         e && e.preventDefault();

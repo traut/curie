@@ -11,7 +11,7 @@
             {{#if bcc }}<span class="headerRow">bcc: {{#commaJoined bcc }} {{> emailAddressWithLink this }}{{/commaJoined }}</span>{{/if }}
         </p>
         <div class="pull-right">
-            {{#each labels}} <a class="label mutedWithHover" href="#p/{{ this }}">{{ this }}</a>{{/each}}
+            {{#each labels}} <a class="label mutedWithHover" href="#p/{{ this }}"><span class="bull" style="color: {{#colorForLabel this}}{{/colorForLabel}}">&diams;</span> {{ this }}</a>{{/each}}
             <div class="btn-group">
                 <button class="btn btn-small dropdown-toggle" data-toggle="dropdown">
                     <i class="icon-wrench"></i>

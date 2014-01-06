@@ -24,6 +24,10 @@ body {
     }
 }
 
+.bull {
+    font-weight: 600;
+}
+
 .container-fluid {
     padding-left: 0px;
 }
@@ -161,10 +165,10 @@ button.close {
     -moz-border-radius: 4px;
     border-radius: 4px;
     a {
-        color: black;
+        color: #777;//black;
     }
-    &.unread {
-        border: 1px solid #c0c0c0;
+    &.unread a {
+        color: black;
     }
     @include selected(1px);
     &.marked {
@@ -176,6 +180,7 @@ button.close {
     }
     .dateField {
         white-space: nowrap;
+        text-align: right;
     }
     .emailField {
         overflow: hidden;
@@ -221,6 +226,8 @@ a.label {
 }
 
 .message {
+    border: 1px solid white;
+
     iframe.body {
         border: 0px;
         width: 100%;
@@ -231,7 +238,7 @@ a.label {
 
     a.showQuote {
         cursor: pointer;
-        @include muted;
+        /*@include muted;*/
     }
     @include selected(1px);
     &.marked {
@@ -241,8 +248,6 @@ a.label {
     &.marked.selected {
         @include selected(1px);
     }
-
-    border: 1px solid white;
 
     .quoted {
         color: #999999;
@@ -257,10 +262,9 @@ a.label {
         margin: 0px 0px 20px;
         padding: 10px;
         border-radius: 5px;
-        background-color: #f8f8f8;
         border: 1px solid #ddd;
+        background-color: #f8f8f8;
         /*
-        background-color: #FCFAEE;
         &:nth-child(odd) {
         }
         &:nth-child(even) {
@@ -275,6 +279,7 @@ a.label {
     border-left: 3px double #ddd;
     border-right: thin solid #ddd;
     border-bottom: thin solid #ddd;
+    padding: 0px;
     .messageRow {
         border: 0px;
         margin: 0px;
@@ -458,19 +463,27 @@ a.label {
     }
 
     .popupView {
-        padding: 15px;
-        margin: 5px;
-        width: 95%;
-        background-color: rgba(255, 255, 255, 1);
+        margin: 10px 0px;
         position: absolute;
         top: 0;
-        left: 2%;
+        left: 0%;
+        width: 100%;
+        background-color: white;
+        /*
+        background-color: rgba(255, 255, 255, 1);
+        padding: 15px;
+        width: 95%;
         box-shadow: 0px 0px 10px #ccc;
         border-radius: 5px;
         border: 1px solid #bbb;
+        */
         z-index:999;
 
         display:none;
+
+        .controls {
+            margin-bottom: 10px;
+        }
 
     }
 }
@@ -479,6 +492,7 @@ a.label {
     width: 300px;
     margin-left: -150px;
     margin-right: -150px;
+    box-shadow: none !important;
     .control-group {
         text-align: center;
         margin-bottom: 10px;
@@ -515,9 +529,9 @@ a.label {
 }
 
 #hotkeysModal {
-    width: 800px;
-    margin-left: -400px;
-    margin-right: -400px;
+    width: 900px;
+    margin-left: -450px;
+    margin-right: -450px;
 }
 @media (max-width: 767px) {
     #hotkeysModal {

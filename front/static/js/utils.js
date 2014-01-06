@@ -82,10 +82,11 @@ function removeTags(html) {
   return html.replace(/</g, '&lt;');
 }
 
+var QUOTE_LABEL = "[ &hellip; ]";
+
 var QUOTE_BLOCK = function() {
     var random = Math.floor(Math.random() * 100000);
-    var label = "- quote -";
-    return "<p><a onClick='javascript:$(\"#quote" + random + "\").toggle()' class='showQuote'>" + label + "</a><br/><span id='quote" + random + "' class='hide'>$1</span></p>"
+    return "<p><a onClick='javascript:$(\"#quote" + random + "\").toggle()' class='showQuote'>" + QUOTE_LABEL + "</a><br/><span id='quote" + random + "' class='hide'>$1</span></p>"
 }
 
 function prepareBodyBlocks(message, preferText) {
@@ -98,14 +99,14 @@ function prepareBodyBlocks(message, preferText) {
         if (b.type == 'text') {
             value = removeTags(b.value)
                 .replace(/(^\s*\>+\s*\>*[\s\S]*$)(?=(^[^\>]+$))/mgi, QUOTE_BLOCK());
-            if (value.indexOf("- quote -") == -1) {
+            if (value.indexOf(QUOTE_LABEL) == -1) {
                 value = value
                     .replace(/(^\s*\>+\s*\>*[\s\S]*$)/mgi, QUOTE_BLOCK())
             }
             value = value
                 //.replace(/((\r\n|\n)\s*){3,}/mg, "<br/>")
                 //.replace(/(\r\n|\n)\s*/g, "<br/>");
-                .replace(/(\r\n|\n)\s*/g, "<br/>");
+                .replace(/(\r\n|\n)/g, "<br/>");
         } else if (!preferText) {
             value = b.value;
         } else {
@@ -225,6 +226,20 @@ function elementInViewport(el) {
         (top + height) <= (window.pageYOffset + window.innerHeight) &&
         (left + width) <= (window.pageXOffset + window.innerWidth)
     );
+}
+
+var stringToColour = function(_str) {
+    var str = new jsSHA(_str + _str + _str, "TEXT").getHash("SHA-512", "HEX");
+    var hash = 0;
+    for (var i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    var colour = '#';
+    for (var i = 0; i < 3; i++) {
+        var value = (hash >> (i * 8)) & 0xFF;
+        colour += ('00' + value.toString(16)).substr(-2);
+    }
+    return colour;
 }
 
 Backbone.View.prototype.close = function (a, b) {

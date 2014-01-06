@@ -22,7 +22,7 @@ Curie.Models.Message = Backbone.Model.extend({
     },
     urlRoot: "/messages",
     initialize : function() {
-    },
+    }
 }, { typeName : "Message" });
 
 
@@ -153,7 +153,11 @@ Curie.Models.PagedMessagesWrapper = Backbone.Model.extend({
         this.page = response.page;
 
         var messages = (response && response.docs) ? this.parseMessages(response.docs) : [];
-        this.get("messages").add(messages).sort();
+        if (this.page != 0) {
+            this.get("messages").add(messages).sort();
+        } else {
+            this.get("messages").set(messages).sort();
+        }
         response.messages = this.get("messages");
 
         this.accumulator[this.page] = response.size;
@@ -183,14 +187,24 @@ Curie.Models.Pack = Curie.Models.PagedMessagesWrapper.extend({
         this.set("messages", new Curie.Models.Messages());
         this.ctx.light = true;
 
+        this.get("messages").on("refetch", function() {
+            console.info("refetch event received");
+            this.fetchMessages({remove: true}, true);
+        }, this);
     },
-    fetchMessages : function(options) {
+    fetchMessages : function(options, fromStart) {
         this.ctx.light = false;
         options = options || {};
         _.extend(options, {
-            update : true,
+            //update : true,
             extend : (this.page != 0)
         });
+
+        if (fromStart) {
+            this.page = 0;
+            options.page = 0;
+            options.extend = false;
+        }
         return this.fetch(options);
     },
 }, { typeName : "Pack" });

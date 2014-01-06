@@ -20,6 +20,7 @@ var PackListView = Backbone.View.extend({
 
         var renderData = _.map(this.collection.toJSON(), function(el) {
             el.hashUrl = curie.router.reverse('showPack', {pack : el.name});
+            el.color = stringToColour(el.name);
             //el.active = (el.name == curie.state.get("activePack").get("name"));
             return el;
         });

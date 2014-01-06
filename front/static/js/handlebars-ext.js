@@ -20,8 +20,10 @@ Handlebars.registerHelper('dateformat', function(stamp, format) {
 });
 
 Handlebars.registerHelper('date_ago', function(stamp) {
-    if (stamp) {
-        return moment(stamp).fromNow()
+    if (stamp && (new Date() - stamp) > 7 * 24 * 60 * 60 * 1000) {
+        return moment(stamp).format("DD-MM-YYYY");
+    } else if (stamp) {
+        return moment(stamp).fromNow();
     }
     return '';
 });
@@ -43,6 +45,10 @@ Handlebars.registerHelper('shortify', function(value, maxlength) {
 
 Handlebars.registerHelper('slugifySelector', function(value) {
     return slugifySelector(value);
+});
+
+Handlebars.registerHelper('colorForLabel', function(label) {
+    return stringToColour(label);
 });
 
 Handlebars.registerHelper("last", function(array) {
