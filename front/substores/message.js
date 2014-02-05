@@ -4,8 +4,8 @@ var isodate = require("isodate"),
     async = require('async'),
 
     settings = require('../settings'),
-    utils = require('../utils');
-    solrUtils = require('../solrUtils');
+    utils = require('../utils'),
+    solrUtils = require('../solrUtils'),
     converter = require('../converter');
 
 var log = utils.getLogger("store.message");
@@ -20,7 +20,7 @@ var getFullMessages = function(account, solrMessages, callback) {
     });
 
     var paths = solrMessages.map(function(message) {
-        if (message.labels.indexOf("draft") > -1) {
+        if (message.labels && message.labels.indexOf("draft") > -1) {
             return utils.draftPath(account, message.id);
         } else {
             return utils.messageParsedPath(message.id);

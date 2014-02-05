@@ -86,6 +86,10 @@ Curie.Controllers.Layout.Basic = function () {
 
         "search:show" : appView.showSearch,
         "search:hide" : appView.hideSearch,
+
+        "labels:show" : appView.showLabels,
+        "labels:hide" : appView.hideLabels,
+
         "hotkey:esc" : appView.hideSearch,
 
         "navigate:activePack" : popupView.hide,

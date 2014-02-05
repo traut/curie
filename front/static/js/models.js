@@ -18,7 +18,8 @@ Curie.Models.Message = Backbone.Model.extend({
 
         body : [],
 
-        attachments : []
+        attachments : [],
+        has_attachments : false,
     },
     urlRoot: "/messages",
     initialize : function() {
@@ -308,6 +309,18 @@ Curie.Models.Account = Backbone.Model.extend({
 Curie.Models.Filters = Backbone.Collection.extend({
     url: "/filters",
 }, { typeName : "Filters" });
+
+
+Curie.Models.AttachmentPreview = Backbone.Model.extend({
+    defaults: {
+        id : null,
+        filename : null,
+        filetype : null,
+        filesize : null,
+        thumbnail : null,
+    },
+    urlRoot: "/attachment/preview",
+});
 
 Curie.Models.State = Backbone.Model.extend({
     defaults: {

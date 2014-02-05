@@ -1,8 +1,7 @@
 {{#each packs}}
 <li {{#if active }}class="active"{{/if}} data-pack="{{#slugifySelector name }}{{/slugifySelector}}">
-    <a href="#{{ hashUrl }}" class="pack">
-        <span class="bull" style="color:{{ color }}">&diams;</span>&nbsp;
-        {{#shortify name 23 }}{{/shortify}}
+    <a href="#{{ hashUrl }}" class="pack " style="background-color: transparent; border-right: 3px solid {{#colorForLabel name}}{{/colorForLabel}}">
+        <span class="badge labelBadge" style="background-color: {{#colorForLabel name}}{{/colorForLabel}}">{{#shortify name 23 }}{{/shortify}}</span>
         <span class="pull-right counters unread {{#unless unread }}hide{{/unless}}">{{ unread }}</span>
     </a>
     </li>

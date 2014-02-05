@@ -1,8 +1,10 @@
-/* CSS declarations go here */
 
 body {
     font-family: 'Open Sans', sans-serif;
+    background-attachment: fixed;
+    background-size: 100%;
 }
+
 
 @mixin muted {
     //filter:alpha(opacity=50); opacity:.50;
@@ -24,10 +26,6 @@ body {
     }
 }
 
-.bull {
-    font-weight: 600;
-}
-
 .container-fluid {
     padding-left: 0px;
 }
@@ -36,13 +34,9 @@ body {
     padding : 10px 0px;
     -webkit-overflow-scrolling: touch;
     border-right: 1px solid #ccc;
-    /*
-    box-shadow: 0 0 20px #ccc;
-    -webkit-box-shadow: 0 0 20px #ccc;
-    -moz-box-shadow: 0 0 20px #ccc;
-    */
     height: 100%;
     z-index: 99;
+    background-color: rgba(255, 255, 255, 0.7);
     .sidebarInfo {
         padding: 5px;
     }
@@ -67,7 +61,7 @@ body {
             }
             &>a {
                 padding-left: 20px;
-                padding-right: 20px;
+                padding-right: 10px;
             }
             /*
             a.selected {
@@ -77,8 +71,11 @@ body {
                 border-left: 2px solid white;
             }
             */
-            &.active .counters {
-                color: white;
+            & .counters {
+                text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.2);
+            }
+            &:not(.active)>a {
+                border-right: 3px solid transparent !important;
             }
         }
     }
@@ -160,6 +157,7 @@ button.close {
     //background-color: rgba(243,243,243,.85);
     //background-color: #F7F7F7;
     //border: 1px solid #fff;
+    background-color: rgba(255, 255, 255, 0.7);
     border: 1px solid #F2F2F2;
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
@@ -202,18 +200,6 @@ button.close {
     }
 }
 
-.messageHeader {
-    .date {
-        margin-left: 10px;
-    }
-    span.headerRow {
-        @include muted;
-    }
-    a.email {
-        color: inherit;
-    }
-}
-
 a.label {
     background-color: white;
     border: 1px solid #f2f2f2;
@@ -222,6 +208,25 @@ a.label {
     font-weight: 400;
     &:hover {
         color: black;
+    }
+}
+.labelBadge { 
+    /*
+    opacity: 0.6;
+    */
+    font-weight: normal;
+    color: white;
+    font-size: 9pt;
+    padding: 2px 4px;
+    border-radius: 4px;
+    .unread & {
+        opacity: 1;
+    }
+    .active & {
+        opacity: 1;
+    }
+    &:hover {
+        opacity: 1;
     }
 }
 
@@ -255,6 +260,44 @@ a.label {
         padding-left: 10px;
         border-left: 1px solid #aaa;
     }
+
+
+    .messageHeader {
+        margin: 5px 0px;
+        .date {
+            margin-left: 10px;
+        }
+        span.headerRow {
+            @include muted;
+        }
+        a.email {
+            color: inherit;
+        }
+    }
+
+    .messageBody {
+        &.folded {
+            display: none;
+        }
+    }
+
+    .attachments {
+        margin: 30px 0px 0px;
+        .attachmentPreview {
+            min-width: 200px;
+            width: 100%;
+            float: left;
+            &.withImage {
+                width: auto;
+                img {
+                    display: block;
+                    border: 1px solid #eee;
+                }
+                text-align: center;
+            }
+        }
+    }
+
 }
 
 .threadView {
@@ -363,6 +406,8 @@ a.label {
 }
 
 .draftView {
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 0px 10px 10px 0px;
     .draftBody {
         padding: 15px 15px 0px 10px;
         form {
@@ -389,7 +434,7 @@ a.label {
             border-top: 0px;
             padding: 5px;
             margin-left: 10px;
-            background-color: white;
+            /*background-color: white;*/
         }
         .saved {
             padding-top: 3px;
@@ -402,7 +447,7 @@ a.label {
     width: 600px;
     height: 100%;
     //background-color: rgba(255, 255, 255, 1);
-    background-color: white;
+    /*background-color: white;*/
     position: absolute;
     left: auto;
     right: -622px;
@@ -421,6 +466,22 @@ a.label {
     position: fixed;
     bottom: 10px;
     right: 10px;
+    padding: 10px;
+    border-radius: 6px;
+    form {
+        margin: 0px;
+        input {
+            margin: 0px;
+            width: 250px;
+        }
+    }
+}
+
+.labelsPopup {
+    background-color: rgba(82, 168, 236, 0.2);
+    position: fixed;
+    bottom: 10px;
+    right: 400px;
     padding: 10px;
     border-radius: 6px;
     form {
@@ -468,7 +529,9 @@ a.label {
         top: 0;
         left: 0%;
         width: 100%;
+        /*
         background-color: white;
+        */
         /*
         background-color: rgba(255, 255, 255, 1);
         padding: 15px;
@@ -493,6 +556,9 @@ a.label {
     margin-left: -150px;
     margin-right: -150px;
     box-shadow: none !important;
+    .modal-body {
+        padding: 10px 0px 0px;
+    }
     .control-group {
         text-align: center;
         margin-bottom: 10px;

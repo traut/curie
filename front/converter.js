@@ -53,6 +53,8 @@ function solrToEmailPreview(doc) {
         unread : get_first(doc.unread),
         labels : as_list(doc.labels),
 
+        has_attachments : as_list(doc.attachment || []).length > 0,
+
         threads : as_list(doc.threads || []),
     }
 }

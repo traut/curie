@@ -1,20 +1,25 @@
 var WrappedRowView = Backbone.View.extend({
     initialize : function(options) {
+
+        var params = {
+            model : this.model,
+            rootUrl : this.options.rootUrl,
+            parentName : this.options.parentName
+        }
+
         if (this.model instanceof Curie.Models.Thread) {
-            this.wrappedView = new ThreadRowView({ model : this.model, rootUrl : this.options.rootUrl });
+            this.wrappedView = new ThreadRowView(params);
         //} else if (this.model.get("labels") && this.model.get("labels").indexOf("draft") > -1) {
         } else if (this.model instanceof Curie.Models.Draft) {
-            this.wrappedView = new MessageRowView({ model : this.model, rootUrl : this.options.rootUrl + '/new' });
+            params.rootUrl = params.rootUrl + '/new';
+            this.wrappedView = new MessageRowView(params);
         } else {
-            this.wrappedView = new MessageRowView({ model : this.model, rootUrl : this.options.rootUrl });
+            this.wrappedView = new MessageRowView(params);
         }
         this.$el = null;
     },
     render : function() {
-        var val = this.wrappedView.render({
-            selected : this.selected,
-            marked : this.marked
-        });
+        var val = this.wrappedView.render();
         this.$el = val.$el;
         return val;
     },
@@ -55,14 +60,16 @@ var MessageRowView = Backbone.View.extend({
         this.selected = false;
         this.marked = false;
     },
-    render : function() {
+    render : function(params) {
         //console.info("rendering messagerowview for " + this.model.get("id"));
         var data = this.model.toJSON();
         _.extend(data, {
             url : this.hashUrl,
             selected : this.selected,
-            marked : this.marked
+            marked : this.marked,
         });
+        data.visibleLabels = _.without(data.labels || [], this.options.parentName);
+
         var html = this.template(data);
         this.$el.html(html);
         return this;
@@ -102,21 +109,22 @@ var MessageView = Backbone.View.extend({
     events : {
         "click a[name=showAsBodyType]" : "changeBodyType",
         "click a[name=deleteMessageForever]" : "deleteMessageForever",
+        "click div.messageHeader" : "toggleBody"
     },
     initialize : function() {
         this.model.on("change:body", this.render, this);
 
         this.selected = false;
         this.marked = false;
+
     },
     render : function() {
         var data = this.model.toJSON();
         prepareBodyBlocks(data, true);
 
-        console.info(data);
-
         _.extend(data, {
-            url : this.rootUrl + "/" + this.model.get("id")
+            url : this.rootUrl + "/" + this.model.get("id"),
+            folded : this.options.folded,
         });
 
         this.$el.html(this.template(data));
@@ -129,6 +137,32 @@ var MessageView = Backbone.View.extend({
             }
         }, 1000);
 
+        (this.model.get("attachments") || []).forEach(function(a) {
+            if (!a.file) {
+                return;
+            }
+            new Curie.Models.AttachmentPreview({
+                id : a.file,
+                filename : a.filename
+            }).fetch({
+                success : function(model) {
+                    var preview = self.$("div[name='" + model.get("id") + "']");
+                    $("span[name=filesize]", preview).text(readablizeBytes(model.get("filesize")));
+                    if (model.get("thumbnail")) {
+                        preview.remove();
+
+                        preview.addClass("withImage");
+                        var img = $("<img/>");
+                        $("a", preview).prepend(img);
+                        self.$(".attachments").prepend(preview);
+
+                        img.attr("src", "data:image/png;base64," + model.get("thumbnail"));
+                    } else {
+                    }
+                }
+            });
+        });
+
         return this;
     },
     setUnreadTo : function(bool, successCallback, errorCallback) {
@@ -137,6 +171,9 @@ var MessageView = Backbone.View.extend({
             success : successCallback || dummy,
             error : errorCallback || dummy
         });
+    },
+    toggleBody : function() {
+        this.$(".messageBody").toggle();
     },
     showBodyType : function(type) {
         _.each(this.$(".body"), function(b) {

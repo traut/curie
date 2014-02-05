@@ -1,5 +1,5 @@
     <div class="message">
-        <p class="messageHeader">
+        <div class="messageHeader">
             <span class="lead">
                 <span class="muted pull-right date">{{#dateformat received 'HH:mm, MMM Do'}}{{/dateformat}}</span>
                 {{ subject }}
@@ -9,50 +9,51 @@
             {{#if to }}<span class="headerRow">to: {{#commaJoined to }} {{> emailAddressWithLink this }}{{/commaJoined }}</span>{{/if }}
             {{#if cc }}<span class="headerRow">cc: {{#commaJoined cc }} {{> emailAddressWithLink this }}{{/commaJoined }}</span>{{/if }}
             {{#if bcc }}<span class="headerRow">bcc: {{#commaJoined bcc }} {{> emailAddressWithLink this }}{{/commaJoined }}</span>{{/if }}
-        </p>
-        <div class="pull-right">
-            {{#each labels}} <a class="label mutedWithHover" href="#p/{{ this }}"><span class="bull" style="color: {{#colorForLabel this}}{{/colorForLabel}}">&diams;</span> {{ this }}</a>{{/each}}
-            <div class="btn-group">
-                <button class="btn btn-small dropdown-toggle" data-toggle="dropdown">
-                    <i class="icon-wrench"></i>
-                    <!--<span class="caret"></span>-->
-                </button>
-                <ul class="dropdown-menu" style="float:right;right:0;left:auto;">
-                    <li><a href="#" name="deleteMessageForever" data-type="text">Delete message forever</a></li>
-                    {{#if _multipleTypes }}
-                    <li class="divider"></li>
-                    <li><a href="#" name="showAsBodyType" data-type="text"><!--<i class="icon-ok"></i>-->Show as text</a></li>
-                    <li><a href="#" name="showAsBodyType" data-type="html">Show as HTML</a></li>
-                    {{/if }}
-                </ul>
-            </div>
         </div>
+        <!-- <div class="messageBody {{#if folded}}folded{{/if}}">-->
+        <div class="messageBody">
+            <div class="pull-right">
+                {{#each labels}} <a class="badge labelBadge" href="#p/{{ this }}" style="background-color: {{#colorForLabel this}}{{/colorForLabel}}">{{ this }}</a>{{/each}}
+                <div class="btn-group">
+                    <button class="btn btn-small dropdown-toggle" data-toggle="dropdown"><i class="fa fa-wrench"></i></button>
+                    <ul class="dropdown-menu" style="float:right;right:0;left:auto;">
+                        <li><a href="#" name="deleteMessageForever" data-type="text">Delete message forever</a></li>
+                        {{#if _multipleTypes }}
+                        <li class="divider"></li>
+                        <li><a href="#" name="showAsBodyType" data-type="text"><!--<i class="icon-ok"></i>-->Show as text</a></li>
+                        <li><a href="#" name="showAsBodyType" data-type="html">Show as HTML</a></li>
+                        {{/if }}
+                    </ul>
+                </div>
+            </div>
 
 
-        {{#each _body }}
-            {{#if isHtml }}
-                <pre class="hide" id="pre-{{ id }}">{{ value }}</pre>
-                <iframe data-type="{{ type }}" id="body-{{ id }}" class="body body-{{ type }} {{#if hidden }}hide{{/if }}"></iframe>
-                <script>
-                    {{#unless hidden }}
-                    loadAndShowHTML($("#body-{{ id }}"), $("pre#pre-{{ id }}"));
-                    {{/unless }}
-                </script>
-            {{ else }}
-                <div class="body body-{{ type }} {{#if hidden }}hide{{/if }}" data-type="{{ type }}">{{{ value }}}</div>
+            {{#each _body }}
+                {{#if isHtml }}
+                    <pre class="hide" id="pre-{{ id }}">{{ value }}</pre>
+                    <iframe data-type="{{ type }}" id="body-{{ id }}" class="body body-{{ type }} {{#if hidden }}hide{{/if }}"></iframe>
+                    <script>
+                        {{#unless hidden }}
+                        loadAndShowHTML($("#body-{{ id }}"), $("pre#pre-{{ id }}"));
+                        {{/unless }}
+                    </script>
+                {{ else }}
+                    <div class="body body-{{ type }} {{#if hidden }}hide{{/if }}" data-type="{{ type }}">{{{ value }}}</div>
+                {{/if}}
+            {{/each }}
+
+            {{ attachment }}
+
+            {{#if attachments }}
+            <div class="row-fluid attachments">
+                {{#each attachments }}
+                <div class="attachmentPreview" name="{{ file }}">
+                    <a href="">{{ filename }}</a>
+                    <span class="muted" name="filesize"></span>
+                </div>
+                {{/each}}
+            </div>
             {{/if}}
-        {{/each }}
-
-        {{ attachment }}
-
-        {{#if attachments }}
-        <p>
-            <ul class="inline">
-            {{#each attachments }}
-                <li><a href="/attachment/{{ file }}">{{ filename }}</a></li>
-            {{/each}}
-            </ul>
-        </p>
-        {{/if}}
+        </div>
     </div>
 

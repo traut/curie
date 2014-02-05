@@ -5,6 +5,7 @@ var settings = {
     STORAGE : {
         MESSAGES : "/home/curie/storage/emails/",
         DRAFTS : "/home/curie/storage/drafts/",
+        ATTACHMENTS : "/home/curie/storage/attachments/"
     },
 
 

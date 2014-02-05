@@ -20,7 +20,7 @@ var PopupView = Backbone.View.extend({
         //subview.render();
         this.$(".content").html(subview.$el);
 
-        $("#contentView").css({ "height" : "100px", "overflow" : "hidden" });
+        $("#contentView").css({ "height" : "0px", "overflow" : "hidden" });
         this.$el.show();
     },
     hide : function() {
@@ -67,6 +67,11 @@ var AppView = Backbone.View.extend({
         var searchPopup = this.$("#searchPopup");
         searchPopup.show();
         $("input", searchPopup).focus();
+    },
+    showLabels : function() {
+        var labelsPopup = this.$("#labelsPopup");
+        labelsPopup.show();
+        $("input", labelsPopup).focus();
     },
     hideSearch : function(e) {
         if (e && this.$("#searchPopup").has(e.relatedTarget).length > 0) {

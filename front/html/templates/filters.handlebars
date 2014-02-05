@@ -9,7 +9,11 @@
         </tr>
         {{#each filters}}
             <tr>
-                <td><a class="label" href="#p/{{ label }}"><span class="bull" style="color: {{#colorForLabel label}}{{/colorForLabel}}">&diams;</span> {{ label }}</a></td>
+                <td>
+                    <a class="label" href="#p/{{ label }}">
+                        <span class="badge labelBadge" style="background-color: {{#colorForLabel label}}{{/colorForLabel}}">{{#shortify label 23 }}{{/shortify}}</span>
+                    </a>
+                </td>
                 <td><a href="#search/{{ encoded_query }}">{{ query }}</a></td>
                 <td>{{#if skip_inbox }}yes{{ else }}no{{/if}}</td>
                 <td class="span2">

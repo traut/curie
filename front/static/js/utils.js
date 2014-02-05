@@ -251,3 +251,26 @@ Backbone.View.prototype.close = function (a, b) {
     this.unbind();
 };
 
+function readablizeBytes(bytes) {
+    var s = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'];
+    var e = Math.floor(Math.log(bytes) / Math.log(1024));
+    return (bytes / Math.pow(1024, e)).toFixed(2) + " " + s[e];
+}
+
+
+
+
+
+var BACKGROUNDS = [
+    "http://interfacelift.com/wallpaper/7yz4ma1/03464_mountainsofredbutteswilderness_2880x1800.jpg",
+    "http://interfacelift.com/wallpaper/7yz4ma1/03460_capearagocravasse2_2880x1800.jpg",
+    "http://interfacelift.com/wallpaper/7yz4ma1/03458_sepanggoldcoast_2880x1800.jpg",
+    "http://interfacelift.com/wallpaper/7yz4ma1/03456_washingtonplains_2880x1800.jpg",
+    "http://interfacelift.com/wallpaper/7yz4ma1/03437_jeffersoninthemorning_2880x1800.jpg",
+    "http://interfacelift.com/wallpaper/7yz4ma1/03412_nightskyofsicily_2880x1800.jpg",
+    "http://interfacelift.com/wallpaper/7yz4ma1/03395_gothamcity_2880x1800.jpg"
+];
+
+var CURRENT_BACKGROUND_I = -1;
+
+

@@ -16,17 +16,20 @@
         {{/isOutcoming }}
 
         <div class="span7 subjectField">
+            {{#if visibleLabels }}
+                <span class="pull-left">
+                {{#each visibleLabels}}
+                    <span class="badge labelBadge" style="background-color: {{#colorForLabel this}}{{/colorForLabel}}">{{ this }}</span>
+                {{/each }}
+                </span>&nbsp;
+            {{/if}}
             {{ subject }}&nbsp;
+            {{#if has_attachments }}
+            <span class="pull-right" style="color: rgba(0, 0, 0, 0.4);"><i class="fa fa-files-o"></i></span>
+            {{/if}}
         </div>
         <!--<div class="span3 dateField">{{#dateformat received 'HH:mm, dddd, MMM Do'}}{{/dateformat}}</div>-->
         <div class="span2 dateField">
-            {{#if labels }}
-                <span class="pull-left">
-                {{#each labels}}
-                    <span class="bull" style="color: {{#colorForLabel this}}{{/colorForLabel}}">&diams;</span>
-                {{/each }}
-                </span>
-            {{/if}}
         {{#date_ago received }}{{/date_ago}}
         </div>
 

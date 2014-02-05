@@ -21,6 +21,13 @@ var hotkeys = {
                 curie.state.trigger("search:show");
             }
         },
+        's s' : {
+            doc : 'Stop syncing',
+            action : function(e) {
+                e && e.preventDefault();
+                curie.controllers.data.stopSync();
+            }
+        },
         '?' : {
             doc : 'Show hotkeys description',
             action : showHotkeysHelp
@@ -29,6 +36,24 @@ var hotkeys = {
             doc : 'Go one level up',
             action : function() {
                 curie.state.trigger("hotkey:esc");
+            }
+        },
+        '>' : {
+            doc : 'Change background image',
+            action : function(e) {
+                e && e.preventDefault();
+
+                CURRENT_BACKGROUND_I++;
+
+                if (CURRENT_BACKGROUND_I > BACKGROUNDS.length) {
+                    CURRENT_BACKGROUND_I = -1;
+                    $("body").css({"background-image" : ""});
+                } else {
+                    $("body").css({"background-image" : "url(" + BACKGROUNDS[CURRENT_BACKGROUND_I] + ")"});
+                }
+
+                //document.cookie = "curie-background=" + CURRENT_BACKGROUND_I + "; expires=Thu, 1 Jan 2099 12:00:00 UTC; path=/";
+                
             }
         },
         'q q' : {
@@ -115,9 +140,9 @@ var hotkeys = {
             }
         },
         'a l' : {
-            doc : 'Add label(s) and archive marked messages',
+            doc : 'Add label(s)',
             action : function() {
-                curie.state.get("localHotkeysKeyListener").trigger("action", "add-labels-archive");
+                curie.state.get("localHotkeysKeyListener").trigger("action", "add-labels");
             }
         },
         'D D' : {

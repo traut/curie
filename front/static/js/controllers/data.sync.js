@@ -6,13 +6,17 @@ Curie.Controllers.Data.Sync = function () {
     function startPeriodicSync() {
         console.info("Starting sync controller. interval=" + SYNC_INTERVAL / 1000 + "sec");
         timer && clearInterval(timer);
-        setInterval(function() {
+        timer = setInterval(function() {
             syncPackLists();
             syncPacks();
             syncActiveSearches();
             updateFetchTime();
         }, SYNC_INTERVAL);
     };
+
+    function stopSync() {
+        timer && clearInterval(timer);
+    }
 
 
     function syncPacks() {
@@ -51,5 +55,6 @@ Curie.Controllers.Data.Sync = function () {
 
 
     this.start = startPeriodicSync;
+    this.stop =  stopSync;
 }
 

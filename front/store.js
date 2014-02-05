@@ -16,6 +16,7 @@ messageStore = require('./substores/message');
 draftStore = require('./substores/draft');
 searchStore = require('./substores/search');
 threadStore = require('./substores/thread');
+attachmentStore = require('./substores/attachment');
 
 
 
@@ -49,6 +50,9 @@ router.match('/drafts/:draftId', 'DELETE').to('draftStore.deleteDraft');
 router.match('/drafts', 'PUT').to('draftStore.updateDraft');
 
 
+router.match('/attachment/preview/:attachmentId.attachment', 'GET').to('attachmentStore.getPreview');
+router.match('/attachment/get/:attachmentId.attachment', 'GET').to('attachmentStore.getAttachment');
+
 var stores = {
     accountStore : accountStore.AccountStore(),
     packStore : packStore.PackStore(),
@@ -56,7 +60,8 @@ var stores = {
     threadStore : threadStore.ThreadStore(),
 
     draftStore : draftStore.DraftStore(),
-    searchStore : searchStore.SearchStore()
+    searchStore : searchStore.SearchStore(),
+    attachmentStore : attachmentStore.AttachmentStore()
 }
 
 var routeCall = function(handshake, cast, item, method, callback) {

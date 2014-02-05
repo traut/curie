@@ -53,13 +53,21 @@ var eventSignature = function (operation, cast) {
     return signature;
 }; 
 
+function pathWith2Letters(name) {
+    return name.substring(0, 2) + "/" + name.substring(2, 4) + "/" + name.substring(4, 6);
+}
+
 function messageParsedPath(messageId) {
-    return settings.STORAGE.MESSAGES + messageId.substring(0, 2) + "/" + messageId.substring(2, 4) + "/" + messageId.substring(4, 6) + "/" + messageId + ".parsed.json";
+    return settings.STORAGE.MESSAGES + pathWith2Letters(messageId) + "/" + messageId + ".parsed.json";
+}
+
+function attachmentPath(attachment) {
+    return settings.STORAGE.ATTACHMENTS + pathWith2Letters(attachment) + "/" + attachment;
 }
 
 function draftPath(account, draftId) {
     var hash = crypto.createHash('sha1').update(account).digest("hex");
-    return settings.STORAGE.DRAFTS + hash.substring(0, 2) + "/" + hash.substring(2, 4) + "/" + hash.substring(4, 6) + "/" + hash + "/" + draftId + ".draft.json";
+    return settings.STORAGE.DRAFTS + pathWith2Letters(hash) + "/" + hash + "/" + draftId + ".draft.json";
 }
 
 function uniqueId() {
@@ -156,9 +164,6 @@ function readFromFile(path, callback, plainText) {
 function deleteFile(path, callback) {
     fs.unlink(path, callback);
 }
-
-
-
 
 function getLogger(name) {
     var consoleTransport = new (winston.transports.Console)({
@@ -266,6 +271,7 @@ module.exports = {
     getLogger : getLogger,
 
     messageParsedPath : messageParsedPath,
+    attachmentPath : attachmentPath,
     draftPath : draftPath,
     eventSignature : eventSignature
 }

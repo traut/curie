@@ -47,7 +47,8 @@ Curie.Views.CollectionGeneric = Backbone.View.extend({
     createModelView : function(model) {
         this.modelViews[model.id] = this.modelViews[model.id] || new this.modelViewClass({
             model : model,
-            rootUrl : this.rootUrl
+            rootUrl : this.rootUrl,
+            parentName : this.model.get("name"),
         });
         this.modelViews[model.id].render();
         return this.modelViews[model.id];
@@ -152,7 +153,7 @@ Curie.Views.CollectionGeneric = Backbone.View.extend({
 
         console.info("Action " + action + " catched");
 
-        if (["open", "mark", "delete forever", "archive"].indexOf(action) == -1) {
+        if (["open", "mark", "delete forever", "archive", "add-labels"].indexOf(action) == -1) {
             console.error("unknown action " + action);
             return;
         }
@@ -191,7 +192,10 @@ Curie.Views.CollectionGeneric = Backbone.View.extend({
 
             curie.controllers.data.archiveMessages(marked);
 
+        } else if (action == "add-labels") {
+            curie.state.trigger("labels:show");
         }
+            
     }
 });
 

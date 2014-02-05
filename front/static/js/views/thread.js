@@ -25,6 +25,7 @@ var ThreadRowView = Backbone.View.extend({
         }
         var data = _.extend(modelData, {
             url : this.hashUrl,
+            parentName : this.options.parentName
         });
         var html = template(data);
         this.$el.html(html);
@@ -107,7 +108,17 @@ var ThreadView = Backbone.View.extend({
         if (message instanceof Curie.Models.Draft && !message.get("sent")) {
             return new Curie.Views.DraftView({ model : message, embedded : true });
         } else if (message instanceof Curie.Models.Message) {
-            return new MessageView({ model : message });
+            var messages = this.model.get("messages");
+            var index = messages.indexOf(message);
+            var folded = (
+                !message.get("unread") &&
+                index != (messages.length - 1) &&
+                index != (messages.length - 2)
+            );
+            return new MessageView({
+                model : message,
+                folded : folded,
+            });
         } else {
             console.error("Unknown message type", message);
             return null;

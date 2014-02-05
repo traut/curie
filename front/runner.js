@@ -176,6 +176,10 @@ function bindSocketCalls(socket) {
                 socket.emit("no-session");
                 return;
             }
+            if (!socket.handshake) {
+                socket.emit("no-session");
+                return;
+            }
             socket.handshake.session = session;
             callback();
         });
