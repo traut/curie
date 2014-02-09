@@ -385,11 +385,11 @@ function program1(depth0,data) {
 function program2(depth0,data) {
   
   var buffer = "", stack1, stack2, options;
-  buffer += "\n            <tr>\n                <td>\n                    <a class=\"label\" href=\"#p/";
+  buffer += "\n            <tr>\n                <td>\n                    <a href=\"#p/";
   if (stack1 = helpers.label) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.label; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "\">\n                        <span class=\"badge labelBadge\" style=\"background-color: ";
+    + "\"><span class=\"badge labelBadge\" style=\"background-color: ";
   options = {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data};
   stack2 = ((stack1 = helpers.colorForLabel || depth0.colorForLabel),stack1 ? stack1.call(depth0, depth0.label, options) : helperMissing.call(depth0, "colorForLabel", depth0.label, options));
   if(stack2 || stack2 === 0) { buffer += stack2; }
@@ -397,7 +397,7 @@ function program2(depth0,data) {
   options = {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data};
   stack2 = ((stack1 = helpers.shortify || depth0.shortify),stack1 ? stack1.call(depth0, depth0.label, 23, options) : helperMissing.call(depth0, "shortify", depth0.label, 23, options));
   if(stack2 || stack2 === 0) { buffer += stack2; }
-  buffer += "</span>\n                    </a>\n                </td>\n                <td><a href=\"#search/";
+  buffer += "</span></a>\n                </td>\n                <td><a href=\"#search/";
   if (stack2 = helpers.encoded_query) { stack2 = stack2.call(depth0, {hash:{},data:data}); }
   else { stack2 = depth0.encoded_query; stack2 = typeof stack2 === functionType ? stack2.apply(depth0) : stack2; }
   buffer += escapeExpression(stack2)

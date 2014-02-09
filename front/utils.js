@@ -10,6 +10,7 @@ var util = require('util'),
     async = require('async'),
     beanstalk = require('nodestalker'),
     uuidLib = require('node-uuid'),
+    rmdir = require('rimraf');
 
     settings = require('./settings.js');
 
@@ -61,8 +62,8 @@ function messageParsedPath(messageId) {
     return settings.STORAGE.MESSAGES + pathWith2Letters(messageId) + "/" + messageId + ".parsed.json";
 }
 
-function attachmentPath(attachment) {
-    return settings.STORAGE.ATTACHMENTS + pathWith2Letters(attachment) + "/" + attachment;
+function attachmentPath(messageId, attachment) {
+    return settings.STORAGE.MESSAGES + pathWith2Letters(messageId) + "/" + attachment;
 }
 
 function draftPath(account, draftId) {
@@ -165,6 +166,12 @@ function deleteFile(path, callback) {
     fs.unlink(path, callback);
 }
 
+function deleteMessageDir(messageId, callback) {
+    var path = messageParsedPath(messageId);
+
+    rmdir(pathTool.dirname(path), callback);
+}
+
 function getLogger(name) {
     var consoleTransport = new (winston.transports.Console)({
         colorize: 'true',
@@ -265,6 +272,7 @@ module.exports = {
     writeToFile : writeToFile,
     readFromFile : readFromFile,
     deleteFile : deleteFile,
+    deleteMessage : deleteMessageDir,
 
     pushToQueue : pushToQueue,
 
