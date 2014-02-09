@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,17 +21,14 @@ import org.junit.Test;
 public class ParserTest {
 
     private static final Log log = LogFactory.getLog(ParserTest.class);
-    private Parser parser;
-    private Store store;
+    
+    private static final String SCHEMAS_DIR = "../schemas";
     
     static {
         System.setProperty("java.awt.headless", "true");
     }
 
-
     public ParserTest() throws IOException {
-        store = new Store("../schemas", "/tmp");
-        parser = new Parser(store);
         log.info("Привет, эклипс-консоль!");
     }
 
@@ -46,7 +44,14 @@ public class ParserTest {
     @SuppressWarnings("rawtypes")
 	@Test
     public void testPlainEmail() throws MessagingException, IOException {
-        InputStream is = ClassLoader.getSystemResourceAsStream("plain-email.txt");
+        
+        String filename = "plain-email.txt";
+        URL resource = ClassLoader.getSystemResource(filename);
+        
+        Store store = new Store(new File(resource.getPath()).getParent(), SCHEMAS_DIR);
+        Parser parser = new Parser(store);
+        
+        InputStream is = ClassLoader.getSystemResourceAsStream(filename);
         String mid = "plain-email";
         
         Pair<ParsedMessage,RawMessage> pair = parser.parseMessage(mid, is);
@@ -79,6 +84,9 @@ public class ParserTest {
     public void testHtmlAndTextEmail() throws MessagingException, IOException {
     	
     	String filename = "html-and-text-email.txt";
+    	URL resource = ClassLoader.getSystemResource(filename);
+    	Store store = new Store(new File(resource.getPath()).getParent(), SCHEMAS_DIR);
+        Parser parser = new Parser(store);
     	
         InputStream is = ClassLoader.getSystemResourceAsStream(filename);
         Pair<ParsedMessage, RawMessage> pair = parser.parseMessage(filename, is);
@@ -97,6 +105,9 @@ public class ParserTest {
     public void testBodyAsMultipartInline() throws MessagingException, IOException {
         
     	String filename = "body-in-parts.txt";
+    	URL resource = ClassLoader.getSystemResource(filename);
+        Store store = new Store(new File(resource.getPath()).getParent(), SCHEMAS_DIR);
+        Parser parser = new Parser(store);
     	
     	InputStream is = ClassLoader.getSystemResourceAsStream(filename);
         Pair<ParsedMessage, RawMessage> pair = parser.parseMessage(filename, is);
@@ -112,8 +123,14 @@ public class ParserTest {
 
     @Test
     public void testEmailWithAttachment() throws MessagingException, IOException {
-        InputStream is = ClassLoader.getSystemResourceAsStream("with-attachment.txt");
         
+        String filename = "with-attachment.txt";
+        
+        URL resource = ClassLoader.getSystemResource(filename);
+        Store store = new Store(new File(resource.getPath()).getParent(), SCHEMAS_DIR);
+        Parser parser = new Parser(store);
+        
+        InputStream is = ClassLoader.getSystemResourceAsStream(filename);
         Pair<ParsedMessage, RawMessage> doc = parser.parseMessage("with-attachment", is);
         
         assertEquals(true, store.isValid(doc.getLeft()));

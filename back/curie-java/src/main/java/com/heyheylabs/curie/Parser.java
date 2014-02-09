@@ -64,9 +64,9 @@ public class Parser {
 		}
 
 		String filename = args[0];
+		String emailDir = new File(filename).getParent();
 
-		Store store = new Store();
-
+		Store store = new Store(emailDir);
 		Parser parser = new Parser(store);
 
 		Pair<ParsedMessage, RawMessage> parsedPair = parser.parseMessage(filename);

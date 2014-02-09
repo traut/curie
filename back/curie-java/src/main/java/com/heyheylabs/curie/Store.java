@@ -15,6 +15,7 @@ import java.util.UUID;
 import javax.mail.MessagingException;
 import javax.mail.Part;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -33,24 +34,25 @@ public class Store {
 
     private static final Log log = LogFactory.getLog(Store.class);
 
-    private static final String DEFAULT_ATTACHMENT_STORAGE = "/home/curie/storage/attachments";
     private static final String DEFAULT_SCHEMAS_DIR = "/home/curie/curie/back/schemas";
 
     private JsonValidator validator;
 
     private HashMap<String, JsonNode> schemas = new HashMap<String, JsonNode>();
 
-    private String attachmentStorage = DEFAULT_ATTACHMENT_STORAGE;
     private String schemasDir = DEFAULT_SCHEMAS_DIR;
 
-    public Store() throws IOException {
+    private String emailDir;
+
+    public Store(String emailDir) throws IOException {
         validator = JsonSchemaFactory.byDefault().getValidator();
+        this.emailDir = emailDir;
     }
 
-    public Store(String schemasDir, String attachmentsDir) throws IOException {
-        this();
+    public Store(String emailDir, String schemasDir) throws IOException {
+        this(emailDir);
         this.schemasDir = schemasDir;
-        this.attachmentStorage = attachmentsDir;
+        
     }
 
     private JsonNode loadSchema(String schemaFileName) throws IOException {
@@ -112,14 +114,10 @@ public class Store {
         saveToFile(jsonFilename, doc.asJson());
     }
 
-    public File getAttachment(String attachmentSavedAs) {
+    public File getAttachmentFile(String id) {
 
-        String relativePath = attachmentSavedAs.substring(0, 2) + "/"
-                + attachmentSavedAs.substring(2, 4) + "/"
-                + attachmentSavedAs.substring(4, 6) + "/"
-                + attachmentSavedAs;
-
-        File file = new File(this.attachmentStorage, relativePath);
+        String filename = id + ".attachment";
+        File file = new File(this.emailDir, filename);
 
         File parent = file.getParentFile();
         if (!parent.exists()) {
@@ -130,14 +128,14 @@ public class Store {
 
     public String saveAttachment(String originalFilename, InputStream in) throws IOException, MessagingException, FileNotFoundException {
 
-        String filename = UUID.randomUUID().toString() + ".attachment";
-        FileOutputStream out = new FileOutputStream(getAttachment(filename));
+        String attachmentId = UUID.randomUUID().toString();
+        FileOutputStream out = new FileOutputStream(getAttachmentFile(attachmentId));
 
         try {
-            IOUtils.copy(in, out);
-            return filename;
+            IOUtils.copy(in, out);      //NOTE: no streams larger than 2Gb
+            return attachmentId;
         } catch (IOException e) {
-            log.error("Cannot save attachment " + originalFilename + " to " + filename + ". Skipping");
+            log.error("Cannot save attachment " + originalFilename + " to " + attachmentId + ". Skipping");
             return null;
         } finally {
             IOUtils.closeQuietly(in);
