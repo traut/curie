@@ -121,7 +121,7 @@ MessageStore = function() {
                 },
                 function(_callback) {
                     log.info("Deleting " + message.id + ". Deleting from FS");
-                    utils.deleteFile(utils.messageParsedPath(message.id), _callback);
+                    utils.deleteMessage(message.id, _callback);
                 }
             ], function(err) {
                 callback(err, null);
