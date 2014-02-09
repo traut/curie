@@ -7,6 +7,7 @@
 
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -15,27 +16,91 @@
   <body>
     <div class="wrapper">
       <header>
-        <h1>Curie</h1>
-        <p>Webmail server</p>
-
-        <p class="view"><a href="https://github.com/traut/curie">View the Project on GitHub <small>traut/curie</small></a></p>
-
+        <h1 class="header">Curie</h1>
+        <p class="header">Webmail server</p>
 
         <ul>
-          <li><a href="https://github.com/traut/curie/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/traut/curie/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/traut/curie">View On <strong>GitHub</strong></a></li>
+          <li class="download"><a class="buttons" href="https://github.com/traut/curie/zipball/master">Download ZIP</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/traut/curie/tarball/master">Download TAR</a></li>
+          <li><a class="buttons github" href="https://github.com/traut/curie">View On GitHub</a></li>
         </ul>
+
+        <p class="header">This project is maintained by <a class="header name" href="https://github.com/traut">traut</a></p>
+
+
       </header>
       <section>
         <p>Curie is designed to be a self-hosted GMail replacement</p>
+
+<h2>
+<a name="components" class="anchor" href="#components"><span class="octicon octicon-link"></span></a>Components</h2>
+
+<ul>
+<li><a href="#incoming-email-processing">Incoming email processing</a></li>
+<li>Web service</li>
+</ul><h2>
+<a name="incoming-email-processing" class="anchor" href="#incoming-email-processing"><span class="octicon octicon-link"></span></a><a name="incoming-email-processing"></a>Incoming email processing</h2>
+
+<p>This is the email processing pipeline:</p>
+
+<pre><code>    Maildir
+       ↓
+   watcher.py       // Watcher catches changes in Maildir, moves files
+       |            // to a storage dir and pushes messages to "inbox" queue.
+       |            // Message is just a string - a path to a raw email blob.
+       ↓
++--------------+
+|    inbox     |
++------+-------+
+       ↓
+    parser.sh       // Parser (java code) parses email messages,
+       |            // creates *.raw.json and *.parsed.json files
+       |            // (according to schemas) next to a raw email file
+       ↓
++--------------+
+|    parsed    |
++------+-------+
+       ↓
+   indexer.py       // Reads *.parsed.json files and pushes
+       |            // updates to a Solr instance
+       ↓
++--------------+
+|   indexed    |    
++------+-------+
+       ↓
+   labeler.py       // Reads pre-defined filters (global and
+       |            // user specific) and adds
+       |            // labels to a doc in Solr index 
+       ↓
++--------------+
+|   labeled    |
++------+-------+
+</code></pre>
+
+<h2>
+<a name="web-server" class="anchor" href="#web-server"><span class="octicon octicon-link"></span></a>Web server</h2>
+
+<h3>
+<a name="backend" class="anchor" href="#backend"><span class="octicon octicon-link"></span></a>Backend</h3>
+
+<h3>
+<a name="frontend" class="anchor" href="#frontend"><span class="octicon octicon-link"></span></a>Frontend</h3>
       </section>
       <footer>
-        <p>This project is maintained by <a href="https://github.com/traut">traut</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+        <p><small>Hosted on <a href="http://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
       </footer>
     </div>
-    <script src="javascripts/scale.fix.js"></script>
-    
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+		          <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-47811033-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
   </body>
 </html>
