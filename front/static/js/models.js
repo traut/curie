@@ -318,8 +318,12 @@ Curie.Models.AttachmentPreview = Backbone.Model.extend({
         filetype : null,
         filesize : null,
         thumbnail : null,
+        messageId : null,
     },
-    urlRoot: "/attachment/preview",
+    //urlRoot: "/attachment/preview",
+    url : function() {
+        return "/attachment/preview/" + this.get("messageId") + "/" + this.get("id");
+    }
 });
 
 Curie.Models.State = Backbone.Model.extend({

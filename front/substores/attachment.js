@@ -2,12 +2,13 @@ var isodate = require("isodate"),
     crypto = require('crypto'),
     fs = require('fs-ext'),
     async = require('async'),
+    solrUtils = require('../solrUtils'),
 
     settings = require('../settings'),
     utils = require('../utils');
 
 var mmm = require('mmmagic'),
-    Magic = mmm.Magic;
+    mime = new mmm.Magic(mmm.MAGIC_MIME_TYPE);
 
 
 var log = utils.getLogger("store.attachment");
@@ -16,21 +17,18 @@ AttachmentStore = function() {
     return {
         getPreview : function(handshake, options, callback) {
             var user = handshake.session.user.hash,
-                attachment = options.attachmentId + ".attachment";
+                attachment = options.attachmentId + ".attachment",
+                messageId = options.messageId;
 
-            //FIXME: security hole. we need to check if the requestor is the owner
-            //
-
-            var path = utils.attachmentPath(attachment);
-            var thumbnail = path + ".thumb";
-
-            if (!fs.existsSync(path)) {
-                callback("File " + path + " dosn't exist");
+            if (!messageId || !options.attachmentId) {
+                log.error("No messageId or attachmentId");
+                callback("No message id or attachment id");
                 return;
             }
 
+
             function readAndSend(filepath, reply) {
-                console.info("Reading " + filepath);
+                log.debug("Sending " + filepath);
                 if (!fs.existsSync(filepath)) {
                     callback("File " + filepath + " doesn't exist");
                     return;
@@ -41,14 +39,26 @@ AttachmentStore = function() {
                 });
             }
 
+            
+            var path = utils.attachmentPath(messageId, attachment);
+
+            if (!fs.existsSync(path)) {
+                callback("File " + path + " dosn't exist");
+                return;
+            }
+
             async.parallel({
                 stats : function(callback) {
                     fs.stat(path, callback); 
                 },
                 mime : function(callback) {
-                    new Magic(mmm.MAGIC_MIME_TYPE).detectFile(path, callback);
+                    mime.detectFile(path, callback);
                 }
             }, function(err, results) {
+                if (err) {
+                    callback(err, null);
+                    return;
+                }
 
                 var filetype = results.mime;
                 var filesize = results.stats.size;
@@ -57,63 +67,30 @@ AttachmentStore = function() {
                     id : attachment,
                     filetype : filetype,
                     filesize : filesize,
+                    messageId : messageId,
                 };
 
-                if (err) {
-                    callback(err, null);
-                    return;
-                }
-
-                if (fs.existsSync(thumbnail)) {
-                    readAndSend(thumbnail, reply);
-                } else {
-
-                    var PREVIEW_SIZE = {
-                        width : 400,
-                        height : 300
-                    }
-
-                    //convert -density 300 input.pdf[0] -scale 400000 output.png
-
-                    var params = "";
-
-                    if (filetype == 'image/png' || filetype == 'image/jpeg' || filetype == 'image/jpg') {
-                        var t = filetype.split('/')[1];
-                        params = "-define " + t + ":size=500x180 " + path + " -auto-orient -thumbnail " + PREVIEW_SIZE.width + "x" + PREVIEW_SIZE.height + " -unsharp 0x.5 png:" + thumbnail;
-                    } else if (filetype == 'application/pdf') {
-                        params = path + "[0] -auto-orient -thumbnail " + PREVIEW_SIZE.width + "x" + PREVIEW_SIZE.height + " png:" + thumbnail;
-                    } else {
+                utils.createThumbnail(path, filetype, function(err, thumbnail) {
+                    if (err) {
                         callback(null, reply);
                         return;
                     }
-                    console.info("Making a thumbnail for " + path);
-                    console.info("convert " + params);
-                    var convert = require('child_process').spawn("convert", params.split(" "));
-
-                    convert.stdout.on('data', function (data) {
-                      console.log('stdout: ' + data);
-                    });
-
-                    convert.stderr.on('data', function (data) {
-                      console.log('stderr: ' + data);
-                    });
-
-                    convert.on('close', function (code) {
-                      console.log('child process exited with code ' + code);
-                    });
-
-                    convert.on('close', function (code) {
-                        if (code == 1) {
-                            callback("Can't resize: " + code, null);
-                        }
-                        callback(null, reply);
-                    });
-
-                }
-
+                    readAndSend(thumbnail, reply);
+                });
             });
+
         },
         getAttachment : function(handshake, options, callback) {
+            var user = handshake.session.user.hash,
+                attachment = options.attachmentId + ".attachment",
+                messageId = options.messageId;
+
+            if (!messageId || !options.attachmentId) {
+                log.error("No messageId or attachmentId");
+                callback("No message id or attachment id");
+                return;
+            }
+
         }
     }
 };

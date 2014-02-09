@@ -166,7 +166,18 @@ a.label {
     overflow-x: auto; }
   .message a.showQuote {
     cursor: pointer;
-    /*@include muted;*/ }
+    /*@include muted;*/
+    background: #ddd;
+    color: #555;
+    padding: 0 5px;
+    line-height: 6px;
+    height: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    vertical-align: middle;
+    display: inline-block;
+    border-radius: 1px;
+    text-decoration: none; }
   .message.selected {
     border-left: 1px solid #0088cc !important; }
   .message.marked {

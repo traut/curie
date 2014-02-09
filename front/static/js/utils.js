@@ -82,7 +82,7 @@ function removeTags(html) {
   return html.replace(/</g, '&lt;');
 }
 
-var QUOTE_LABEL = "[ &hellip; ]";
+var QUOTE_LABEL = "&hellip;";
 
 var QUOTE_BLOCK = function() {
     var random = Math.floor(Math.random() * 100000);

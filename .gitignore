@@ -9,6 +9,7 @@ local_settings.py
 .sass-cache
 .classpath
 .project
+settings.js
 var
 snapshot.db
 

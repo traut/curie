@@ -7,6 +7,13 @@ var settings = {
         DRAFTS : "/home/curie/storage/drafts/",
     },
 
+    LOG_LEVEL : 'debug',
+
+    PREVIEW_SIZE : {
+        width : 400,
+        height : 300
+    },
+
 
     NUM_ROWS : 30,
     NUM_GROUPS : 30,
@@ -16,8 +23,8 @@ var settings = {
 
     LOG_FILE : '/home/curie/curie/front/curie.log',
 
-
-    SECRET : 'j30bEHtFectqbprA6HTe1FpVRlSx/6UOg9JHmOrt7Pa2Bf4que6nTpFrM+uYNHw8',
+    //SECRET : 'REPLACE-WITH-A-SECRET-STRING',
+    SECRET : 'AlgudbuvCoxFuccuthtegBetAytnovewyoghMoicNodveodjinwessovBedsyuOndyonyacCyackCoshtugDyadrugjecVomtIagHotumIghurEabDoak[',
 
     COOKIE_NAME_SESSION : 'curie.sid',
     COOKIE_EXIPE_IN : 60 * 60 * 1000, // 60min

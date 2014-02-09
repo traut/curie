@@ -143,7 +143,8 @@ var MessageView = Backbone.View.extend({
             }
             new Curie.Models.AttachmentPreview({
                 id : a.file,
-                filename : a.filename
+                filename : a.filename,
+                messageId : self.model.get("id"),
             }).fetch({
                 success : function(model) {
                     var preview = self.$("div[name='" + model.get("id") + "']");

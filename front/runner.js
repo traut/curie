@@ -125,7 +125,6 @@ io.configure(function (){
                 callback(null, false);
                 return;
             }
-            console.info(session);
 
             log.info("User " + session.user.hash + " authorized");
 
@@ -168,8 +167,6 @@ function withSession(sessionId, callback) {
 function bindSocketCalls(socket) {
     var sessionId = socket.handshake.sessionID;
 
-    console.info("sessionid from handshake: " + sessionId, socket.handshake);
-
     var runInSession = function(callback) {
         withSession(sessionId, function(err, session) {
             if (err || !session) {
@@ -187,31 +184,31 @@ function bindSocketCalls(socket) {
 
     socket.on('create', function(data) {
         runInSession(function() {
-            log.log("info", "create %j", data, {});
+            log.log("debug", "create %j", data, {});
             store.create(socket, data.cast, data.item);
         });
     });
     socket.on('read', function(data) {
         runInSession(function() {
-            log.log("info", "read %j", data, {});
+            log.log("debug", "read %j", data, {});
             store.read(socket, data.cast, data.ctx);
         });
     });  
     socket.on('update', function(data) {
         runInSession(function() {
-            log.log("info", "update %j", data, {});
+            log.log("debug", "update %j", data, {});
             store.update(socket, data.cast, data.item);
         });
     }); 
     socket.on('patch', function(data) {
         runInSession(function() {
-            log.log("info", "patch %j", data, {});
+            log.log("debug", "patch %j", data, {});
             store.patch(socket, data.cast, data.changed);
         });
     }); 
     socket.on('delete', function(data) {
         runInSession(function() {
-            log.log("info", "delete %j", data, {});
+            log.log("debug", "delete %j", data, {});
             store.destroy(socket, data.cast, data.item);
         });
     });

@@ -175,6 +175,7 @@ function deleteMessageDir(messageId, callback) {
 function getLogger(name) {
     var consoleTransport = new (winston.transports.Console)({
         colorize: 'true',
+        level: settings.LOG_LEVEL,
         label: name,
         timestamp: function() {
             var d = new Date();
@@ -258,6 +259,52 @@ function pushToQueue(queue, message) {
     });
 }
 
+
+
+function createThumbnail(path, filetype, _callback) {
+
+    var thumbnail = path + ".thumb";
+
+    //convert -density 300 input.pdf[0] -scale 400000 output.png
+    
+    if (fs.existsSync(thumbnail)) {
+        _callback(null, thumbnail);
+        return;
+    }
+
+    var params = "";
+
+    if (filetype == 'image/png' || filetype == 'image/jpeg' || filetype == 'image/jpg') {
+        var t = filetype.split('/')[1];
+        params = "-define " + t + " " + path + " -auto-orient -thumbnail " + settings.PREVIEW_SIZE.width + "x" + settings.PREVIEW_SIZE.height + " -unsharp 0x.5 png:" + thumbnail;
+    } else if (filetype == 'application/pdf') {
+        params = path + "[0] -auto-orient -thumbnail " + settings.PREVIEW_SIZE.width + "x" + settings.PREVIEW_SIZE.height + " png:" + thumbnail;
+    } else {
+        _callback("Unknown type");
+        return;
+    }
+
+    childProcess = require('child_process');
+    var convert = childProcess.spawn("convert", params.split(" "));
+
+    convert.stdout.on('data', function (data) {
+        log.debug('stdout: ' + data);
+    });
+
+    convert.stderr.on('data', function (data) {
+        log.error('stderr: ' + data);
+    });
+
+    convert.on('close', function (code) {
+        if (code == 1) {
+            log.error('child process exited with code ' + code + " for " + path);
+            _callback("Can't resize: " + code);
+            return;
+        }
+        _callback(null, thumbnail);
+    });
+}
+
  
 module.exports = {
     AccessDenied : AccessDenied,
@@ -273,6 +320,8 @@ module.exports = {
     readFromFile : readFromFile,
     deleteFile : deleteFile,
     deleteMessage : deleteMessageDir,
+
+    createThumbnail : createThumbnail,
 
     pushToQueue : pushToQueue,
 

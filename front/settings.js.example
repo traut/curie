@@ -1,0 +1,32 @@
+var settings = {
+
+    DOMAIN : 'somedomain.com',
+
+    STORAGE : {
+        MESSAGES : "/storage/emails/",
+        DRAFTS : "/storage/drafts/",
+    },
+
+    LOG_LEVEL : 'debug',
+
+    PREVIEW_SIZE : {
+        width : 400,
+        height : 300
+    },
+
+
+    NUM_ROWS : 30,
+    NUM_GROUPS : 30,
+    NUM_ROWS_IN_GROUP : 0,
+
+    INFINITY : 100,
+
+    LOG_FILE : 'curie.log',
+
+    SECRET : 'REPLACE-WITH-A-SECRET-STRING',
+
+    COOKIE_NAME_SESSION : 'curie.sid',
+    COOKIE_EXIPE_IN : 60 * 60 * 1000, // 60min
+}
+
+module.exports = settings;

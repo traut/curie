@@ -50,7 +50,7 @@ router.match('/drafts/:draftId', 'DELETE').to('draftStore.deleteDraft');
 router.match('/drafts', 'PUT').to('draftStore.updateDraft');
 
 
-router.match('/attachment/preview/:attachmentId.attachment', 'GET').to('attachmentStore.getPreview');
+router.match('/attachment/preview/:messageId/:attachmentId.attachment', 'GET').to('attachmentStore.getPreview');
 router.match('/attachment/get/:attachmentId.attachment', 'GET').to('attachmentStore.getAttachment');
 
 var stores = {
