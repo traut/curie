@@ -25,7 +25,9 @@ Curie.Views.DraftView = Backbone.View.extend({
         });
 
         this.$el.html(this.template(data));
-        this.$("input[name=to]").focus();
+        setTimeout(function() {
+            $("input[name=to]", this.$el).focus();
+        }, 300);
 
         return this;
     },

@@ -181,7 +181,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 function program1(depth0,data) {
   
   var buffer = "", stack1;
-  buffer += "\n    <h1 class=\"lead\"><span class=\"muted\">Search:</span> ";
+  buffer += "\n    <h1 class=\"lead searchHeader\"><span class=\"muted\">Search:</span> ";
   if (stack1 = helpers.query) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.query; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
@@ -189,7 +189,7 @@ function program1(depth0,data) {
   if (stack1 = helpers.size) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.size; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + " found</span></h1>\n    ";
+    + " found</span></h1>\n    <div class=\"selectionActions\" name=\"selection-actions\">\n        <div class=\"btn-group controls pull-right\">\n            <button class=\"btn btn-small\" name=\"delete-selected\">Delete <span name=\"howManySelected\"></span> selected</button>\n            <button class=\"btn btn-small\" name=\"delete-all\">Delete all found</button>\n        </div>\n    </div>\n    ";
   return buffer;
   }
 
@@ -898,7 +898,15 @@ function program25(depth0,data) {
   if (stack1 = helpers.file) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.file; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "\">\n                    <a href=\"\">";
+    + "\">\n                    <a href=\"/attachment/";
+  if (stack1 = helpers.id) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "/";
+  if (stack1 = helpers.file) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.file; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\" target=\"_blank\">";
   if (stack1 = helpers.filename) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.filename; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
@@ -939,10 +947,6 @@ function program25(depth0,data) {
   stack2 = helpers.each.call(depth0, depth0._body, {hash:{},inverse:self.noop,fn:self.program(16, program16, data),data:data});
   if(stack2 || stack2 === 0) { buffer += stack2; }
   buffer += "\n\n            ";
-  if (stack2 = helpers.attachment) { stack2 = stack2.call(depth0, {hash:{},data:data}); }
-  else { stack2 = depth0.attachment; stack2 = typeof stack2 === functionType ? stack2.apply(depth0) : stack2; }
-  buffer += escapeExpression(stack2)
-    + "\n\n            ";
   stack2 = helpers['if'].call(depth0, depth0.attachments, {hash:{},inverse:self.noop,fn:self.program(24, program24, data),data:data});
   if(stack2 || stack2 === 0) { buffer += stack2; }
   buffer += "\n        </div>\n    </div>\n\n";

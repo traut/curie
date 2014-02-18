@@ -145,9 +145,13 @@ Curie.Views.CollectionGeneric = Backbone.View.extend({
         }
 
         var nextIndex = getNextIndex(selectedIndex, move, this.collection.length);
+        if (selectedIndex == nextIndex && selectedIndex == (this.collection.length - 1) && this.model && this.model.nextPage) {
+            this.model.nextPage();
+        }
 
         var view = this.modelViews[this.collection.at(nextIndex).id];
         view && view.select();
+
     },
     performAction : function(action) {
 
@@ -182,20 +186,27 @@ Curie.Views.CollectionGeneric = Backbone.View.extend({
                 this.modelViews[selected.id].actionOpen();
             } else if (action == 'mark') {
                 this.modelViews[selected.id].actionMark();
+
+                this.showSelectionActionButtons();
             }
         } else if (action == "archive" ){
             var marked = this.collection.filter(function(m) {
                 return this.modelViews[m.id].isMarked();
             }, this);
 
-            console.info("archiving " + marked.length + " messages");
-
             curie.controllers.data.archiveMessages(marked);
 
         } else if (action == "add-labels") {
             curie.state.trigger("labels:show");
         }
-            
+    },
+    showSelectionActionButtons : function() {
+        this.$("[name=selection-actions]").show();
+
+        var marked = this.collection.filter(function(m) {
+            return this.modelViews[m.id].isMarked();
+        }, this).length;
+        this.$("[name=howManySelected]", "[name=selection-actions]").text(marked);
     }
 });
 
@@ -203,7 +214,9 @@ Curie.Views.CollectionGeneric = Backbone.View.extend({
 
 Curie.Views.Pack = Curie.Views.CollectionGeneric.extend({
     events : {
-        "click .loadMore button" : "loadNextPage"
+        "click .loadMore button" : "loadNextPage",
+        "click button[name=delete-selected]" : "deleteAllSelected",
+        "click button[name=delete-all]" : "deleteAll",
     },
     initialize : function(options) {
         options = options || {};
@@ -216,6 +229,12 @@ Curie.Views.Pack = Curie.Views.CollectionGeneric.extend({
     },
     loadNextPage : function() {
         this.model.nextPage();
+    },
+    deleteAllSelected : function() {
+        Mousetrap.trigger("D D");
+    },
+    deleteAll : function() {
+        curie.controllers.data.deleteAllFound(this.model);
     }
 });
 

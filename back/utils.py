@@ -30,10 +30,26 @@ def solr_escape(value):
     """
     return ESCAPE_CHARS_RE.sub(r'\\\g<char>', value)
 
+def strip_control_chars(value):
+    # escaping control characters leaving spaces (ord==32) and tabs (ord==9) in place
+    return ''.join([ch for ch in value if ord(ch) > 31 or ord(ch) == 9])
+
 
 def get_accounts_for_email(email):
+
+    if "@" not in email:
+        return []
+
     cur = usersDb.cursor()
-    return [f[0] for f in cur.execute("select hash from accounts, emails where emails.account_id = accounts.id and emails.email = '%s'" % email).fetchall()]
+    exact_matches = (f[0] for f in cur.execute("select hash from accounts, emails where emails.account_id = accounts.id and emails.email = '%s'" % email).fetchall())
+
+    domain = email.split('@')[1];
+    domain_matches = (f[0] for f in cur.execute("select hash from accounts, emails where emails.account_id = accounts.id and emails.email = '*@%s'" % domain).fetchall())
+
+    results = set()
+    results.update(exact_matches)
+    results.update(domain_matches)
+    return list(results)
 
 def get_filters(account_hash):
     cur = filtersDb.cursor()
@@ -69,6 +85,7 @@ def get_recepients(blob):
 
 def get_accounts_for_blob(blob):
     hashes = []
+    print get_recepients(blob)
     for email in get_recepients(blob):
         hashes.extend(get_accounts_for_email(email))
     return hashes

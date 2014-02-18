@@ -178,11 +178,13 @@ function getNextIndex(currentIndex, actionType, itemsLength) {
     switch (actionType) {
         case "up": 
             nextIndex = currentIndex - 1;
-            nextIndex = (nextIndex < 0) ? (itemsLength - 1) : nextIndex;
+            //nextIndex = (nextIndex < 0) ? (itemsLength - 1) : nextIndex;
+            nextIndex = (nextIndex < 0) ? 0 : nextIndex;
             break;
         case "down":
             nextIndex = currentIndex + 1;
-            nextIndex = (nextIndex >= itemsLength) ? 0 : nextIndex;
+            //nextIndex = (nextIndex >= itemsLength) ? 0 : nextIndex;
+            nextIndex = (nextIndex >= itemsLength) ? itemsLength - 1 : nextIndex;
             break;
         case "first":
             nextIndex = 0;

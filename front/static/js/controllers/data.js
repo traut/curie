@@ -17,6 +17,8 @@ Curie.Controllers.Data = function () {
         extendQuery : search.extendQuery,
         extendAndEncodeQuery : search.extendAndEncodeQuery,
 
+        deleteAllFound : search.deleteAllFound,
+
         startSync : sync.start,
         stopSync : sync.stop,
     });

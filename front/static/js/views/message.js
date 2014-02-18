@@ -84,7 +84,7 @@ var MessageRowView = Backbone.View.extend({
         this.selected = true;
         updateElementClass(this.$(".messageRow"), true, "selected");
         if (!elementInViewport(this.$el[0])) {
-            $('html, body').animate({scrollTop : this.$el.offset().top - 200}, 10);
+            $('html, body').animate({scrollTop : this.$el.offset().top - 200}, 300);
         }
     },
     unselect : function() {

@@ -107,12 +107,12 @@ button.close {
   .messageRow.unread a {
     color: black; }
   .messageRow.selected {
-    border-left: 1px solid #0088cc !important; }
+    border-left: 2px solid #0088cc !important; }
   .messageRow.marked {
     background-color: #fcf8e3;
     border: 1px solid #fbeed5; }
   .messageRow.marked.selected.selected {
-    border-left: 1px solid #0088cc !important; }
+    border-left: 2px solid #0088cc !important; }
   .messageRow .dateField {
     white-space: nowrap;
     text-align: right; }
@@ -396,6 +396,13 @@ a.label {
     display: none; }
     #packView .popupView .controls {
       margin-bottom: 10px; }
+  #packView .searchHeader {
+    clear: both;
+    overflow: auto; }
+  #packView .selectionActions {
+    overflow: auto;
+    width: 100%;
+    display: none; }
 
 #loginModal {
   width: 300px;

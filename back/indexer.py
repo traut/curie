@@ -7,7 +7,7 @@ import solr
 import uuid
 import itertools
 
-from utils import solr_escape, read_blob, get_accounts_for_blob
+from utils import solr_escape, read_blob, get_accounts_for_blob, strip_control_chars
 
 
 import logging
@@ -28,8 +28,12 @@ def create_email_doc(account_hash, blob):
     def extract(field, subfield):
         return filter(None, [a.get(subfield) for a in blob["fields"][field]])
 
+    def extract_and_clean(field, subfield):
+        return [strip_control_chars(x) for x in extract(field, subfield)]
+
     def as_json(field):
         return json.dumps(blob["fields"][field])
+
 
     document = {
         "id" : mid,
@@ -44,24 +48,24 @@ def create_email_doc(account_hash, blob):
         "from.email" : _from["email"],
         "from.json" : json.dumps(_from),
 
-        "cc.name" : extract("cc", "name"),
-        "cc.email" : extract("cc", "email"),
+        "cc.name" : extract_and_clean("cc", "name"),
+        "cc.email" : extract_and_clean("cc", "email"),
         "cc.json" : as_json("cc"),
 
-        "bcc.name" : extract("bcc", "name"),
-        "bcc.email" : extract("bcc", "email"),
+        "bcc.name" : extract_and_clean("bcc", "name"),
+        "bcc.email" : extract_and_clean("bcc", "email"),
         "bcc.json" : as_json("bcc"),
 
-        "to.name" : extract("to", "name"),
-        "to.email" : extract("to", "email"),
+        "to.name" : extract_and_clean("to", "name"),
+        "to.email" : extract_and_clean("to", "email"),
         "to.json" : as_json("to"),
 
-        "attachment" : extract("attachments", "filename"),
+        "attachment" : extract_and_clean("attachments", "filename"),
 
         "reference" : blob["fields"].get("references", []),
 
         "subject" : blob["fields"].get("subject"),
-        "body" : extract("body", "value")
+        "body" : extract_and_clean("body", "value")
     }
 
     return document

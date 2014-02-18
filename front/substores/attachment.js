@@ -26,58 +26,53 @@ AttachmentStore = function() {
                 return;
             }
 
-
-            function readAndSend(filepath, reply) {
-                log.debug("Sending " + filepath);
-                if (!fs.existsSync(filepath)) {
-                    callback("File " + filepath + " doesn't exist");
-                    return;
-                }
-                fs.readFile(filepath, function (err, data) {
-                    reply.thumbnail = new Buffer(data, 'binary').toString('base64');
-                    callback(null, reply);
-                });
-            }
-
-            
-            var path = utils.attachmentPath(messageId, attachment);
-
-            if (!fs.existsSync(path)) {
-                callback("File " + path + " dosn't exist");
-                return;
-            }
-
-            async.parallel({
-                stats : function(callback) {
-                    fs.stat(path, callback); 
-                },
-                mime : function(callback) {
-                    mime.detectFile(path, callback);
-                }
-            }, function(err, results) {
+            solrUtils.getMessage(user, messageId, function(err, message) {
                 if (err) {
+                    log.error("No access to " + messageId);
                     callback(err, null);
                     return;
                 }
+                var path = utils.attachmentPath(messageId, attachment);
 
-                var filetype = results.mime;
-                var filesize = results.stats.size;
+                if (!fs.existsSync(path)) {
+                    callback("File " + path + " dosn't exist");
+                    return;
+                }
 
-                var reply = {
-                    id : attachment,
-                    filetype : filetype,
-                    filesize : filesize,
-                    messageId : messageId,
-                };
 
-                utils.createThumbnail(path, filetype, function(err, thumbnail) {
+                async.parallel({
+                    stats : function(callback) {
+                        fs.stat(path, callback); 
+                    },
+                    mime : function(callback) {
+                        mime.detectFile(path, callback);
+                    }
+                }, function(err, results) {
                     if (err) {
-                        callback(null, reply);
+                        callback(err, null);
                         return;
                     }
-                    readAndSend(thumbnail, reply);
+
+                    var filetype = results.mime;
+                    var filesize = results.stats.size;
+
+                    var reply = {
+                        id : attachment,
+                        filetype : filetype,
+                        filesize : filesize,
+                        messageId : messageId,
+                    };
+
+                    utils.createThumbnail(path, filetype, function(err, thumbnail) {
+                        if (err) {
+                            callback(null, reply);
+                            return;
+                        }
+                        readAndSend(thumbnail, reply);
+                    });
                 });
             });
+            
 
         },
         getAttachment : function(handshake, options, callback) {
@@ -94,6 +89,19 @@ AttachmentStore = function() {
         }
     }
 };
+
+
+function readAndSend(filepath, reply, _callback) {
+    log.debug("Sending " + filepath);
+    if (!fs.existsSync(filepath)) {
+        _callback("File " + filepath + " doesn't exist");
+        return;
+    }
+    fs.readFile(filepath, function (err, data) {
+        reply.thumbnail = new Buffer(data, 'binary').toString('base64');
+        _callback(null, reply);
+    });
+}
 
 module.exports = {
     AttachmentStore : AttachmentStore

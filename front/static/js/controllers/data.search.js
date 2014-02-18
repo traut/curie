@@ -42,16 +42,21 @@ Curie.Controllers.Data.Search = function () {
             _query = createQueryFromTerm(query);
         }
         return _query;
-    }
+    };
 
 
     var extendAndEncodeQuery = function(query) {
         return utf8_to_b64(extendQuery(query));
-    }
+    };
+
+    var deleteAllFound = function(searchModel) {
+        console.info("Deleting everything for query=" + searchModel.get("query"));
+    };
 
     _.extend(this, {
         getResults : getResults,
         extendQuery : extendQuery,
-        extendAndEncodeQuery : extendAndEncodeQuery
+        extendAndEncodeQuery : extendAndEncodeQuery,
+        deleteAllFound : deleteAllFound
     });
 }
