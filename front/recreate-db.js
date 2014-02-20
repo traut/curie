@@ -13,7 +13,7 @@ var filtersDB = new sqlite3.Database('/home/curie/curie/filters.db');
 //        + " (id  INTEGER PRIMARY KEY AUTOINCREMENT, hash VARCHAR(40), login VARCHAR(255), password VARCHAR(500),"
 //        + " UNIQUE(hash) ON CONFLICT REPLACE, UNIQUE(login) ON CONFLICT REPLACE)");
 //
-//    usersDB.run("CREATE TABLE emails (id INTEGER PRIMARY KEY AUTOINCREMENT, account_id INTEGER, email VARCHAR(255), fullname VARCHAR(500), primary BOOLEAN DEFAULT 0);");
+//    usersDB.run("CREATE TABLE emails (id INTEGER PRIMARY KEY AUTOINCREMENT, account_id INTEGER, email VARCHAR(255), fullname VARCHAR(500), main BOOLEAN DEFAULT 0);");
 //
 //});
 

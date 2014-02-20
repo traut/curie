@@ -12,7 +12,9 @@ var http = require('http'),
     utils = require('./utils'),
     solrUtils = require('./solrUtils'),
     store = require("./store.js"),
-    feed = require("./feed.js");
+    feed = require("./feed.js"),
+
+    attachmentStore = require("./substores/attachment.js");
 
 var log = utils.getLogger("runner");
 
@@ -83,30 +85,19 @@ app.post('/auth', function (req, res) {
 });
 
 app.get('/attachment/:message/:attachment', function (req, res) {
-    console.info(req.params);
-    console.info(req.session.user);
-
     if (!req.session.user || 1 == 2) {
         res.redirect(401, '/'); // Unauthorized
         return;
     }
 
-    var user = req.session.user.hash;
-    var messageId = req.params.message;
-    var attachmentId = req.prarms.attachment;
-
-    solrUtils.getMessage(user, messageId, function(err, message) {
-        if (err) {
-            log.error("No access to " + messageId + " for " + user);
-            res.send(403); // Forbidden
+    attachmentStore.getAttachment(req.session.user.hash, req.params.message, req.params.attachment, function(errCode, response) {
+        if (errCode) {
+            res.send(errCore);
             return;
         }
-        var attachmentPath = fs.readFileSync(__dirname + '/html/index.html'));
-
-        res.writeHead(200, { 'Content-type': 'text/plain'});
-        res.end("HeyHey " + req.params.message + " " + req.params.attachment);
-        //res.end(fs.readFileSync(__dirname + '/html/index.html'));
-    }
+        res.set(response.headers);
+        res.sendfile(response.path);
+    });
 });
 
 

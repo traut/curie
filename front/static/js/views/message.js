@@ -159,6 +159,7 @@ var MessageView = Backbone.View.extend({
 
                         img.attr("src", "data:image/png;base64," + model.get("thumbnail"));
                     } else {
+                        // rendering nothing if there is no thumbnail
                     }
                 }
             });

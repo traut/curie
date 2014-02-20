@@ -5,10 +5,9 @@ var isodate = require("isodate"),
     solrUtils = require('../solrUtils'),
 
     settings = require('../settings'),
-    utils = require('../utils');
+    utils = require('../utils'),
 
-var mmm = require('mmmagic'),
-    mime = new mmm.Magic(mmm.MAGIC_MIME_TYPE);
+    messageStore = require('./message.js');
 
 
 var log = utils.getLogger("store.attachment");
@@ -17,10 +16,10 @@ AttachmentStore = function() {
     return {
         getPreview : function(handshake, options, callback) {
             var user = handshake.session.user.hash,
-                attachment = options.attachmentId + ".attachment",
+                attachmentId = options.attachmentId,
                 messageId = options.messageId;
 
-            if (!messageId || !options.attachmentId) {
+            if (!messageId || !attachmentId) {
                 log.error("No messageId or attachmentId");
                 callback("No message id or attachment id");
                 return;
@@ -32,7 +31,7 @@ AttachmentStore = function() {
                     callback(err, null);
                     return;
                 }
-                var path = utils.attachmentPath(messageId, attachment);
+                var path = utils.attachmentPath(messageId, attachmentId);
 
                 if (!fs.existsSync(path)) {
                     callback("File " + path + " dosn't exist");
@@ -45,7 +44,7 @@ AttachmentStore = function() {
                         fs.stat(path, callback); 
                     },
                     mime : function(callback) {
-                        mime.detectFile(path, callback);
+                        utils.mime.detectFile(path, callback);
                     }
                 }, function(err, results) {
                     if (err) {
@@ -57,7 +56,7 @@ AttachmentStore = function() {
                     var filesize = results.stats.size;
 
                     var reply = {
-                        id : attachment,
+                        id : attachmentId,
                         filetype : filetype,
                         filesize : filesize,
                         messageId : messageId,
@@ -68,7 +67,7 @@ AttachmentStore = function() {
                             callback(null, reply);
                             return;
                         }
-                        readAndSend(thumbnail, reply);
+                        readAndSend(thumbnail, reply, callback);
                     });
                 });
             });
@@ -90,6 +89,36 @@ AttachmentStore = function() {
     }
 };
 
+function getAttachment(userHash, messageId, attachmentId, callback) {
+    messageStore.getFullMessage(userHash, messageId, function(err, message) {
+        if (err) {
+            log.error("No access to " + messageId + " for " + user);
+            callback(403, null);
+            return;
+        }
+
+        var attachments = message.attachments.filter(function(a) { return (a.file == attachmentId); });
+
+        if (attachments.length == 0) {
+            log.error("Attachment " + attachmentId + " for message " + messageId + " doesn't exist");
+            callback(404);
+            return;
+        }
+
+        var attachment = attachments[0];
+        var attachmentPath = utils.attachmentPath(message.id, attachment.file);
+
+        utils.mime.detectFile(attachmentPath, function(err, result) {
+            callback(null, {
+                headers : {
+                    "Content-Disposition": 'attachment; filename="' + attachment.filename + '"',
+                    "Content-Type" : result
+                },
+                path : attachmentPath
+            });
+        });
+    });
+}
 
 function readAndSend(filepath, reply, _callback) {
     log.debug("Sending " + filepath);
@@ -104,5 +133,6 @@ function readAndSend(filepath, reply, _callback) {
 }
 
 module.exports = {
-    AttachmentStore : AttachmentStore
+    AttachmentStore : AttachmentStore,
+    getAttachment : getAttachment
 }

@@ -14,6 +14,9 @@ var util = require('util'),
 
     settings = require('./settings.js');
 
+var mmm = require('mmmagic'),
+    mime = new mmm.Magic(mmm.MAGIC_MIME_TYPE);
+
 
 
 AccessDenied = function(accessedByAccount, contentType, contentId) {
@@ -63,7 +66,7 @@ function messageParsedPath(messageId) {
 }
 
 function attachmentPath(messageId, attachment) {
-    return settings.STORAGE.MESSAGES + pathWith2Letters(messageId) + "/" + attachment;
+    return settings.STORAGE.MESSAGES + pathWith2Letters(messageId) + "/" + attachment + ".attachment";
 }
 
 function draftPath(account, draftId) {
@@ -288,11 +291,10 @@ function createThumbnail(path, filetype, _callback) {
     var convert = childProcess.spawn("convert", params.split(" "));
 
     convert.stdout.on('data', function (data) {
-        log.debug('stdout: ' + data);
     });
 
     convert.stderr.on('data', function (data) {
-        log.error('stderr: ' + data);
+        console.error('stderr: ' + data);
     });
 
     convert.on('close', function (code) {
@@ -330,7 +332,9 @@ module.exports = {
     messageParsedPath : messageParsedPath,
     attachmentPath : attachmentPath,
     draftPath : draftPath,
-    eventSignature : eventSignature
+    eventSignature : eventSignature,
+
+    mime : mime
 }
 
 

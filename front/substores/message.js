@@ -47,32 +47,35 @@ var getFullMessages = function(account, solrMessages, callback) {
     });
 }
 
+function getFullMessage(userHash, mid, callback) {
+    log.info("Reading message", mid);
+
+    var path = utils.messageParsedPath(mid);
+
+    async.parallel({
+        fs : function(callback) {
+            utils.readFromFile(path, callback);
+        },
+        solr : function(callback) {
+            solrUtils.getMessage(userHash, mid, callback);
+        }
+    }, function(err, results) {
+        if (err) {
+            callback(err, null);
+            return;
+        }
+        var email = converter.parsedAndSolrToEmail(results.fs, results.solr);
+        //email.body = results.fs.body;
+        callback(null, email);
+    });
+}
+
 MessageStore = function() {
     return {
         getMessage : function(handshake, options, callback) {
             var mid = options.messageId;
-
-            log.info("Reading message", mid);
-
-            var path = utils.messageParsedPath(mid);
-
-            async.parallel({
-                fs : function(callback) {
-                    utils.readFromFile(path, callback);
-                },
-                solr : function(callback) {
-                    solrUtils.getMessage(handshake.session.user.hash, mid, callback);
-                }
-            }, function(err, results) {
-                if (err) {
-                    callback(err, null);
-                    return;
-                }
-                var email = converter.parsedAndSolrToEmail(results.fs, results.solr);
-                //email.body = results.fs.body;
-                callback(null, email);
-                log.info("Message " + mid + " was send");
-            });
+            getFullMessage(handshake.session.user.hash, mid, callback);
+            log.info("Message " + mid + " was send");
         },
         patchMessage : function(handshake, options, callback) {
             log.info("Patching message with params", {params : options});
@@ -134,5 +137,6 @@ MessageStore = function() {
 
 module.exports = {
     getFullMessages : getFullMessages,
+    getFullMessage : getFullMessage,
     MessageStore : MessageStore
 }

@@ -705,11 +705,7 @@ function program21(depth0,data) {
     + "&nbsp;\n            ";
   stack2 = helpers['if'].call(depth0, depth0.has_attachments, {hash:{},inverse:self.noop,fn:self.program(19, program19, data),data:data});
   if(stack2 || stack2 === 0) { buffer += stack2; }
-  buffer += "\n        </div>\n        <!--<div class=\"span3 dateField\">";
-  options = {hash:{},inverse:self.noop,fn:self.program(17, program17, data),data:data};
-  stack2 = ((stack1 = helpers.dateformat || depth0.dateformat),stack1 ? stack1.call(depth0, depth0.received, "HH:mm, dddd, MMM Do", options) : helperMissing.call(depth0, "dateformat", depth0.received, "HH:mm, dddd, MMM Do", options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
-  buffer += "</div>-->\n        <div class=\"span2 dateField\">\n        ";
+  buffer += "\n        </div>\n        <div class=\"span2 dateField\">\n        ";
   options = {hash:{},inverse:self.noop,fn:self.program(17, program17, data),data:data};
   stack2 = ((stack1 = helpers.date_ago || depth0.date_ago),stack1 ? stack1.call(depth0, depth0.received, options) : helperMissing.call(depth0, "date_ago", depth0.received, options));
   if(stack2 || stack2 === 0) { buffer += stack2; }
@@ -886,30 +882,28 @@ function program24(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\n            <div class=\"row-fluid attachments\">\n                ";
-  stack1 = helpers.each.call(depth0, depth0.attachments, {hash:{},inverse:self.noop,fn:self.program(25, program25, data),data:data});
+  stack1 = helpers.each.call(depth0, depth0.attachments, {hash:{},inverse:self.noop,fn:self.programWithDepth(25, program25, data, depth0),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\n            </div>\n            ";
   return buffer;
   }
-function program25(depth0,data) {
+function program25(depth0,data,depth1) {
   
-  var buffer = "", stack1;
+  var buffer = "", stack1, stack2;
   buffer += "\n                <div class=\"attachmentPreview\" name=\"";
   if (stack1 = helpers.file) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.file; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "\">\n                    <a href=\"/attachment/";
-  if (stack1 = helpers.id) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1)
+    + "\">\n                    <a href=\"/attachment/"
+    + escapeExpression(((stack1 = depth1.id),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "/";
-  if (stack1 = helpers.file) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.file; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1)
+  if (stack2 = helpers.file) { stack2 = stack2.call(depth0, {hash:{},data:data}); }
+  else { stack2 = depth0.file; stack2 = typeof stack2 === functionType ? stack2.apply(depth0) : stack2; }
+  buffer += escapeExpression(stack2)
     + "\" target=\"_blank\">";
-  if (stack1 = helpers.filename) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.filename; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1)
+  if (stack2 = helpers.filename) { stack2 = stack2.call(depth0, {hash:{},data:data}); }
+  else { stack2 = depth0.filename; stack2 = typeof stack2 === functionType ? stack2.apply(depth0) : stack2; }
+  buffer += escapeExpression(stack2)
     + "</a>\n                    <span class=\"muted\" name=\"filesize\"></span>\n                </div>\n                ";
   return buffer;
   }
