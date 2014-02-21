@@ -131,7 +131,12 @@ public class Parser {
 		}
 		raw.addKeyValue("Body", IOUtils.toString(email.getInputStream(), "UTF-8"));
 
-		doc.addField("message_id", email.getMessageID());
+		String messageId = email.getMessageID();
+		if (messageId == null) {                          // NOTE: spam warning
+		    messageId = "";
+		}
+		
+		doc.addField("message_id", messageId);
 		doc.addField("from", email.getFrom());
 		doc.addField("to", email.getRecipients(RecipientType.TO));
 		doc.addField("cc", email.getRecipients(RecipientType.CC));
