@@ -86,7 +86,7 @@ app.post('/auth', function (req, res) {
 
 app.get('/attachment/:message/:attachment', function (req, res) {
     if (!req.session.user || 1 == 2) {
-        res.redirect(401, '/'); // Unauthorized
+        res.redirect('/'); // Unauthorized
         return;
     }
 
@@ -110,10 +110,6 @@ app.get('/logout', function (req, res) {
 var server = http.createServer(app);
 var io = socketio.listen(server);
 io.set('log level', 1); // info
-
-server.listen(8080, function() {
-    log.info('Listening at: http://localhost:8080');
-});
 
 io.configure(function (){
     io.set('authorization', function (handshakeData, callback) {
@@ -238,4 +234,8 @@ function bindSocketCalls(socket) {
         //sessionStore.destroy(sessionId);
     });
 }
+
+server.listen(8080, function() {
+    log.info('Listening at: http://localhost:8080');
+});
 

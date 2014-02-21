@@ -1,6 +1,7 @@
 
-STORAGE_EMAILS = '/home/curie/storage/emails'
-STORAGE = '/home/curie/storage/'
+STORAGE = '/home/curie/storage'
+
+STORAGE_EMAILS = STORAGE + '/emails'
 
 QUEUE_SERVER_NAME = 'localhost'
 QUEUE_SERVER_PORT = 11300

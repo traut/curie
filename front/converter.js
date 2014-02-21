@@ -37,6 +37,9 @@ function as_list(val) {
 }
 
 function solrToEmailPreview(doc) {
+    if (!doc) {
+        return null;
+    }
     return {
         id : get_first(doc.id),  //FIXME do we really need get_first here?
 

@@ -39,6 +39,8 @@ def run_filters(account_hash, message_id, query_label_pairs):
             updates.append(dict(id=r["id"], labels=dict(add=label)))
             added_labels.add(label)
 
+        print caged_query, len(results)
+
         if results:
             skip_inbox = skip_inbox or _skip_inbox
 
