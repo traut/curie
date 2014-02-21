@@ -25,6 +25,7 @@
         "handlebars": "1.0.12",
         "socket.io": "0.9.16",
         "async": "0.2.9",
-        "backbone.io": "0.4.0"
+        "backbone.io": "0.4.0",
+        "minimist": "0.0.8"
     }
 }

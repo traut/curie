@@ -10,13 +10,15 @@ var util = require('util'),
     async = require('async'),
     beanstalk = require('nodestalker'),
     uuidLib = require('node-uuid'),
-    rmdir = require('rimraf');
+    rmdir = require('rimraf'),
 
     settings = require('./settings.js');
 
 var mmm = require('mmmagic'),
     mime = new mmm.Magic(mmm.MAGIC_MIME_TYPE);
 
+var args = require('minimist')(process.argv.slice(2));
+var LOG_FILE = args["log"] || "curie-webserver.log";
 
 
 AccessDenied = function(accessedByAccount, contentType, contentId) {
@@ -90,7 +92,7 @@ function pad(n) {
 
 
 var fileTransport = new (winston.transports.File)({
-    filename: settings.LOG_FILE,
+    filename: LOG_FILE,
     json: 'false'
 });
 
