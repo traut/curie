@@ -5,9 +5,9 @@ var usersDB = new sqlite3.Database(__dirname + '/../users.db');
 var filtersDB = new sqlite3.Database(__dirname + '/../filters.db');
 
 usersDB.serialize(function() {
-    usersDB.run("DROP TABLE accounts");
-    usersDB.run("DROP TABLE emails");
-    usersDB.run("DROP TABLE details");
+    usersDB.run("DROP TABLE IF EXISTS accounts");
+    usersDB.run("DROP TABLE IF EXISTS emails");
+    usersDB.run("DROP TABLE IF EXISTS details");
 
     usersDB.run("CREATE TABLE accounts"
         + " (id  INTEGER PRIMARY KEY AUTOINCREMENT, hash VARCHAR(40), login VARCHAR(255), password VARCHAR(500),"
@@ -18,7 +18,7 @@ usersDB.serialize(function() {
 });
 
 filtersDB.serialize(function() {
-    filtersDB.run("DROP TABLE filters");
+    filtersDB.run("DROP TABLE IF EXISTS filters");
 
     filtersDB.run("CREATE TABLE filters (id INTEGER PRIMARY KEY AUTOINCREMENT, hash VARCHAR(40), query VARCHAR(1000), label VARCHAR(500), skip_inbox BOOLEAN DEFAULT 0);");
 });

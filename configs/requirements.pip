@@ -12,8 +12,8 @@ pathtools==0.1.2
 pjson==0.3
 pydns==2.3.6
 pyzmail==1.0.2
-queueit==1.0
 solrpy==0.9.5
 spambayes==1.1b1
 watchdog==0.6.0
 wsgiref==0.1.2
+git+git://github.com/chexov/queueit.git

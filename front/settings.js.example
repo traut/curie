@@ -3,8 +3,8 @@ var settings = {
     DOMAIN : 'somedomain.com',
 
     STORAGE : {
-        MESSAGES : "/storage/emails/",
-        DRAFTS : "/storage/drafts/",
+        MESSAGES : "STORAGE-MESSAGES-PATH",
+        DRAFTS : "STORAGE-DRAFTS-PATH",
     },
 
     LOG_LEVEL : 'debug',
@@ -20,8 +20,6 @@ var settings = {
     NUM_ROWS_IN_GROUP : 0,
 
     INFINITY : 100,
-
-    LOG_FILE : 'curie.log',
 
     SECRET : 'REPLACE-WITH-A-SECRET-STRING',
 
