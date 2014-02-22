@@ -1,4 +1,6 @@
-#! /usr/bin/env bash
+#! /bin/sh
+
+set -e
 
 STORAGE=./storage
 SOLR=./solr
