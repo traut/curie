@@ -21,7 +21,8 @@ q-wrapper indexed labeled $CURIE/back/labeler.py > $PWD/curie-worker-labeler.log
 
 q-wrapper relabel relabeled $CURIE/back/relabeler.py > $PWD/curie-worker-relabeler.log 2>&1 &
 
-cd $CURIE
+cd $CURIE/front
 node ./runner.js &
+cd ../..
 
 echo "Server is listening on http://localhost:8080"

@@ -64,6 +64,12 @@ npm install
 node ./recreate-db.js
 cd ..
 
+# FIXME: should be removed
+# patch barista package. we want it to support PATCH messages
+
+sed -i.bak "s/'GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'OPTIONS'/'GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'/" $CURIE/front/node_modules/barista/lib/router.js
+
+# Done
 
 echo
 echo "To start all the processes use run-all.sh"
