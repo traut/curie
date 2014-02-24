@@ -10,8 +10,7 @@ var barista = require('barista'),
 
 var log = utils.getLogger("users");
 
-// hacky for now
-var db = new sqlite3.Database('/home/curie/curie/users.db');
+var db = new sqlite3.Database(settings.DB.USERS);
 
 function hashPassword(password) {
     return crypto.createHash('sha512', crypto.randomBytes(256)).update(password).digest('hex');

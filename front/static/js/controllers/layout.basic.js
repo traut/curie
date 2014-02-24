@@ -75,7 +75,7 @@ Curie.Controllers.Layout.Basic = function () {
         if (activePack) {
             var unread = activePack.get("unread");
             var name = activePack.get("name");
-            document.title = name + ((unread && unread > 0) ? " (" + unread +")" : "") + " - Curie";
+            document.title = ((unread && unread > 0) ? "(" + unread +") " : "") + name + " - Curie";
         } else {
             document.title = "Curie";
         }
