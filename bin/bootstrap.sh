@@ -35,12 +35,12 @@ rm $TMP/$SOLR_ARCHIVE
 CURIE_SOLR=$SOLR/example/curie
 mkdir -p $CURIE_SOLR/messages/conf
 
-cp $SOLR/example/solr/collection1/conf/* $CURIE_SOLR/messages/conf/
+cp -r $SOLR/example/solr/collection1/conf/* $CURIE_SOLR/messages/conf/
 
 echo "name=messages" > $CURIE_SOLR/messages/core.properties
 
 cp $CURIE/configs/solr/solr.xml $CURIE_SOLR/
-cp $CURIE/configs/solr/messages/* $CURIE_SOLR/messages/conf/
+cp -r$CURIE/configs/solr/messages/* $CURIE_SOLR/messages/conf/
 
 
 # we're done with preparations. let's configure curie
