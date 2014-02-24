@@ -12,11 +12,7 @@ SOLR=$DIR/solr
 
 # start solr
 
-cd $SOLR/example
-java -Dsolr.solr.home=curie -jar start.jar > $DIR/curie-solr.log 2>&1 &
-cd ../..
-
-
+java -Dsolr.solr.home=curie -jar $SOLR/example/start.jar > $DIR/curie-solr.log 2>&1 &
 
 # start workers; pipeline described here - http://traut.github.io/curie/#incoming-email-processing
 
@@ -32,6 +28,6 @@ q-wrapper relabel relabeled $CURIE/back/relabeler.py > $DIR/curie-worker-relabel
 # start webserver
 cd $CURIE/front
 node ./runner.js --log $DIR/curie-webserver.log &
-cd ../..
+cd $DIR
 
 echo "Server is listening on http://localhost:8080"
