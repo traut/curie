@@ -49,8 +49,8 @@
         <pre><code>curl https://raw.github.com/traut/curie/master/bin/bootstrap.sh | bash</code></pre>
         If the last line of the output is "To start all the processes use run-all.sh" then everything is fine and you can try running workers and services.
 </p>
-<p> 3. To run Solr, the workers and Curie webserver run <a href="https://raw.github.com/traut/curie/master/bin/run-all.sh">run-all.sh</a> from the same directory:
-        <pre><code>$ ./curie/front/run-all.sh</pre></code>
+<p> 3. To run Solr, the workers and Curie webserver run <a href="https://raw.github.com/traut/curie/master/bin/run-all.sh">run-all.sh</a>:
+        <pre><code>$ ./curie/front/bin/run-all.sh</pre></code>
         There is a high probability that this will not work out of the box. You can find more info in ./curie-*.log files. Try running the demons manually, maybe in screen session.
 </p>
 <p> 4. To create a new user account, you would have to go into node shell and call users.addAccount function:
