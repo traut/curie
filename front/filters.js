@@ -10,7 +10,7 @@ var barista = require('barista'),
 
 var log = utils.getLogger("filter");
 
-var db = new sqlite3.Database('/home/curie/curie/filters.db');
+var db = new sqlite3.Database(settings.DB.FILTERS);
 
 function addFilter(account, query, label, skip_inbox, callback) {
 

@@ -1,8 +1,8 @@
+var settings = require('./settings'),
+    sqlite3 = require('sqlite3').verbose();
 
-var sqlite3 = require('sqlite3').verbose();
-
-var usersDB = new sqlite3.Database(__dirname + '/../users.db');
-var filtersDB = new sqlite3.Database(__dirname + '/../filters.db');
+var usersDB = new sqlite3.Database(settings.DB.USERS);
+var filtersDB = new sqlite3.Database(settings.DB.FILTERS);
 
 usersDB.serialize(function() {
     usersDB.run("DROP TABLE IF EXISTS accounts");

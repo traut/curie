@@ -6,8 +6,10 @@ from jsonschema import validate
 
 import sqlite3
 
-usersDb = sqlite3.connect('/home/curie/curie/users.db')
-filtersDb = sqlite3.connect('/home/curie/curie/filters.db')
+from settings import USERS_DB, FILTERS_DB
+
+usersDb = sqlite3.connect(USERS_DB)
+filtersDb = sqlite3.connect(FILTERS_DB)
 
 
 # Solr/Lucene special characters: + - ! ( ) { } [ ] ^ " ~ * ? : \

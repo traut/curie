@@ -51,15 +51,21 @@ cp $CURIE/configs/solr/messages/* $CURIE_SOLR/messages/conf/
 RANDOM_STRING=$(cat /dev/urandom | env LC_CTYPE=C tr -cd 'a-zA-Z0-9' | head -c 128)
 
 cp $CURIE/front/settings.js.example $CURIE/front/settings.js
+cp $CURIE/back/settings.py.example $CURIE/back/settings.py
 
+STORAGE_FULL=$(cd $STORAGE; pwd);
 CURIE_FULL=$(cd $CURIE; pwd);
 
-sed -i.bak "s@STORAGE-MESSAGES-PATH@$CURIE_FULL/messages@" $CURIE/front/settings.js
-sed -i.bak "s@STORAGE-DRAFTS-PATH@$CURIE_FULL/drafts@" $CURIE/front/settings.js
+sed -i.bak "s@STORAGE-MESSAGES-PATH@$STORAGE_FULL/messages@" $CURIE/front/settings.js
+sed -i.bak "s@STORAGE-DRAFTS-PATH@$STORAGE_FULL/drafts@" $CURIE/front/settings.js
 sed -i.bak "s@REPLACE-WITH-A-SECRET-STRING@$RANDOM_STRING@" $CURIE/front/settings.js
 
-sed -i.bak "s@USERS-DB@$CURIE/users.db@" $CURIE/front/settings.js
-sed -i.bak "s@FILTERS-DB@$CURIE/filters.db@" $CURIE/front/settings.js
+sed -i.bak "s@USERS-DB@$CURIE_FULL/users.db@" $CURIE/front/settings.js
+sed -i.bak "s@FILTERS-DB@$CURIE_FULL/filters.db@" $CURIE/front/settings.js
+
+sed -i.bak "s@STORAGE-PATH@$STORAGE_FULL@" $CURIE/back/settings.py
+sed -i.bak "s@USERS-DB@$CURIE_FULL/users.db@" $CURIE/back/settings.py
+sed -i.bak "s@FILTERS-DB@$CURIE_FULL/filters.db@" $CURIE/back/settings.py
 
 # configure python virtual environment
 
