@@ -38,7 +38,11 @@ app.configure(function () {
             httpOnly : true,
         }
     }));
+    if (settings.DEV == true) {
+        app.use('/static', express.static(__dirname + '/static'));
+    }
     app.use(express.bodyParser());
+
     //app.use(express.logger());
 });
 
@@ -233,10 +237,6 @@ function bindSocketCalls(socket) {
         log.info("Disconnect received for session=" + sessionId);
         //sessionStore.destroy(sessionId);
     });
-}
-
-if (settings.DEV == true) {
-    app.use(express.static(__dirname + '/static'));
 }
 
 server.listen(8080, function() {
