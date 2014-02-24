@@ -30,14 +30,49 @@
 
       </header>
       <section>
-        <p>Curie is designed to be a self-hosted GMail replacement</p>
+
+<h2><a name="about" class="anchor" href="#about"><span class="octicon octicon-link"></span></a>About</h2>
+<p>Curie is designed to be a self-hosted GMail replacement</p>
+
+<h2><a name="Installation" class="anchor" href="#Installation"><span class="octicon octicon-link"></span></a>Installation (Dev instance)</h2>
+<p>These are the steps to configure local dev Curie instance:</p>
+<p>1. Requirements:
+        <ul>
+            <li>python2.6</li>
+            <li>node</li>
+            <li>java</li>
+            <li><a href="http://kr.github.io/beanstalkd/">beanstalkd</a></li>
+        </ul>
+</p>
+<p> 2. Download and run <a href="https://raw.github.com/traut/curie/master/bin/bootstrap.sh">bootstrap.sh</a>. It will create local instance in the current directory (download/configure <a href="https://lucene.apache.org/solr/">Solr</a>, checkout/configure Curie).
+        <pre><code>curl https://raw.github.com/traut/curie/master/bin/bootstrap.sh | sh</code></pre>
+        If the last line of the output is "To start all the processes use run-all.sh" then everything is fine and you can try running workers and services.
+</p>
+<p> 3. To run Solr, the workers and Curie webserver run <a href="https://raw.github.com/traut/curie/master/bin/run-all.sh">run-all.sh</a> from the same directory:
+        <pre><code>$ https://raw.github.com/traut/curie/master/bin/run-all.sh</pre></code>
+        There is a high probability that this will not work out of the box. Try running the daemons manually, maybe in screen session.
+</p>
+<p> 4. To create new user account:
+    <pre><code>
+~$ cd curie/front/
+~/curie/front$ node
+> users = require('./users.js')
+{ addAccount: [Function: addAccount],
+  signIn: [Function: signIn],
+  getAccountEmails: [Function: getAccountEmails],
+  getAccountDetails: [Function: getAccountDetails] }
+> users.addAccount('login', 'password', [{ fullname : 'James Bond', email : 'james@bond.com' }, { fullname : 'Bruce Wayne', email : 'bruce.wayne@wayne.com'}]);
+undefined
+> 15:09:35.675 - info: [users] Account 5 created with 2 email addresses
+~/curie/front$
+    </code></pre>
+</p>
 
 <h2>
 <a name="components" class="anchor" href="#components"><span class="octicon octicon-link"></span></a>Components</h2>
 
 <ul>
 <li><a href="#incoming-email-processing">Incoming email processing</a></li>
-<li>Web service</li>
 </ul><h2>
 <a name="incoming-email-processing" class="anchor" href="#incoming-email-processing"><span class="octicon octicon-link"></span></a><a name="incoming-email-processing"></a>Incoming email processing</h2>
 
