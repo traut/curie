@@ -235,6 +235,10 @@ function bindSocketCalls(socket) {
     });
 }
 
+if (settings.DEV == true) {
+    app.use(express.static(__dirname + '/static'));
+}
+
 server.listen(8080, function() {
     log.info('Listening at: http://localhost:8080');
 });
