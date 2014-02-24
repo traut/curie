@@ -2,9 +2,12 @@
 
 set -e
 
-STORAGE=./storage
-SOLR=./solr
-CURIE=./curie
+DIR=$(pwd)
+
+STORAGE=$DIR/storage
+SOLR=$DIR/solr
+CURIE=$DIR/curie
+
 
 TMP=.
 
@@ -55,6 +58,9 @@ sed -i.bak "s@STORAGE-MESSAGES-PATH@$CURIE_FULL/messages@" $CURIE/front/settings
 sed -i.bak "s@STORAGE-DRAFTS-PATH@$CURIE_FULL/drafts@" $CURIE/front/settings.js
 sed -i.bak "s@REPLACE-WITH-A-SECRET-STRING@$RANDOM_STRING@" $CURIE/front/settings.js
 
+sed -i.bak "s@USERS-DB@$CURIE/users.db@" $CURIE/front/settings.js
+sed -i.bak "s@FILTERS-DB@$CURIE/filters.db@" $CURIE/front/settings.js
+
 # configure python virtual environment
 
 virtualenv $CURIE/.e
@@ -68,7 +74,7 @@ pip install -r $CURIE/configs/requirements.pip
 cd $CURIE/front
 npm install
 node ./recreate-db.js
-cd ..
+cd $DIR
 
 # FIXME: should be removed
 # patch barista package. we want it to support PATCH messages

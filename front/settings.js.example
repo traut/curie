@@ -14,6 +14,11 @@ var settings = {
         height : 300
     },
 
+    DB : {
+        USERS : 'USERS-DB',
+        FILTERS : 'FILTERS-DB'
+    },
+
 
     NUM_ROWS : 30,
     NUM_GROUPS : 30,
