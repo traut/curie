@@ -29,6 +29,9 @@ Curie.Views.DraftView = Backbone.View.extend({
             $("input[name=to]", this.$el).focus();
         }, 300);
 
+
+        $("textarea", this.$el).autosize();
+
         return this;
     },
     closeAndNavigate : function() {

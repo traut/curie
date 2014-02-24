@@ -21,11 +21,11 @@
                 </p>
             </div>
             <div class="control-group">
-                <textarea {{#if embedded }}rows="2"{{else}}rows="10"{{/if}} name="body">{{#each body}}{{ value }}{{/each}}</textarea>
+                <textarea {{#if embedded }}style="height:50px"{{else}}style="height:400px"{{/if}} name="body">{{#each body}}{{ value }}{{/each}}</textarea>
             </div>
         </form>
     </div>
-    <div class="draftFooter row-fluid {{#if embedded}}hide{{/if}}">
+    <div class="draftFooter row-fluid {{#unless received}}hide{{/unless}}">
         <div class="modal-footer">
             <div class="pull-left saved">
                 <span class="muted {{#unless received}}hide{{/unless}}" name="title">Saved: </span><span name="value">{{#dateformat received 'HH:mm:SS, dddd, MMM Do'}}{{/dateformat}}</span>
