@@ -38,7 +38,7 @@ rm $TMP/$SOLR_ARCHIVE
 CURIE_SOLR=$SOLR/example/curie
 mkdir -p $CURIE_SOLR/messages/conf
 
-cp $SOLR/example/solr/collection1/conf/* $CURIE_SOLR/messages/conf/
+cp -R $SOLR/example/solr/collection1/conf/* $CURIE_SOLR/messages/conf/
 
 echo "name=messages" > $CURIE_SOLR/messages/core.properties
 
