@@ -10,6 +10,7 @@ local_settings.py
 .classpath
 .project
 settings.js
+settings.py
 var
 snapshot.db
 
