@@ -1,7 +1,7 @@
     <div class="message">
         <div class="messageHeader">
             <span class="lead">
-                <span class="muted pull-right date">{{#dateformat received 'HH:mm, MMM Do'}}{{/dateformat}}</span>
+                <a href="#{{ url }}"><span class="muted pull-right date">{{#dateformat received 'HH:mm, MMM Do'}}{{/dateformat}}</span></a>
                 {{ subject }}
                 <span class="headerRow">from {{> emailAddressWithLink from }}</span>
                 <br/>

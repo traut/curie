@@ -109,7 +109,7 @@ var MessageView = Backbone.View.extend({
     events : {
         "click a[name=showAsBodyType]" : "changeBodyType",
         "click a[name=deleteMessageForever]" : "deleteMessageForever",
-        "click div.messageHeader" : "toggleBody"
+        //"click div.messageHeader" : "toggleBody"
     },
     initialize : function() {
         this.model.on("change:body", this.render, this);
@@ -123,7 +123,7 @@ var MessageView = Backbone.View.extend({
         prepareBodyBlocks(data, true);
 
         _.extend(data, {
-            url : this.rootUrl + "/" + this.model.get("id"),
+            url : this.options.rootUrl + "/" + this.model.get("id"),
             folded : this.options.folded,
         });
 

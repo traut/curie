@@ -118,6 +118,7 @@ var ThreadView = Backbone.View.extend({
             return new MessageView({
                 model : message,
                 folded : folded,
+                rootUrl : this.options.rootUrl || curie.router.reverse('showPack', { pack : curie.state.get("activePack").get("name") })
             });
         } else {
             console.error("Unknown message type", message);
