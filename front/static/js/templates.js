@@ -908,11 +908,15 @@ function program25(depth0,data,depth1) {
   return buffer;
   }
 
-  buffer += "    <div class=\"message\">\n        <div class=\"messageHeader\">\n            <span class=\"lead\">\n                <span class=\"muted pull-right date\">";
+  buffer += "    <div class=\"message\">\n        <div class=\"messageHeader\">\n            <span class=\"lead\">\n                <a href=\"#";
+  if (stack1 = helpers.url) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.url; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\"><span class=\"muted pull-right date\">";
   options = {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data};
   stack2 = ((stack1 = helpers.dateformat || depth0.dateformat),stack1 ? stack1.call(depth0, depth0.received, "HH:mm, MMM Do", options) : helperMissing.call(depth0, "dateformat", depth0.received, "HH:mm, MMM Do", options));
   if(stack2 || stack2 === 0) { buffer += stack2; }
-  buffer += "</span>\n                ";
+  buffer += "</span></a>\n                ";
   if (stack2 = helpers.subject) { stack2 = stack2.call(depth0, {hash:{},data:data}); }
   else { stack2 = depth0.subject; stack2 = typeof stack2 === functionType ? stack2.apply(depth0) : stack2; }
   buffer += escapeExpression(stack2)

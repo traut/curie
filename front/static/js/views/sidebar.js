@@ -22,14 +22,12 @@ var SidebarView = Backbone.View.extend({
     updateAccountInfo : function(account) {
         account = account || curie.state.get("account");
         var primaryMailbox = Handlebars.templates.emailAddress(account.get("primary"));
-        console.info(account.get("primary"));
         this.$("#accountInfo").html(primaryMailbox);
     },
 
     showAlert : function(msg) {
         var msg = msg || "Connection error";
         this.$("#errorAlert").html(msg).show();
-        console.error(msg);
     },
 
     hideAlert : function() {
