@@ -18,6 +18,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
 
+import com.heyheylabs.curie.message.MessageParsed;
+import com.heyheylabs.curie.message.MessageRaw;
+
 public class ParserTest {
 
     private static final Log log = LogFactory.getLog(ParserTest.class);
@@ -54,12 +57,14 @@ public class ParserTest {
         InputStream is = ClassLoader.getSystemResourceAsStream(filename);
         String mid = "plain-email";
         
-        Pair<ParsedMessage,RawMessage> pair = parser.parseMessage(mid, is);
+        Pair<MessageParsed,MessageRaw> pair = parser.parseMessage(mid, is);
         
-        ParsedMessage parsed = pair.getLeft();
-        RawMessage raw = pair.getRight();
+        MessageParsed parsed = pair.getLeft();
+        MessageRaw raw = pair.getRight();
         
         Map data = parsed.asDataMap();
+        HashMap<String, Object> rawData = raw.asDataMap();
+        
         Map fields = (Map) data.get("fields");
         
         assertEquals(true, store.isValid(parsed));
@@ -71,12 +76,20 @@ public class ParserTest {
         assertEquals(getFirstForType(body, "text"), "Hey, testing queue\n\n\nSergey");
         
         assertEquals(mid, data.get("id"));
-        assertEquals(mid, raw.asDataMap().get("id"));
+
+        assertEquals(mid, rawData.get("id"));
         
         List references = (List) fields.get("references");
         
 		assertEquals(2, references.size());
         assertEquals("<CABjC=OsuboJJWPdMRY=QbTragOz-tSBijOj68ZVo-BvfESwVzg@mail.gmail.com>", references.get(0));
+        
+        Object receivedHeaderValues = ((Map) rawData.get("values")).get("Received");
+        
+        assertNotNull(receivedHeaderValues);
+        assertEquals(true, receivedHeaderValues instanceof Iterable);
+        assertEquals(3, ((List) receivedHeaderValues).size());
+        
     }
 
     @SuppressWarnings("rawtypes")
@@ -89,7 +102,7 @@ public class ParserTest {
         Parser parser = new Parser(store);
     	
         InputStream is = ClassLoader.getSystemResourceAsStream(filename);
-        Pair<ParsedMessage, RawMessage> pair = parser.parseMessage(filename, is);
+        Pair<MessageParsed, MessageRaw> pair = parser.parseMessage(filename, is);
         
         assertEquals(true, store.isValid(pair.getLeft()));
         assertEquals(true, store.isValid(pair.getRight()));
@@ -110,7 +123,7 @@ public class ParserTest {
         Parser parser = new Parser(store);
     	
     	InputStream is = ClassLoader.getSystemResourceAsStream(filename);
-        Pair<ParsedMessage, RawMessage> pair = parser.parseMessage(filename, is);
+        Pair<MessageParsed, MessageRaw> pair = parser.parseMessage(filename, is);
         
         assertEquals(true, store.isValid(pair.getLeft()));
         assertEquals(true, store.isValid(pair.getRight()));
@@ -131,7 +144,7 @@ public class ParserTest {
         Parser parser = new Parser(store);
         
         InputStream is = ClassLoader.getSystemResourceAsStream(filename);
-        Pair<ParsedMessage, RawMessage> doc = parser.parseMessage("with-attachment", is);
+        Pair<MessageParsed, MessageRaw> doc = parser.parseMessage("with-attachment", is);
         
         assertEquals(true, store.isValid(doc.getLeft()));
         assertEquals(true, store.isValid(doc.getRight()));

@@ -8,15 +8,11 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.UUID;
 
 import javax.mail.MessagingException;
-import javax.mail.Part;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,30 +25,25 @@ import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import com.github.fge.jsonschema.main.JsonValidator;
 import com.github.fge.jsonschema.report.ProcessingReport;
 import com.google.common.base.Joiner;
+import com.heyheylabs.curie.message.MessageParsed;
+import com.heyheylabs.curie.message.MessageRaw;
+import com.heyheylabs.curie.message.IValidatable;
 
 public class Store {
 
     private static final Log log = LogFactory.getLog(Store.class);
 
-    private static final String DEFAULT_SCHEMAS_DIR = "/home/curie/curie/back/schemas";
-
     private JsonValidator validator;
 
     private HashMap<String, JsonNode> schemas = new HashMap<String, JsonNode>();
 
-    private String schemasDir = DEFAULT_SCHEMAS_DIR;
-
-    private String emailDir;
-
-    public Store(String emailDir) throws IOException {
-        validator = JsonSchemaFactory.byDefault().getValidator();
-        this.emailDir = emailDir;
-    }
+    private final String schemasDir;
+    private final String emailDir;
 
     public Store(String emailDir, String schemasDir) throws IOException {
-        this(emailDir);
+        validator = JsonSchemaFactory.byDefault().getValidator();
+        this.emailDir = emailDir;
         this.schemasDir = schemasDir;
-        
     }
 
     private JsonNode loadSchema(String schemaFileName) throws IOException {
@@ -66,7 +57,7 @@ public class Store {
     }
 
 
-    public boolean isValid(Validatable doc) throws IOException {
+    public boolean isValid(IValidatable doc) throws IOException {
 
         JsonNode schema = loadSchema(doc.getSchemaFileName());
 
@@ -104,12 +95,12 @@ public class Store {
 
     }
 
-    public void saveParsedMessage(String filename, ParsedMessage doc) throws IOException {
+    public void saveParsedMessage(String filename, MessageParsed doc) throws IOException {
         String jsonFilename = filename + ".parsed.json";
         saveToFile(jsonFilename, doc.asJson());
     }
 
-    public void saveRawMessage(String filename, RawMessage doc) throws IOException {
+    public void saveRawMessage(String filename, MessageRaw doc) throws IOException {
         String jsonFilename = filename + ".raw.json";
         saveToFile(jsonFilename, doc.asJson());
     }
@@ -140,6 +131,8 @@ public class Store {
         } finally {
             IOUtils.closeQuietly(in);
             IOUtils.closeQuietly(out);
+            
+            log.debug("Attachment \"" + originalFilename + "\" saved with name \"" + attachmentId + "\"");
         }
     }
 
