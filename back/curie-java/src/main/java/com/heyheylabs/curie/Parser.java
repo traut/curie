@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -32,6 +33,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.heyheylabs.curie.message.MessageParsed;
@@ -89,9 +91,9 @@ public class Parser {
                 raw.addHeaderValue(h.getName(), value);
             }
         }
-        
+
         //FIXME: somehow parse "Received:" header to get recepients address. Needed for bcc emails without To: and Cc: headers
-        
+
         raw.addHeaderValue("Body", IOUtils.toString(email.getInputStream(), "UTF-8"));
 
         String messageId = email.getMessageID();
@@ -210,11 +212,17 @@ public class Parser {
         return charset;
     }
 
-    private List<String> cleanUp(List<String> values) { 
-        return Lists.newArrayList(Collections2.transform(values, new Function<String, String>() {
+    private List<String> cleanUp(List<String> values) {
+        Collection<String> unescaped = Collections2.transform(values, new Function<String, String>() {
             public String apply(String value) {
-                return StringEscapeUtils.unescapeJava(value).trim();
+                return StringUtils.chop(StringEscapeUtils.unescapeJava(value));
             }
-        }));
+        });
+        Collection<String> filtered = Collections2.filter(unescaped, new Predicate<String>() {
+            public boolean apply(String el) {
+                return StringUtils.isNotBlank(el);
+            }
+        });
+        return Lists.newArrayList(filtered);
     }
 }
