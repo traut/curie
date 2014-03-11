@@ -34,6 +34,11 @@
 <h2><a name="about" class="anchor" href="#about"><span class="octicon octicon-link"></span></a>About</h2>
 <p>Curie is designed to be a GMail replacement</p>
 
+<h2><a name="Overview" class="anchor" href="#Overview"><span class="octicon octicon-link"></span></a>Overview</h2>
+
+<object data="images/curie-flow-chart.svg" type="image/svg+xml"></object>
+
+
 <h2><a name="Installation" class="anchor" href="#Installation"><span class="octicon octicon-link"></span></a>Installation (dev instance)</h2>
 <p>These are the steps to configure local dev Curie instance:</p>
 <p>1. Requirements:
@@ -70,58 +75,33 @@ undefined
 </p>
 <p> 5. Now you should be able to go to http://localhost:8080/ and sign in with credentials you provided</p>
 
-<h2>
-<a name="components" class="anchor" href="#components"><span class="octicon octicon-link"></span></a>Components</h2>
+<h2><a name="Components" class="anchor" href="#Components"><span class="octicon octicon-link"></span></a>Components</h2>
 
-<ul>
-<li><a href="#incoming-email-processing">Incoming email processing</a></li>
-</ul><h2>
-<a name="incoming-email-processing" class="anchor" href="#incoming-email-processing"><span class="octicon octicon-link"></span></a><a name="incoming-email-processing"></a>Incoming email processing</h2>
+<h3><a name="Workers" class="anchor" href="#Workers"><span class="octicon octicon-link"></span></a>Workers</h3>
 
-<p>This is the email processing pipeline:</p>
+<table>
+    <tr>
+        <th>Script</th><th>Description</th>
+    </tr>
+    <tr>
+        <td><pre>watcher.py</pre></td>
+        <td>Watcher catches changes in Maildir, moves files to a storage dir and pushes events to "inbox" queue. Event is just a string - a path to a raw email blob.</td>
+    </tr>
+    <tr>
+        <td><pre>parser.sh</pre></td>
+        <td>Parser (java code) parses email messages, creates *.raw.json and *.parsed.json files (according to schemas) next to a raw email file.</td>
+    </tr>
+    <tr>
+        <td><pre>indexer.py</pre></td>
+        <td>Reads *.parsed.json files and pushes updates to a Solr instance.</td>
+    </tr>
+    <tr>
+        <td><pre>labeler.py</pre></td>
+        <td>Reads pre-defined filters (global and user specific) and adds labels to a doc in Solr index</td>
+    </tr>
+</table>
 
-<pre><code>    Maildir
-       ↓
-   watcher.py       // Watcher catches changes in Maildir, moves files
-       |            // to a storage dir and pushes messages to "inbox" queue.
-       |            // Message is just a string - a path to a raw email blob.
-       ↓
-+--------------+
-|    inbox     |
-+------+-------+
-       ↓
-    parser.sh       // Parser (java code) parses email messages,
-       |            // creates *.raw.json and *.parsed.json files
-       |            // (according to schemas) next to a raw email file
-       ↓
-+--------------+
-|    parsed    |
-+------+-------+
-       ↓
-   indexer.py       // Reads *.parsed.json files and pushes
-       |            // updates to a Solr instance
-       ↓
-+--------------+
-|   indexed    |    
-+------+-------+
-       ↓
-   labeler.py       // Reads pre-defined filters (global and
-       |            // user specific) and adds
-       |            // labels to a doc in Solr index 
-       ↓
-+--------------+
-|   labeled    |
-+------+-------+
-</code></pre>
 
-<h2>
-<a name="web-server" class="anchor" href="#web-server"><span class="octicon octicon-link"></span></a>Web server</h2>
-
-<h3>
-<a name="backend" class="anchor" href="#backend"><span class="octicon octicon-link"></span></a>Backend</h3>
-
-<h3>
-<a name="frontend" class="anchor" href="#frontend"><span class="octicon octicon-link"></span></a>Frontend</h3>
       </section>
       <footer>
         <p><small>Hosted on <a href="http://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
