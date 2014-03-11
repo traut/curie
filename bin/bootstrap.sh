@@ -25,7 +25,7 @@ git clone https://github.com/traut/curie.git $CURIE
 
 # get and unpack solr
 
-SOLR_VERSION=4.6.1
+SOLR_VERSION=4.7.0
 SOLR_ARCHIVE=solr-$SOLR_VERSION.tgz
 
 wget http://mirror.tcpdiag.net/apache/lucene/solr/$SOLR_VERSION/$SOLR_ARCHIVE -O $TMP/$SOLR_ARCHIVE
