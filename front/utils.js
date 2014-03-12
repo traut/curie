@@ -281,7 +281,7 @@ function createThumbnail(path, filetype, _callback) {
 
     if (filetype == 'image/png' || filetype == 'image/jpeg' || filetype == 'image/jpg') {
         var t = filetype.split('/')[1];
-        params = "-define " + t + " " + path + " -auto-orient -thumbnail " + settings.PREVIEW_SIZE.width + "x" + settings.PREVIEW_SIZE.height + " -unsharp 0x.5 png:" + thumbnail;
+        params = "-define " + t + " " + path + " -auto-orient -thumbnail " + settings.PREVIEW_SIZE.width + "x" + settings.PREVIEW_SIZE.height + "^ -gravity center -unsharp 0x.5 png:" + thumbnail;
     } else if (filetype == 'application/pdf') {
         params = path + "[0] -auto-orient -thumbnail " + settings.PREVIEW_SIZE.width + "x" + settings.PREVIEW_SIZE.height + " png:" + thumbnail;
     } else {
