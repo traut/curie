@@ -37,9 +37,7 @@ var ThreadRowView = Backbone.View.extend({
     select : function() {
         this.selected = true;
         updateElementClass(this.$(">.messageRow"), true, "selected");
-        if (!elementInViewport(this.$el[0])) {
-            $('html, body').animate({scrollTop : this.$el.offset().top - 200}, 10);
-        }
+        scrollToElement(this.$el);
     },
     unselect : function() {
         this.selected = false;
@@ -253,9 +251,7 @@ var ThreadView = Backbone.View.extend({
 
         var view = views[this.selectedIndex];
         view.select();
-        if (!elementInViewport(view.$el[0])) {
-            $('html, body').animate({scrollTop : view.$el.offset().top - 200}, 10);
-        }
+        scrollToElement(view.$el);
 
     },
     performAction : function(action) {
@@ -264,7 +260,6 @@ var ThreadView = Backbone.View.extend({
 
         if (action == "delete forever") {
             var toDelete = messages.filter(function(m) {
-                console.info("isMarked ", m, m.id, this.subViews);
                 return this.subViews[m.id].isMarked();
             }, this);
 

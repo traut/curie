@@ -230,6 +230,13 @@ function elementInViewport(el) {
     );
 }
 
+function scrollToElement(el, delay) {
+    delay = delay || 300;
+    if (!elementInViewport(el[0])) {
+        $('html, body').animate({scrollTop : el.offset().top - 200}, delay);
+    }
+}
+
 var stringToColour = function(_str) {
     var str = new jsSHA(_str + _str + _str, "TEXT").getHash("SHA-512", "HEX");
     var hash = 0;
