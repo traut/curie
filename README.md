@@ -1,10 +1,10 @@
 ## Curie
 
 ### Demo
-http://curie.heyheylabs.com
+https://curie.heyheylabs.com
 
-login: test
-password: test
+* login: test
+* password: test
 
 ### Documentation
 Please see the documentation at http://traut.github.io/curie/
