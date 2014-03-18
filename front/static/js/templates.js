@@ -185,11 +185,11 @@ function program1(depth0,data) {
   if (stack1 = helpers.query) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.query; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "<span class=\"pull-right muted\">";
+    + "<span class=\"pull-right muted\"><span name=\"total\">";
   if (stack1 = helpers.size) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.size; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + " found</span></h1>\n    <div class=\"selectionActions\" name=\"selection-actions\">\n        <div class=\"btn-group controls pull-right\">\n            <button class=\"btn btn-small\" name=\"delete-selected\">Delete <span name=\"howManySelected\"></span> selected</button>\n            <button class=\"btn btn-small\" name=\"delete-all\">Delete all found</button>\n        </div>\n    </div>\n    ";
+    + "</span> found</span></h1>\n    <div class=\"selectionActions\" name=\"selection-actions\">\n        <div class=\"btn-group controls pull-right\">\n            <button class=\"btn btn-small\" name=\"delete-selected\">Delete <span name=\"howManySelected\"></span> selected</button>\n            <button class=\"btn btn-small\" name=\"delete-all\">Delete all found</button>\n        </div>\n    </div>\n    ";
   return buffer;
   }
 

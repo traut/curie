@@ -14,6 +14,25 @@ var log = utils.getLogger("store.search");
 
 SearchStore = function() {
     return {
+
+        deleteByQuery : function(handshake, options, callback) {
+            var searchQuery = options.ctx.query,
+                account = handshake.session.user.hash;
+
+            var query = solrUtils.accessControl(handshake.session.user.hash) + searchQuery;
+
+            solrUtils.query(query, {
+                start : 0,
+                rows : 1000000,
+                fl : "id",
+            }, function(err, results) {
+                console.info(results);
+            });
+            solrUtils.deleteQuery(query, callback);
+
+            callback();
+        },
+
         getTopNResults : function(handshake, options, callback) {
             var searchQuery = options.ctx.query,
                 amount = options.ctx.amount,

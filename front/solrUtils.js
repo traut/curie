@@ -80,6 +80,24 @@ function deleteMessage(messageId, callback) {
     });
 }
 
+function deleteQuery(query, callback) {
+    solr.del(null, query, function(err) {
+        if (err) {
+            log.error("Can't docs for query", {query: query, err: err});
+            callback(err, null);
+            return;
+        }
+        solr.commit(function(err) {
+            if (err) {
+                callback(err, null);
+                return;
+            }
+            log.info("Delete for " + query + " successful");
+            callback()
+        });
+    });
+}
+
 module.exports = {
     query : function(query, data, callback) {
         return solr.query(query, data, function(err, response) {
@@ -95,6 +113,8 @@ module.exports = {
     getMessage : getMessage,
     indexMessage : indexMessage,
     updateMessage : updateMessage,
+
     deleteMessage : deleteMessage,
+    deleteQuery : deleteQuery,
     escape : _escape
 }

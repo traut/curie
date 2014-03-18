@@ -1,6 +1,6 @@
 <div>
     {{#if query }}
-    <h1 class="lead searchHeader"><span class="muted">Search:</span> {{ query }}<span class="pull-right muted">{{ size }} found</span></h1>
+    <h1 class="lead searchHeader"><span class="muted">Search:</span> {{ query }}<span class="pull-right muted"><span name="total">{{ size }}</span> found</span></h1>
     <div class="selectionActions" name="selection-actions">
         <div class="btn-group controls pull-right">
             <button class="btn btn-small" name="delete-selected">Delete <span name="howManySelected"></span> selected</button>
