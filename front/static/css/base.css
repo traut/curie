@@ -157,69 +157,66 @@ a.label {
   .labelBadge:hover {
     opacity: 1; }
 
-.message {
-  border: 1px solid white; }
-  .message iframe.body {
-    border: 0px;
-    width: 100%; }
-  .message .body-text {
-    overflow-x: auto; }
-  .message a.showQuote {
-    cursor: pointer;
-    /*@include muted;*/
-    background: #ddd;
-    color: #555;
-    padding: 0 5px;
-    line-height: 6px;
-    height: 12px;
-    font-size: 12px;
-    font-weight: bold;
-    vertical-align: middle;
-    display: inline-block;
-    border-radius: 1px;
-    text-decoration: none; }
-  .message.selected {
-    border-left: 1px solid #0088cc !important; }
-  .message.marked {
-    background-color: #fcf8e3 !important;
-    border: 1px solid #fbeed5; }
-  .message.marked.selected.selected {
-    border-left: 1px solid #0088cc !important; }
-  .message .quoted {
-    color: #999999;
-    margin-left: 10px;
-    padding-left: 10px;
-    border-left: 1px solid #aaaaaa; }
-  .message .messageHeader {
-    margin: 5px 0px; }
-    .message .messageHeader .date {
-      margin-left: 10px; }
-    .message .messageHeader span.headerRow {
-      color: #bbb;
-      font-weight: 300; }
-    .message .messageHeader a.email {
-      color: inherit; }
-  .message .messageBody.folded {
-    display: none; }
-  .message .attachments {
-    margin: 30px 0px 0px; }
-    .message .attachments .attachmentPreview {
-      min-width: 200px;
-      width: 100%;
-      float: left; }
-      .message .attachments .attachmentPreview.withImage {
-        width: auto;
-        text-align: center; }
-        .message .attachments .attachmentPreview.withImage img {
-          display: block;
-          border: 1px solid #eeeeee; }
+.message iframe.body {
+  border: 0px;
+  width: 100%; }
+.message .body-text {
+  overflow-x: auto; }
+.message a.showQuote {
+  cursor: pointer;
+  /*@include muted;*/
+  background: #ddd;
+  color: #555;
+  padding: 0 5px;
+  line-height: 6px;
+  height: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  vertical-align: middle;
+  display: inline-block;
+  border-radius: 1px;
+  text-decoration: none; }
+.message.selected {
+  border-left: 1px solid #0088cc !important; }
+.message.marked {
+  background-color: #fcf8e3 !important;
+  border: 1px solid #fbeed5; }
+.message.marked.selected.selected {
+  border-left: 1px solid #0088cc !important; }
+.message .quoted {
+  color: #999999;
+  margin-left: 10px;
+  padding-left: 10px;
+  border-left: 1px solid #aaaaaa; }
+.message .messageHeader {
+  margin: 5px 0px; }
+  .message .messageHeader .date {
+    margin-left: 10px; }
+  .message .messageHeader span.headerRow {
+    color: #bbb;
+    font-weight: 300; }
+  .message .messageHeader a.email {
+    color: inherit; }
+.message .messageBody.folded {
+  display: none; }
+.message .attachments {
+  margin: 30px 0px 0px; }
+  .message .attachments .attachmentPreview {
+    min-width: 200px;
+    width: 100%;
+    float: left; }
+    .message .attachments .attachmentPreview.withImage {
+      width: auto;
+      text-align: center; }
+      .message .attachments .attachmentPreview.withImage img {
+        display: block;
+        border: 1px solid #eeeeee; }
 
 .threadView .message {
   margin: 0px 0px 20px;
-  padding: 10px;
-  border-radius: 5px;
-  border: 1px solid #dddddd;
-  background-color: #f8f8f8;
+  padding: 5px 10px;
+  border-radius: 10px;
+  background-color: #f3f3f3;
   /*
   &:nth-child(odd) {
   }
@@ -288,7 +285,7 @@ a.label {
 
 .draftView {
   background-color: rgba(255, 255, 255, 0.7);
-  padding: 0px 10px 10px 0px; }
+  padding: 0px 10px 100px 0px; }
   .draftView .draftBody {
     padding: 15px 15px 0px 10px; }
     .draftView .draftBody form {

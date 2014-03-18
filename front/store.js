@@ -43,6 +43,7 @@ router.match('/messages/:messageId', 'DELETE').to('messageStore.deleteMessageFor
 
 router.match('/search', 'GET').to('searchStore.getSearch');
 router.match('/search/top', 'GET').to('searchStore.getTopNResults');
+router.match('/search', 'DELETE').to('searchStore.deleteByQuery');
 
 router.match('/drafts/:draftId', 'GET').to('draftStore.getDraft');
 router.match('/drafts/:draftId', 'POST').to('draftStore.updateDraft');

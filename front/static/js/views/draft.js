@@ -30,7 +30,7 @@ Curie.Views.DraftView = Backbone.View.extend({
         }, 300);
 
 
-        $("textarea", this.$el).autosize();
+        $("textarea", this.$el).autosize({append: "\n"});
 
         return this;
     },

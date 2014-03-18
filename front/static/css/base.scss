@@ -231,7 +231,7 @@ a.label {
 }
 
 .message {
-    border: 1px solid white;
+    //border: 1px solid white;
 
     iframe.body {
         border: 0px;
@@ -314,10 +314,11 @@ a.label {
 .threadView {
     .message {
         margin: 0px 0px 20px;
-        padding: 10px;
-        border-radius: 5px;
-        border: 1px solid #ddd;
-        background-color: #f8f8f8;
+        padding: 5px 10px;
+        border-radius: 10px;
+        //border: 1px solid #ddd;
+        //background-color: #f8f8f8;
+        background-color: #f3f3f3;
         /*
         &:nth-child(odd) {
         }
@@ -418,7 +419,7 @@ a.label {
 
 .draftView {
     background-color: rgba(255, 255, 255, 0.7);
-    padding: 0px 10px 10px 0px;
+    padding: 0px 10px 100px 0px;
     .draftBody {
         padding: 15px 15px 0px 10px;
         form {

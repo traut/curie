@@ -238,10 +238,6 @@ Curie.Models.SearchResults = Curie.Models.PagedMessagesWrapper.extend({
         this.set("name", 'Search for "' + (query || this.get("query")) + '"');
     },
 
-    destroy : function() {
-        this.trigger("destroy", this);
-    },
-
 }, { typeName : "SearchResults" });
 
 

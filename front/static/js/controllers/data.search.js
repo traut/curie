@@ -11,7 +11,8 @@ Curie.Controllers.Data.Search = function () {
             if (lastModel.get("query") == query) {
                 return lastModel;
             } else {
-                lastModel.destroy();
+                //lastModel.destroy();
+                delete lastModel;
             }
         }
 
@@ -51,6 +52,12 @@ Curie.Controllers.Data.Search = function () {
 
     var deleteAllFound = function(searchModel) {
         console.info("Deleting everything for query=" + searchModel.get("query"));
+        searchModel.destroy({
+            success : function() {
+                console.info("Success of deletion. Fetching results");
+                searchModel.fetch();
+            }
+        });
     };
 
     _.extend(this, {

@@ -90,10 +90,12 @@ Curie.Views.CollectionGeneric = Backbone.View.extend({
 
     render : function() {
 
-        _.keys(this.modelViews, function(mid) {
-            this.modelViews[mid].close();
-            delete this.modelViews[mid];
-        });
+        _.values(this.modelViews).forEach(function(modelView) {
+            if (!this.collection.contains(modelView.model)) {
+                modelView.close();
+                delete this.modelViews[modelView.model.id];
+            }
+        }, this);
 
         if (this.getModelsWithoutViews().length > 0){
             this.createMissingModelViews();
@@ -104,17 +106,12 @@ Curie.Views.CollectionGeneric = Backbone.View.extend({
 
             var renderOptions = this.options.renderOptions || {};
 
-            _.extend(renderOptions, {
-                // FIXME: should be dynamically rendered because it's 0 if rendered before fetch
-                size : this.model.get("total")
-            });
-
             var renderedPack = $(this.options.template(renderOptions));
             renderedPack.find(".content").html(this.$list);
             this.$el.html(renderedPack);
-            console.info("packview for " + this.model.get("name") + " attached to element");
         }
         this.updateMoreAvailable();
+        this.updateTotal();
 
         return this.$el;
     },
@@ -127,6 +124,12 @@ Curie.Views.CollectionGeneric = Backbone.View.extend({
             this.$(".loadMore").hide();
         }
     },
+
+    updateTotal : function() {
+        this.$("span[name=total]").text(this.model.get("total"));
+    },
+
+
     moveSelection : function(move) {
 
         if (["down", "up", "last", "first"].indexOf(move) == -1) {
@@ -250,5 +253,6 @@ Curie.Views.SearchResults = Curie.Views.Pack.extend({
             }
         });
         Curie.Views.Pack.prototype.initialize.apply(this, [options]);
+
     },
 });

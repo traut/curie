@@ -60,7 +60,7 @@ function getFullMessage(userHash, mid, callback) {
             solrUtils.getMessage(userHash, mid, callback);
         }
     }, function(err, results) {
-        if (err) {
+        if (err || !results.solr || !results.fs) {
             callback(err, null);
             return;
         }
