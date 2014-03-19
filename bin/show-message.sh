@@ -15,7 +15,7 @@ echo $FILEPATH
 
 if [ "$FORMAT" = "json" ]
 then
-    cat $FILEPATH.json | pjson 
+    jq '.' $FILEPATH.json
 elif [ "$FORMAT" = "plain" ] 
 then
     less $FILEPATH

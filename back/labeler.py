@@ -24,10 +24,8 @@ INBOX_LABEL = "inbox"
 
 def run_filters(account_hash, message_id, query_label_pairs):
 
-    updates = []
-
+    labels = set()
     skip_inbox = False
-    added_labels = set()
 
     for query, label, _skip_inbox in query_label_pairs:
 
@@ -36,33 +34,30 @@ def run_filters(account_hash, message_id, query_label_pairs):
         results = solrMessages.select(caged_query, fields="id", score=False, rows=ROWS).results
 
         for r in results:
-            updates.append(dict(id=r["id"], labels=dict(add=label)))
-            added_labels.add(label)
-
-        print caged_query, len(results)
+            labels.add(label)
 
         if results:
             skip_inbox = skip_inbox or _skip_inbox
 
-    if push_updates(updates):
-        logger.info("%d documents updated with %d filters for account %s", len(updates), len(query_label_pairs), account_hash)
+    prepared_updates = [dict(id=message_id, labels=dict(add=label)) for label in labels]
+
+    if push_updates(prepared_updates):
+        logger.info("Message %s updated with %d filters for account %s", message_id, len(query_label_pairs), account_hash)
     else:
         sys.exit(1)
 
     if not skip_inbox:
         caged_query = "+id:%s +account:%s -labels:'%s'" % (message_id, account_hash, INBOX_LABEL)
-        results = solrMessages.select(caged_query, fields="id", score=False, rows=ROWS).results
 
-        if results:
+        if solrMessages.select(caged_query, fields="id", score=False, rows=ROWS).results:
             update = dict(
                 id = message_id,
                 labels = dict(add=INBOX_LABEL)
             )
-            added_labels.add(INBOX_LABEL)
             if not push_updates([update]):
                 sys.exit(1)
 
-    logger.info("Labeling for %s is done. Labels %s added", message_id, added_labels)
+    logger.info("Labeling for %s is done. Labels %s added", message_id, list(labels))
 
 
 def push_updates(updates):
