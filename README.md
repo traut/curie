@@ -1,7 +1,7 @@
 ## Curie
 
-### Demo
-https://curie.heyheylabs.com
+### Demo 
+https://curie.heyheylabs.com _(instance is temprorary down due to index structure refactoring)_
 
 * login: test
 * password: test
